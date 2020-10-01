@@ -1,0 +1,21 @@
+.DS_Store
+
+# Ayure Kinect dlls
+dnn_model.onnx
+k4a.dll
+k4abt.dll
+onnxruntime.dll
+depthengine_1_0.dll
+depthengine_2_0.dll
+dnn_model_2_0.onnx
+
+# Visual Studio cache directory
+.vs
+.vs/slnx.sqlite
+
+# big files
+unity/cublas64_100.dll
+unity/cudnn64_7.dll
+
+
+lightweight-human-pose-estimation-3d-demo.pytorch/
