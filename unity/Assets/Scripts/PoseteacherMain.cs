@@ -8,14 +8,29 @@ using System.IO;
 using System.Collections;
 using NativeWebSocket;
 
+
+// Class that keeps references to sub-objects in the scene of a avatar container
+// Probably use this when refactoring as the base class for the script attached to avatar containers
+// TODO: 
+// implement functions for changing the currently used avatar, and keep state to not have to setActive on all avatars. (Use enum for current avatar?)
+// transfer functions for moving the avatars into here
+// rename class
 public class AvatarGo
 {
+
+    // TODO: if cube avatar class is created, migrate this to there. Otherwise move the getting of other refrences from init to here
+    // if the function stays, it should assign direcly to the field of the class
+    // create function declaration and move this function under initializer
     void prepareGameObjects(GameObject avatarContainer, ref GameObject[] debugObjects)
     {
+        // Gets refernces to the cube children of the cube container
+        // TODO: do this after finding cubeContainer and setting to field is done in init, to not run Find again
         GameObject cubeC = avatarContainer.transform.Find("CubeContainer").gameObject;
         debugObjects = new GameObject[(int)JointType.Count];
         for (var i = 0; i < (int)JointType.Count; i++)
         {
+            // Find cube children, and insert refrences in same order as joints from the BT SDK
+            // Note: cube objects have same name as the joints in the SDK
             var cube = cubeC.transform.Find(Enum.GetName(typeof(JointType), i)).gameObject;
             cube.transform.localScale = Vector3.one * 0.4f;
             cube.transform.SetParent(cubeC.transform);
@@ -24,22 +39,32 @@ public class AvatarGo
         
     }
 
+    // References to avatar objets in scene part of the container
+    public GameObject avatarContainer, cubeContainer, stickContainer, robotContainer, smplContainer;
+
+    // References to cubes of the cubes avatar
+    // TODO: Could be put in separate class cube avatar, and handled there.
+    public GameObject[] debugObjects;
+
+    // References to parts of the stick person avatar
+    // TODO: Could be put in separate class stick person, and handled there. 
     public GameObject LeftLowerLeg, RightLowerLeg, LeftUpperArm, RightUpperArm, LeftUpperLeg, RightUpperLeg, TorsoLeft,
        TorsoRight, HipStick, LeftLowerArm, RightLowerArm, LeftEye, RightEye, Shoulders, MouthStick, NoseStick, LeftEar, RightEar;
-
     public GameObject LeftShoulderStick, RightShoulderStick, LeftHipStick, RightHipStick, LeftElbowStick, RightElbowStick, LeftWristStick, RightWristStick,
         LeftKneeStick, RightKneeStick, LeftAnkleStick, RightAnkleStick;
 
-    public GameObject avatarContainer, cubeContainer, stickContainer, robotContainer, smplContainer;
-    public GameObject[] debugObjects;
-
+    // Initialization of class object
     public AvatarGo(GameObject avatarContainer)
     {
         this.avatarContainer = avatarContainer;
+
+        // TODO: already mentionned above:
+        // if the function stays, it should assign direcly to the field of the class
         GameObject[] debugObjects = {};
         prepareGameObjects(avatarContainer, ref debugObjects);
         this.debugObjects = debugObjects;
 
+        // Find child object avatars in scene and save references in fields
         GameObject cubeC = avatarContainer.transform.Find("CubeContainer").gameObject;
         GameObject stickC = avatarContainer.transform.Find("StickContainer").gameObject;
         GameObject robotC = avatarContainer.transform.Find("RobotContainer").gameObject;
@@ -49,7 +74,7 @@ public class AvatarGo
         robotContainer = robotC;
         smplContainer = smplC;
 
-        
+        // Find children of the stick person avatar in scene and save references in fields
         LeftLowerLeg = stickC.transform.Find("LLLeg").gameObject;
         RightLowerLeg = stickC.transform.Find("RLLeg").gameObject;
         LeftUpperArm = stickC.transform.Find("LeftUpperArm").gameObject;
@@ -82,6 +107,9 @@ public class AvatarGo
         LeftAnkleStick = stickC.transform.Find("LeftAnkleStick").gameObject;
         RightAnkleStick = stickC.transform.Find("RightAnkleStick").gameObject;
 
+
+        // Deactivate all other avatars except stickContainer
+        // Note: it is necessary to do this after getting references, otherwise objects can't be found in scene
         stickContainer.SetActive(true);
         cubeContainer.SetActive(false);
         robotContainer.SetActive(false);
@@ -89,47 +117,81 @@ public class AvatarGo
     }
 }
 
+// Main script
+// TODO:
+// Reorder functions (need to define placeholders first for somoe)
 public class PoseteacherMain : MonoBehaviour
 {
+
     Device device;
     BodyTracker tracker;
 
+    // Used for displaying RGB Kinect video
     public Renderer renderer;
+    RawImage m_RawImage;
     GameObject streamCanvas;
     GameObject videoCube;
 
+    // Refrences to containers in scene
+    // TODO: change it to list(s) or other flexible datastructure to allow more
     AvatarGo avatarSelf;
     AvatarGo avatarTeacher;
     AvatarGo avatarSelf2;
     AvatarGo avatarTeacher2;
 
-    public bool mirroring = true;
+    
     GameObject spatialAwarenessSystem;
-    RawImage m_RawImage;
-    //Select a Texture in the Inspector to change to
+    
+
+    //Select a Texture in the Inspector to change it (unused)
     public Texture m_Texture;
     Texture2D tex;
+
+    // Decides what action is being done with joints
+    // TODO: 
+    // Change to enum (!!! making this changes makes buttons in scene unusable)
+    // Make setter functions? For loading file and reset recording, should be rewritten as separate functions, not values here
+    // 3 and 4 are currently not used/implemented
+    // 3 not necessary as load happens automatically at playback
+    // 4 disabled to not accidentaly delete current file contents
     public int recording_mode = 0; // 0: not recording, 1: recording, 2: playback, 3: load_file, 4: reset_recording
+    // 
+    // TODO:
+    // Change to enum? (!!! making this changes makes button playback speed change in scene unusable)
     public int playback_speed = 1; // 1: x1 , 2: x0.5, 4: x0.25
     private int playback_counter = 0;
+    
     IEnumerable<string> read_recording_data;
     IEnumerator<string> sequenceEnum;
     JointDataList saved_joint_data;
-    JointDataListLive remote_joints_live = null;
+    JointDataListLive remote_joints_live = null; // Live (newest) joint data
 
+    // File that is being read from
     string current_file = "jsondata.txt";
 
-    public bool isMaleSMPL = true; // can be changed in the UI
+    // can be changed in the UI
+    // TODO: probaly change to using functions to toggle
+    public bool isMaleSMPL = true; 
     public bool usingKinectAlternative = true;
+    
+
+    public bool mirroring = true; // can probably be changed to private (if no UI elements use it)
     public bool debugMode = true;
     private bool loadedFakeData = false;
+
+    // Web socket is currently used only for Kinect Alternative
     WebSocket websocket;
     public string WS_ip = "ws://localhost:2567";
+
+    // Used for showing if pose is correct
     public Material normal_material;
     public Material correct_material;
     public Material incorrect_material;
     public bool shouldCheckCorrectness = true;
     public float correctionThresh = 30.0f;
+
+    // Mirror all avatar containers
+    // TODO: Move code to AvatarGo class
     public void do_mirror()
     {
 
@@ -157,6 +219,9 @@ public class PoseteacherMain : MonoBehaviour
         }
     }
 
+    // Setters used in UI, configured in Inspector tab of respective buttons
+    // Changing the names could (shouldn't) break the link to UI
+    // Changing function signatures (parameters) WILL break the link to UI
     public void set_SMPL(bool value)
     {
         isMaleSMPL = value;
@@ -173,32 +238,40 @@ public class PoseteacherMain : MonoBehaviour
     {
         correctionThresh = thresh;
     }
-
     public void set_playback_speed(int a)
     {
         playback_speed = a;
     }
-
     public void set_current_file(string curr)
     {
         current_file = curr;
     }
 
+    // Generate new filename with timestamp and set as file to write to
     public void gen_new_current_file()
     {
         string timestamp = DateTime.Now.ToString("yyyy_MM_dd-HH_mm_ss");
         current_file = "jsondata/" + timestamp + ".txt";
     }
 
+
+    // Class reperesenting a pose, only used for getting pose from websocket 
+    // in format of lightweight-human-pose-estimation-3d-demo.pytorch (mentioned in README)
     [Serializable]
     public class RemoteJointList
     {
         public List<List<double>> values { get; set; }
     }
+
+    // Do once on scene startup
     async void Start()
     {
+        // Contains code to instantiate a websocket to obtain pose data
+        // Web socket is currently used only for Kinect Alternative
+
 
         // Unity apparently cannot deserialize arrays, so we had to do it manually
+        // TODO: Function only used once in Start, but maybe should be outside
         RemoteJointList DeserializeRJL(string message)
         {
             string[] joints3D = message.Split(new string[] { "], [" }, StringSplitOptions.None);
@@ -215,7 +288,8 @@ public class PoseteacherMain : MonoBehaviour
             RemoteJointList rjl = new RemoteJointList { values = joints };
             return rjl;
         }
-
+        
+        // TODO: remove static socket ip , replace from field
         websocket = new WebSocket("ws://localhost:2567");
 
         websocket.OnOpen += () =>
@@ -235,6 +309,7 @@ public class PoseteacherMain : MonoBehaviour
 
         websocket.OnMessage += (bytes) =>
         {
+            // If joint information is recieved, set remote_joints_live
             var message = System.Text.Encoding.UTF8.GetString(bytes);
             Debug.Log("WS message received: " + message);
             var remote_joints = DeserializeRJL(message);
@@ -248,7 +323,7 @@ public class PoseteacherMain : MonoBehaviour
         await websocket.Connect();
     }
 
-
+    // For testing websocket
     async void SendWebSocketMessage()
     {
         if (websocket.State == WebSocketState.Open)
@@ -258,27 +333,44 @@ public class PoseteacherMain : MonoBehaviour
         }
     }
 
+    // Actions to do before quitting application
     private async void OnApplicationQuit()
     {
         await websocket.Close();
     }
 
+
+    // Activated once, on enable (at the start)
+    // TODO: Merge with Start function as this script is never disabled
     private void OnEnable()
     {
         Debug.Log("OnEnable");
 
-        // This returns the GameObject named Hand.
+        // Get refrences to objects used to show RGB video (Kinect)
         streamCanvas = GameObject.Find("RawImage");
         videoCube = GameObject.Find("VideoCube");
 
+        // Find avatar container objects, and initialize their respective AvatarGo classes
         GameObject avatarContainer = GameObject.Find("AvatarContainer");
         GameObject avatarContainerT = GameObject.Find("AvatarContainerT");
         GameObject avatarContainer2 = GameObject.Find("AvatarContainer2");
         GameObject avatarContainerT2 = GameObject.Find("AvatarContainerT2");
 
+        avatarSelf = new AvatarGo(avatarContainer);
+        avatarTeacher = new AvatarGo(avatarContainerT);
+        avatarSelf2 = new AvatarGo(avatarContainer2);
+        avatarTeacher2 = new AvatarGo(avatarContainerT2);
+
+        // Set unused containers to inactive
+        avatarTeacher.avatarContainer.gameObject.SetActive(false);
+        avatarSelf2.avatarContainer.gameObject.SetActive(false);
+        avatarTeacher2.avatarContainer.gameObject.SetActive(false);
+
+        // Test print to log
         Debug.Log(streamCanvas);
 
-        if(usingKinectAlternative == false)
+        // Setup device and tracker for Azure Kinect Body Tracking
+        if (usingKinectAlternative == false)
         {
             this.device = Device.Open(0);
             var config = new DeviceConfiguration
@@ -299,16 +391,11 @@ public class PoseteacherMain : MonoBehaviour
             this.tracker = BodyTracker.Create(calibration, trackerConfiguration);
         }
 
-        avatarSelf = new AvatarGo(avatarContainer);
-        avatarTeacher = new AvatarGo(avatarContainerT);
-        avatarSelf2 = new AvatarGo(avatarContainer2);
-        avatarTeacher2 = new AvatarGo(avatarContainerT2);
-
-        avatarTeacher.avatarContainer.gameObject.SetActive(false);
-        avatarSelf2.avatarContainer.gameObject.SetActive(false);
-        avatarTeacher2.avatarContainer.gameObject.SetActive(false);
+        
     }
 
+    // If script onbject is disabled, (normally this never happens)
+    // when usingKinectAlternative == false the varables are unitialized i.e. ==null
     private void OnDisable()
     {
         if (tracker != null)
@@ -321,7 +408,7 @@ public class PoseteacherMain : MonoBehaviour
         }
     }
 
-
+    // Change recording mode via keyboard input for debugging and to not need menu
     void checkKeyInput()
     {
         if (Input.GetKey(KeyCode.X))
@@ -351,7 +438,12 @@ public class PoseteacherMain : MonoBehaviour
         }
     }
 
+    // Functions for moving different avatars to a JointDataListLive pose
+    // TODO: move functions to AvatarGo class
+    // remove code duplication
+    // remove unused lines of code 
 
+    // Move the stick person avatar contained in avatarSelf
     void moveStickPerson(JointDataListLive joint_data_list, AvatarGo avatarSelf)
     {
         /************************************Joints**************************************/
@@ -685,9 +777,10 @@ public class PoseteacherMain : MonoBehaviour
         avatarSelf.RightLowerLeg.transform.Rotate(90, 0, 0);
         avatarSelf.RightLowerLeg.transform.localScale = new Vector3(0.2f, 1.2f, 0.2f);
     }
-
+    // Move the cube avatar contained in avatarSelf
     void moveCubePerson(JointDataListLive joint_data_list, AvatarGo avatarSelf)
     {
+        //Place cubes at position and orietation of joints
         for (JointType jt = 0; jt < JointType.Count; jt++)
         {
             var joint = joint_data_list.data[(int)jt];
@@ -701,9 +794,10 @@ public class PoseteacherMain : MonoBehaviour
             obj.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
         }
     }
-
+    // Move the robot avatar contained in avatarSelf
     void moveRobotPerson(JointDataListLive joint_data_list, AvatarGo avatarSelf)
     {
+        // Copied from stick person move
         JointDataLive stickJoint = joint_data_list.data[5];
         var stickPos = stickJoint.Position;
         var stickOrientation = stickJoint.Orientation;
@@ -1034,7 +1128,15 @@ public class PoseteacherMain : MonoBehaviour
         avatarSelf.RightLowerLeg.transform.Rotate(90, 0, 0);
         avatarSelf.RightLowerLeg.transform.localScale = new Vector3(0.2f, 1.2f, 0.2f);
 
-        // get Robot body parts
+        // Code above is copied from stick person move
+        // TODO: probably could just call move stickperson function?
+
+        // Below the orientation of the stick figure parts is applied to the robot avatar, ith some additional calculations
+        // TODO: is there a simpler way to do this?
+        // If way to apply pose to a humanoid rig is discovered, that would work directly and be simpler
+
+
+        // Get Robot body parts references
         GameObject right_shoulder_joint, right_upper_arm_joint, right_forearm_joint, left_upper_arm_joint, left_forearm_joint;
         GameObject left_thigh_joint, left_knee_joint, right_thigh_joint, right_knee_joint;
         GameObject robotKyle = avatarSelf.robotContainer.transform.Find("Robot Kyle").gameObject;
@@ -1065,10 +1167,12 @@ public class PoseteacherMain : MonoBehaviour
         right_knee_joint = right_thigh_joint.transform.Find("Right_Knee_Joint_01").gameObject;
         left_knee_joint = left_thigh_joint.transform.Find("Left_Knee_Joint_01").gameObject;
 
+
         Quaternion rootTransform = Quaternion.FromToRotation(robotRoot.transform.rotation.eulerAngles, avatarSelf.stickContainer.transform.rotation.eulerAngles);
         Quaternion relativeTransform = Quaternion.FromToRotation(transform.up, avatarSelf.LeftUpperArm.transform.localRotation.eulerAngles);
         Vector3 ea = avatarSelf.RightUpperArm.transform.rotation.eulerAngles;
 
+        // Change parents of body part to all be in global coordinates of avatar
         if (set == true)
         {
             right_upper_arm_joint.transform.SetParent(avatarSelf.robotContainer.transform);
@@ -1076,6 +1180,8 @@ public class PoseteacherMain : MonoBehaviour
             right_thigh_joint.transform.SetParent(avatarSelf.robotContainer.transform);
             left_thigh_joint.transform.SetParent(avatarSelf.robotContainer.transform);
         }
+
+        // Some manually tested rotations are applied after the calculated pose, as there are offsets
         right_upper_arm_joint.transform.localRotation = avatarSelf.RightUpperArm.transform.localRotation;
         right_upper_arm_joint.transform.Rotate(0, 0, 90);
 
@@ -1097,7 +1203,7 @@ public class PoseteacherMain : MonoBehaviour
         right_knee_joint.transform.localRotation = Quaternion.Inverse(right_thigh_joint.transform.localRotation) * avatarSelf.RightKneeStick.transform.localRotation;
         right_knee_joint.transform.Rotate(180, 0, -170);
     }
-
+    // Move the SMPL avatar contained in avatarSelf
     void moveSMPLPerson(JointDataListLive joint_data_list, AvatarGo avatarSelf)
     {
         JointDataLive stickJoint = joint_data_list.data[5];
@@ -1433,6 +1539,11 @@ public class PoseteacherMain : MonoBehaviour
         avatarSelf.RightLowerLeg.transform.Rotate(90, 0, 0);
         avatarSelf.RightLowerLeg.transform.localScale = new Vector3(0.2f, 1.2f, 0.2f);
 
+        // Code above is copied from stick person move
+        // TODO: probably could just call move stickperson function?
+
+        // Below the orientation of the stick figure parts is applied to the SMPL avatar, ith some additional calculations
+        // TODO: <check TODO moveRobotPerson, same as there>
 
         // get SMPL body parts
         GameObject smpl_body;
@@ -1545,6 +1656,8 @@ public class PoseteacherMain : MonoBehaviour
             L_hip.transform.SetParent(avatarSelf.smplContainer.transform);
             R_hip.transform.SetParent(avatarSelf.smplContainer.transform);
         }
+
+        // Some manually tested rotations are applied after the calculated pose, as there are offsets
         R_Shoulder.transform.localRotation = avatarSelf.RightUpperArm.transform.localRotation;
         R_Shoulder.transform.Rotate(0, 180, 90);
         R_Elbow.transform.localRotation = Quaternion.Inverse(R_Shoulder.transform.localRotation) * avatarSelf.RightLowerArm.transform.localRotation;
@@ -1566,6 +1679,8 @@ public class PoseteacherMain : MonoBehaviour
         R_Knee.transform.Rotate(90, 180, 90);
     }
 
+
+    // Change material of stickContainer avatar if not close enough to teacher pose
     void showCorrection(AvatarGo avatarSelf, AvatarGo avatarTeacher)
     {
         float LeftUpperArm_difference = Quaternion.Angle(avatarSelf.LeftUpperArm.transform.localRotation, avatarTeacher.LeftUpperArm.transform.localRotation);
@@ -1591,6 +1706,7 @@ public class PoseteacherMain : MonoBehaviour
         }
     }
 
+    // Converts Azure Kinect SDK BT Body to JointDataList (serializable for JSON) pose
     JointDataList convertBodyToJDL(Body body)
     {
         JointData[] joint_data_array = new JointData[(int)JointType.Count];
@@ -1610,6 +1726,7 @@ public class PoseteacherMain : MonoBehaviour
         return jdl;
     }
 
+    // Converts JSON string to JointDataListLive pose
     JointDataListLive JSON_to_JDL_Live(string frame_json)
     {
         JointDataLive[] joint_data_recorded_array = new JointDataLive[(int)JointType.Count];
@@ -1634,6 +1751,7 @@ public class PoseteacherMain : MonoBehaviour
         return recorded_data;
     }
 
+    // Converts Azure Kinect SDK BT Body to JointDataListLive pose
     JointDataListLive Body_to_JDL_Live(Body body)
     {
         JointDataLive[] joint_data_live_array = new JointDataLive[(int)JointType.Count];
@@ -1655,6 +1773,7 @@ public class PoseteacherMain : MonoBehaviour
         return live_data;
     }
 
+    // Converts RemoteJointList pose to JointDataListLive pose
     JointDataListLive Remote_to_JDL_Live(RemoteJointList rjl)
     {
         // format in  lightweight-human-pose-estimation-3d-demo.pytorch
@@ -1756,12 +1875,16 @@ public class PoseteacherMain : MonoBehaviour
         return received_data;
     }
 
+    // Appends the passed pose (JointDataList format) to the file as JSON
+    // TODO: remove unused parameter avatarSelf
     void appendRecordedFrame(JointDataList jdl, AvatarGo avatarSelf, string filename)
     {
         string json = JsonUtility.ToJson(jdl) + Environment.NewLine;
         File.AppendAllText(filename, json);
     }
 
+    // Loads passed filename into read_recording_data and sequenceEnum fields
+    // If no filename is passed, loads current_file
     public void loadRecording(string filename = "")
     {
         // read recording file
@@ -1774,6 +1897,9 @@ public class PoseteacherMain : MonoBehaviour
         Debug.Log(read_recording_data);
     }
 
+    // !!! Deletes contents of the passed filename to remove all appended poses
+    // If no filename is passed current_file content is deleted
+    // Currently not used
     void resetRecording(string filename = "")
     {
         // reset recording file
@@ -1932,6 +2058,7 @@ public class PoseteacherMain : MonoBehaviour
     }
 
 
+    // Done at each application update
     void Update()
     {
         #if !UNITY_WEBGL || UNITY_EDITOR
@@ -1940,23 +2067,29 @@ public class PoseteacherMain : MonoBehaviour
 
         checkKeyInput();
 
+        // Get new pose
         if (usingKinectAlternative)
         {
+            // remote_joints_live is non-null if alternative is sending pose data over websocket
             if (remote_joints_live != null)
             {
                 JointDataListLive live_data = remote_joints_live;
                 animateAvatars(avatarSelf, live_data);
             }
+            // no data being recieved over websocket and debug mode
             else if(debugMode == true)
             {
-                // use fake input for testing
+                // load fake data once
+                // TODO: should probably be in Start function
                 if (loadedFakeData == false)
                 {
                     loadedFakeData = true;
                     loadRecording();
                 }
 
-                // use fake data
+                // use fake data from JSON file for testing
+                // TODO: have different sequenceEnum for fake input not same as used for playback teacher
+                // otherwise advances pose also for teacher
                 sequenceEnum.MoveNext();
                 string frame_json = sequenceEnum.Current;
                 JointDataListLive fake_live_data = JSON_to_JDL_Live(frame_json);
@@ -1967,13 +2100,18 @@ public class PoseteacherMain : MonoBehaviour
         }
         else
         {
+            // TODO: move to function?
+            // potentially simplify by not using "using" scopes
             using (Capture capture = device.GetCapture())
             {
+                // Make tracker estimate body
                 tracker.EnqueueCapture(capture);
+
+                // Code for getting RGB image from camera
                 var color = capture.Color;
                 if (color != null && color.WidthPixels > 0)
                 {
-                    UnityEngine.Object.Destroy(tex);
+                    UnityEngine.Object.Destroy(tex);// required to not keep old images in memory
                     tex = new Texture2D(color.WidthPixels, color.HeightPixels, TextureFormat.BGRA32, false);
                     tex.LoadRawTextureData(color.GetBufferCopy());
                     tex.Apply();
@@ -1992,17 +2130,24 @@ public class PoseteacherMain : MonoBehaviour
                 }
             }
 
+            // Get pose estimate from tracker
             using (BodyFrame frame = tracker.PopResult())
             {
                 Debug.LogFormat("{0} bodies found.", frame.BodyCount);
+
+                //  At least one body found by Body Tracking
                 if (frame.BodyCount > 0)
                 {
+                    // Use first estimated person, if mutiple are in the image
+                    // !!! There are (probably) no guarantees on consisitent ordering between estimates
                     var bodies = frame.Bodies;
                     var body = bodies[0];
 
+                    // Apply pose to user avatar(s)
                     JointDataListLive live_data = Body_to_JDL_Live(body);
                     animateAvatars(avatarSelf, live_data);
 
+                    // if recording pose, append to current_file file
                     if (recording_mode == 1) // recording
                     {
                         JointDataList jdl = convertBodyToJDL(body);
@@ -2013,16 +2158,18 @@ public class PoseteacherMain : MonoBehaviour
         }
 
 
+        // Playback for teacher avatar(s)
         if (recording_mode == 2) // playback
         {
-
-            if(sequenceEnum == null)
+            // load if not yet loaded
+            if (sequenceEnum == null)
             {
                 loadRecording();
             }
 
-            // play recording
-            // needs to be loaded with recording_mode 3 first
+            // play recording at different speeds
+            // skip pose update if counter isn't big enought
+            // TODO: maybe rewrite...
             if (playback_speed == 1) // x1
             {
                 sequenceEnum.MoveNext();
@@ -2035,7 +2182,6 @@ public class PoseteacherMain : MonoBehaviour
                     sequenceEnum.MoveNext();
                     playback_counter = 0;
                 }
-
             }
             else //(playback_speed == 3) // x0.25
             {
@@ -2047,10 +2193,12 @@ public class PoseteacherMain : MonoBehaviour
                 }
             }
 
+            // Get current pose and apply it to teacher avatars
             string frame_json = sequenceEnum.Current;
             JointDataListLive recorded_data = JSON_to_JDL_Live(frame_json);
             animateTeacher(avatarTeacher, recorded_data);
 
+            // TODO: Put this in animate function?
             if (shouldCheckCorrectness)
             {
                 showCorrection(avatarSelf, avatarTeacher);
@@ -2063,6 +2211,10 @@ public class PoseteacherMain : MonoBehaviour
 
 }
 
+// TODO: The following classes should be renamed with more intuitive naming
+
+// Class with position and orientation of one joint in string format
+// Used for conversion to JSON
 [Serializable]
 class JointData
 {
@@ -2070,18 +2222,23 @@ class JointData
     public string rotation;
 }
 
+// Class with position and orientation of all joints (one pose) in string format
+// Used for conversion to JSON
 [Serializable]
 class JointDataList
 {
     public JointData[] data;
 }
 
+// Class with position and orientation of one joint
 class JointDataLive
 {
     public Vector3 Position;
     public Quaternion Orientation;
 }
 
+// Class with position and orientation of all joints (one pose)
+// Used for applying poses to avatars
 [Serializable]
 class JointDataListLive
 {
