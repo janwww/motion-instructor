@@ -782,12 +782,7 @@ class AvatarGo
     {
         this.avatarContainer = avatarContainer;
 
-        // TODO: already mentionned above:
-        // if the function stays, it should assign direcly to the field of the class
-        GameObject[] debugObjects = {};
-        prepareGameObjects(avatarContainer, ref debugObjects);
-        this.cubeContainer.debugObjects = debugObjects;
-
+        
         // Find child object avatars in scene and save references in fields
         GameObject cubeC = avatarContainer.transform.Find("CubeContainer").gameObject;
         GameObject stickC = avatarContainer.transform.Find("StickContainer").gameObject;
@@ -803,6 +798,12 @@ class AvatarGo
         containers.Add(AvatarType.STICK, stickContainer);
         containers.Add(AvatarType.ROBOT, robotContainer);
         containers.Add(AvatarType.SMPL, smplContainer);
+
+        // TODO: already mentionned above:
+        // if the function stays, it should assign direcly to the field of the class
+        GameObject[] debugObjects = { };
+        prepareGameObjects(avatarContainer, ref debugObjects);
+        this.cubeContainer.debugObjects = debugObjects;
 
         // Find children of the stick person avatar in scene and save references in fields
         /*LeftLowerLeg = stickC.transform.Find("LLLeg").gameObject;
