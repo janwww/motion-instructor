@@ -445,7 +445,7 @@ class StickContainer : Container
     }
 }
 
-// Class that contains information about the cube contained in an AvatarGo object
+// Class that contains information about the robot and joints contained in an AvatarGo object
 class RobotContainer : Container
 {
     // stick needed for Move calculations
@@ -550,7 +550,7 @@ class RobotContainer : Container
     }
 }
 
-// Class that contains information about the cube contained in an AvatarGo object
+// Class that contains information about the skinned multi-person linear body model contained in an AvatarGo object
 class SmplContainer : Container
 {
     // stick needed for Move calculations
