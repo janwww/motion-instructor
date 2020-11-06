@@ -11,4 +11,8 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/Scenes/MRTK-UI-test.unity
     guid: fd60f4004f7a3e8479edd3878772ef09
-  m_configObjects: {}
+  m_configObjects:
+    Unity.XR.WindowsMR.Settings: {fileID: 11400000, guid: 2591c24de7c067b4ca996c3fcbd189c5,
+      type: 2}
+    com.unity.xr.management.loader_settings: {fileID: 11400000, guid: 244f0619f26cb554f857c406795b128a,
+      type: 2}
