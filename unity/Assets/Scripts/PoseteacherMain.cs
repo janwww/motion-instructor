@@ -7,15 +7,732 @@ using UnityEngine.UI;
 using System.IO;
 using System.Collections;
 using NativeWebSocket;
+using System.Security.Permissions;
 
+// Base interface for different type of containers (cube, stick etc.)
+interface Container
+{
+    // Activates/Deactivates the contained GameObject object
+    void SetActive(bool active);
+    // Move the contained GameObject object based on the input JointData
+    void MovePerson(JointDataListLive joint_data_list);
+}
+
+// Class that contains information about the cube contained in an AvatarGo object
+// TODO move debugObject functionalities from AvatarGo to CubeContainer
+class CubeContainer : Container
+{
+    // CONSIDER moving GameObject to interface? Change the interface to abstract base class with SetActive function there
+    public GameObject cube;
+
+    // References to cubes of the cubes avatar
+    public GameObject[] debugObjects;
+
+    public CubeContainer(GameObject container)
+    {
+        cube = container;
+    }
+
+    public void MovePerson(JointDataListLive joint_data_list)
+    {
+        //Place cubes at position and orietation of joints
+        for (JointType jt = 0; jt < JointType.Count; jt++)
+        {
+            var joint = joint_data_list.data[(int)jt];
+            var pos = joint.Position;
+            var orientation = joint.Orientation;
+            var v = new Vector3(pos[0], -pos[1], pos[2]) * 0.004f;
+            var r = new Quaternion(orientation[0], orientation[1], orientation[2], orientation[3]);
+            var obj = debugObjects[(int)jt];
+            obj.transform.localPosition = v;
+            obj.transform.localRotation = r;
+            obj.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
+        }
+    }
+
+    public void SetActive(bool active)
+    {
+        cube.SetActive(active);
+    }
+}
+
+// Class that contains information about the stick figure contained in an AvatarGo object
+class StickContainer : Container
+{
+    public GameObject stick;
+
+    // References to parts of the stick person avatar
+    public GameObject LeftLowerLeg, RightLowerLeg, LeftUpperArm, RightUpperArm, LeftUpperLeg, RightUpperLeg, TorsoLeft,
+       TorsoRight, HipStick, LeftLowerArm, RightLowerArm, LeftEye, RightEye, Shoulders, MouthStick, NoseStick, LeftEar, RightEar;
+    public GameObject LeftShoulderStick, RightShoulderStick, LeftHipStick, RightHipStick, LeftElbowStick, RightElbowStick, LeftWristStick, RightWristStick,
+        LeftKneeStick, RightKneeStick, LeftAnkleStick, RightAnkleStick;
+
+    public StickContainer(GameObject container)
+    {
+        stick = container;
+
+        // Find children of the stick person avatar in scene and save references in fields
+        LeftLowerLeg = stick.transform.Find("LLLeg").gameObject;
+        RightLowerLeg = stick.transform.Find("RLLeg").gameObject;
+        LeftUpperArm = stick.transform.Find("LeftUpperArm").gameObject;
+        RightUpperArm = stick.transform.Find("RightUpperArm").gameObject;
+        LeftUpperLeg = stick.transform.Find("LeftUpperLeg").gameObject; // HipLeft 18 KneeLeft 19 AnkleLeft 20
+        RightUpperLeg = stick.transform.Find("RightUpperLeg").gameObject; // HipRight 22 KneeRight 23 AnkleRight 24
+        TorsoLeft = stick.transform.Find("TorsoLeft").gameObject; // ShoulderLeft 5 HipLeft 18
+        TorsoRight = stick.transform.Find("TorsoRight").gameObject; // ShoulderRight 12 HipRight 22
+        HipStick = stick.transform.Find("HipStick").gameObject; // HipLeft 18 HipRight 22
+        LeftLowerArm = stick.transform.Find("LeftLowerArm").gameObject; // = ElbowLeft 6 WristLeft 7
+        RightLowerArm = stick.transform.Find("RightLowerArm").gameObject; // = ElbowRight 13 WristRight 14
+        LeftEye = stick.transform.Find("LeftEye").gameObject; // 28
+        RightEye = stick.transform.Find("RightEye").gameObject; // 30
+        Shoulders = stick.transform.Find("Shoulders").gameObject; // ShoulderLeft 5 ShoulderRight 12
+        MouthStick = stick.transform.Find("MouthStick").gameObject; // = Neck 3
+        NoseStick = stick.transform.Find("NoseStick").gameObject; // 27
+        LeftEar = stick.transform.Find("LeftEar").gameObject; // 29
+        RightEar = stick.transform.Find("RightEar").gameObject; // 31
+
+        LeftShoulderStick = stick.transform.Find("LeftShoulderStick").gameObject;
+        RightShoulderStick = stick.transform.Find("RightShoulderStick").gameObject;
+        LeftHipStick = stick.transform.Find("LeftHipStick").gameObject;
+        RightHipStick = stick.transform.Find("RightHipStick").gameObject;
+        LeftElbowStick = stick.transform.Find("LeftElbowStick").gameObject;
+        RightElbowStick = stick.transform.Find("RightElbowStick").gameObject;
+        LeftWristStick = stick.transform.Find("LeftWristStick").gameObject;
+        RightWristStick = stick.transform.Find("RightWristStick").gameObject;
+        LeftKneeStick = stick.transform.Find("LeftKneeStick").gameObject;
+        RightKneeStick = stick.transform.Find("RightKneeStick").gameObject;
+        LeftAnkleStick = stick.transform.Find("LeftAnkleStick").gameObject;
+        RightAnkleStick = stick.transform.Find("RightAnkleStick").gameObject;
+    }
+
+    public void MovePerson(JointDataListLive joint_data_list)
+    {
+        /************************************Joints**************************************/
+        JointDataLive stickJoint = joint_data_list.data[5];
+        var stickPos = stickJoint.Position;
+        var stickOrientation = stickJoint.Orientation;
+        var stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.008f;
+        var stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
+        LeftShoulderStick.transform.localPosition = stickV;
+        LeftShoulderStick.transform.localRotation = stickR;
+
+        stickJoint = joint_data_list.data[12];
+        stickPos = stickJoint.Position;
+        stickOrientation = stickJoint.Orientation;
+        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.008f;
+        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
+        RightShoulderStick.transform.localPosition = stickV;
+        RightShoulderStick.transform.localRotation = stickR;
+
+        stickJoint = joint_data_list.data[18];
+        stickPos = stickJoint.Position;
+        stickOrientation = stickJoint.Orientation;
+        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.008f;
+        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
+        LeftHipStick.transform.localPosition = stickV;
+        LeftHipStick.transform.localRotation = stickR;
+
+        stickJoint = joint_data_list.data[22];
+        stickPos = stickJoint.Position;
+        stickOrientation = stickJoint.Orientation;
+        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.008f;
+        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
+        RightHipStick.transform.localPosition = stickV;
+        RightHipStick.transform.localRotation = stickR;
+
+        stickJoint = joint_data_list.data[6];
+        stickPos = stickJoint.Position;
+        stickOrientation = stickJoint.Orientation;
+        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.008f;
+        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
+        LeftElbowStick.transform.localPosition = stickV;
+        LeftElbowStick.transform.localRotation = stickR;
+
+        stickJoint = joint_data_list.data[13];
+        stickPos = stickJoint.Position;
+        stickOrientation = stickJoint.Orientation;
+        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.008f;
+        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
+        RightElbowStick.transform.localPosition = stickV;
+        RightElbowStick.transform.localRotation = stickR;
+
+        stickJoint = joint_data_list.data[7];
+        stickPos = stickJoint.Position;
+        stickOrientation = stickJoint.Orientation;
+        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.008f;
+        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
+        LeftWristStick.transform.localPosition = stickV;
+        LeftWristStick.transform.localRotation = stickR;
+
+        stickJoint = joint_data_list.data[14];
+        stickPos = stickJoint.Position;
+        stickOrientation = stickJoint.Orientation;
+        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.008f;
+        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
+        RightWristStick.transform.localPosition = stickV;
+        RightWristStick.transform.localRotation = stickR;
+
+        stickJoint = joint_data_list.data[19];
+        stickPos = stickJoint.Position;
+        stickOrientation = stickJoint.Orientation;
+        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.008f;
+        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
+        LeftKneeStick.transform.localPosition = stickV;
+        LeftKneeStick.transform.localRotation = stickR;
+
+        stickJoint = joint_data_list.data[23];
+        stickPos = stickJoint.Position;
+        stickOrientation = stickJoint.Orientation;
+        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.008f;
+        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
+        RightKneeStick.transform.localPosition = stickV;
+        RightKneeStick.transform.localRotation = stickR;
+
+        stickJoint = joint_data_list.data[20];
+        stickPos = stickJoint.Position;
+        stickOrientation = stickJoint.Orientation;
+        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.008f;
+        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
+        LeftAnkleStick.transform.localPosition = stickV;
+        LeftAnkleStick.transform.localRotation = stickR;
+
+        stickJoint = joint_data_list.data[24];
+        stickPos = stickJoint.Position;
+        stickOrientation = stickJoint.Orientation;
+        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.008f;
+        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
+        RightAnkleStick.transform.localPosition = stickV;
+        RightAnkleStick.transform.localRotation = stickR;
+
+
+        /************************************Head**************************************/
+        stickJoint = joint_data_list.data[28];
+        stickPos = stickJoint.Position;
+        stickOrientation = stickJoint.Orientation;
+        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.008f;
+        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
+        LeftEye.transform.localPosition = stickV;
+        LeftEye.transform.localRotation = stickR;
+        LeftEye.transform.localScale = new Vector3(0.3f, 0.2f, 0.2f);
+
+        stickJoint = joint_data_list.data[30];
+        stickPos = stickJoint.Position;
+        stickOrientation = stickJoint.Orientation;
+        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.008f;
+        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
+        RightEye.transform.localPosition = stickV;
+        RightEye.transform.localRotation = stickR;
+        RightEye.transform.localScale = new Vector3(0.3f, 0.2f, 0.2f);
+
+        stickJoint = joint_data_list.data[27];
+        stickPos = stickJoint.Position;
+        stickOrientation = stickJoint.Orientation;
+        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.008f;
+        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
+        NoseStick.transform.localPosition = stickV;
+        NoseStick.transform.localRotation = stickR;
+        NoseStick.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
+
+        stickJoint = joint_data_list.data[29];
+        stickPos = stickJoint.Position;
+        stickOrientation = stickJoint.Orientation;
+        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.008f;
+        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
+        LeftEar.transform.localPosition = stickV;
+        LeftEar.transform.localRotation = stickR;
+        LeftEar.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
+        LeftEar.transform.LookAt(LeftShoulderStick.transform.position);
+        LeftEar.transform.Rotate(90, 0, 0);
+
+        stickJoint = joint_data_list.data[31];
+        stickPos = stickJoint.Position;
+        stickOrientation = stickJoint.Orientation;
+        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.008f;
+        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
+        RightEar.transform.localPosition = stickV;
+        RightEar.transform.localRotation = stickR;
+        RightEar.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
+        RightEar.transform.LookAt(RightShoulderStick.transform.position);
+        RightEar.transform.Rotate(90, 0, 0);
+
+        stickJoint = joint_data_list.data[27];
+        stickPos = stickJoint.Position;
+        stickOrientation = stickJoint.Orientation;
+        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.008f;
+        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
+        MouthStick.transform.localPosition = stickV;
+        MouthStick.transform.localRotation = stickR;
+        MouthStick.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
+
+
+        /************************************Body**************************************/
+        stickJoint = joint_data_list.data[5];
+        var stickJoint_b = joint_data_list.data[12];
+        stickPos = stickJoint.Position;
+        var stickPos_b = stickJoint_b.Position;
+        stickOrientation = stickJoint.Orientation;
+        Vector3 stick = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) - new Vector3(stickPos_b[0], -stickPos_b[1], stickPos_b[2]);
+        float stick_length = stick.magnitude * 0.002f;
+        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.004f;
+        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
+        Shoulders.transform.localPosition = new Vector3((stickPos[0] + stickPos_b[0]) * 0.5f, (-stickPos[1] - stickPos_b[1]) * 0.5f, (stickPos[2] + stickPos_b[2]) * 0.5f) * 0.008f;
+        Shoulders.transform.LookAt(RightShoulderStick.transform.position);
+        Shoulders.transform.Rotate(90, 0, 0);
+        Shoulders.transform.localScale = new Vector3(0.2f, stick_length, 0.2f);
+
+        stickJoint = joint_data_list.data[18];
+        stickJoint_b = joint_data_list.data[22];
+        stickPos = stickJoint.Position;
+        stickPos_b = stickJoint_b.Position;
+        stickOrientation = stickJoint.Orientation;
+        stick = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) - new Vector3(stickPos_b[0], -stickPos_b[1], stickPos_b[2]);
+        stick_length = stick.magnitude * 0.002f;
+        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.004f;
+        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
+        HipStick.transform.localPosition = new Vector3((stickPos[0] + stickPos_b[0]) * 0.5f, (-stickPos[1] - stickPos_b[1]) * 0.5f, (stickPos[2] + stickPos_b[2]) * 0.5f) * 0.008f;
+        HipStick.transform.LookAt(RightHipStick.transform.position);
+        HipStick.transform.Rotate(90, 0, 0);
+        HipStick.transform.localScale = new Vector3(0.2f, stick_length, 0.2f);
+
+        stickJoint = joint_data_list.data[18];
+        stickJoint_b = joint_data_list.data[5];
+        stickPos = stickJoint.Position;
+        stickPos_b = stickJoint_b.Position;
+        stickOrientation = stickJoint.Orientation;
+        stick = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) - new Vector3(stickPos_b[0], -stickPos_b[1], stickPos_b[2]);
+        stick_length = stick.magnitude * 0.002f;
+        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.004f;
+        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
+        TorsoLeft.transform.localPosition = new Vector3((stickPos[0] + stickPos_b[0]) * 0.5f, (-stickPos[1] - stickPos_b[1]) * 0.5f, (stickPos[2] + stickPos_b[2]) * 0.5f) * 0.008f;
+        TorsoLeft.transform.LookAt(LeftShoulderStick.transform.position);
+        TorsoLeft.transform.Rotate(90, 0, 0);
+        TorsoLeft.transform.localScale = new Vector3(0.2f, stick_length, 0.2f);
+
+        stickJoint = joint_data_list.data[12];
+        stickJoint_b = joint_data_list.data[22];
+        stickPos = stickJoint.Position;
+        stickPos_b = stickJoint_b.Position;
+        stickOrientation = stickJoint.Orientation;
+        stick = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) - new Vector3(stickPos_b[0], -stickPos_b[1], stickPos_b[2]);
+        stick_length = stick.magnitude * 0.002f;
+        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.004f;
+        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
+        TorsoRight.transform.localPosition = new Vector3((stickPos[0] + stickPos_b[0]) * 0.5f, (-stickPos[1] - stickPos_b[1]) * 0.5f, (stickPos[2] + stickPos_b[2]) * 0.5f) * 0.008f;
+        TorsoRight.transform.LookAt(RightShoulderStick.transform.position);
+        TorsoRight.transform.Rotate(90, 0, 0);
+        TorsoRight.transform.localScale = new Vector3(0.2f, stick_length, 0.2f);
+
+
+        /************************************Arms**************************************/
+        stickJoint = joint_data_list.data[5];
+        stickJoint_b = joint_data_list.data[6];
+        stickPos = stickJoint.Position;
+        stickPos_b = stickJoint_b.Position;
+        stickOrientation = stickJoint.Orientation;
+        stick = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) - new Vector3(stickPos_b[0], -stickPos_b[1], stickPos_b[2]);
+        stick_length = stick.magnitude * 0.002f;
+        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.004f;
+        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
+        LeftUpperArm.transform.localPosition = new Vector3((stickPos[0] + stickPos_b[0]) * 0.5f, (-stickPos[1] - stickPos_b[1]) * 0.5f, (stickPos[2] + stickPos_b[2]) * 0.5f) * 0.008f;
+        LeftUpperArm.transform.LookAt(LeftElbowStick.transform.position);
+        LeftUpperArm.transform.Rotate(90, 0, 0);
+        LeftUpperArm.transform.localScale = new Vector3(0.2f, 1.2f, 0.2f);
+
+        stickJoint = joint_data_list.data[12];
+        stickJoint_b = joint_data_list.data[13];
+        stickPos = stickJoint.Position;
+        stickPos_b = stickJoint_b.Position;
+        stickOrientation = stickJoint.Orientation;
+        stick = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) - new Vector3(stickPos_b[0], -stickPos_b[1], stickPos_b[2]);
+        stick_length = stick.magnitude * 0.002f;
+        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.004f;
+        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
+        RightUpperArm.transform.localPosition = new Vector3((stickPos[0] + stickPos_b[0]) * 0.5f, (-stickPos[1] - stickPos_b[1]) * 0.5f, (stickPos[2] + stickPos_b[2]) * 0.5f) * 0.008f;
+        RightUpperArm.transform.LookAt(RightElbowStick.transform.position);
+        RightUpperArm.transform.Rotate(90, 0, 0);
+        RightUpperArm.transform.localScale = new Vector3(0.2f, 1.2f, 0.2f);
+
+        stickJoint = joint_data_list.data[6];
+        stickJoint_b = joint_data_list.data[7];
+        stickPos = stickJoint.Position;
+        stickPos_b = stickJoint_b.Position;
+        stickOrientation = stickJoint.Orientation;
+        stick = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) - new Vector3(stickPos_b[0], -stickPos_b[1], stickPos_b[2]);
+        stick_length = stick.magnitude * 0.002f;
+        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.004f;
+        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
+        LeftLowerArm.transform.localPosition = new Vector3((stickPos[0] + stickPos_b[0]) * 0.5f, (-stickPos[1] - stickPos_b[1]) * 0.5f, (stickPos[2] + stickPos_b[2]) * 0.5f) * 0.008f;
+        LeftLowerArm.transform.LookAt(LeftWristStick.transform.position);
+        LeftLowerArm.transform.Rotate(90, 0, 0);
+        LeftLowerArm.transform.localScale = new Vector3(0.2f, 1.2f, 0.2f);
+
+        stickJoint = joint_data_list.data[13];
+        stickJoint_b = joint_data_list.data[14];
+        stickPos = stickJoint.Position;
+        stickPos_b = stickJoint_b.Position;
+        stickOrientation = stickJoint.Orientation;
+        stick = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) - new Vector3(stickPos_b[0], -stickPos_b[1], stickPos_b[2]);
+        stick_length = stick.magnitude * 0.002f;
+        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.004f;
+        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
+        RightLowerArm.transform.localPosition = new Vector3((stickPos[0] + stickPos_b[0]) * 0.5f, (-stickPos[1] - stickPos_b[1]) * 0.5f, (stickPos[2] + stickPos_b[2]) * 0.5f) * 0.008f;
+        RightLowerArm.transform.LookAt(RightWristStick.transform.position);
+        RightLowerArm.transform.Rotate(90, 0, 0);
+        RightLowerArm.transform.localScale = new Vector3(0.2f, 1.2f, 0.2f);
+
+
+        /************************************Legs**************************************/
+        stickJoint = joint_data_list.data[18];
+        stickJoint_b = joint_data_list.data[19];
+        stickPos = stickJoint.Position;
+        stickPos_b = stickJoint_b.Position;
+        stickOrientation = stickJoint.Orientation;
+        stick = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) - new Vector3(stickPos_b[0], -stickPos_b[1], stickPos_b[2]);
+        stick_length = stick.magnitude * 0.002f;
+        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.004f;
+        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
+        LeftUpperLeg.transform.localPosition = new Vector3((stickPos[0] + stickPos_b[0]) * 0.5f, (-stickPos[1] - stickPos_b[1]) * 0.5f, (stickPos[2] + stickPos_b[2]) * 0.5f) * 0.008f;
+        LeftUpperLeg.transform.LookAt(LeftHipStick.transform.position);
+        LeftUpperLeg.transform.Rotate(90, 0, 0);
+        LeftUpperLeg.transform.localScale = new Vector3(0.2f, 1.2f, 0.2f);
+
+        stickJoint = joint_data_list.data[22];
+        stickJoint_b = joint_data_list.data[23];
+        stickPos = stickJoint.Position;
+        stickPos_b = stickJoint_b.Position;
+        stickOrientation = stickJoint.Orientation;
+        stick = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) - new Vector3(stickPos_b[0], -stickPos_b[1], stickPos_b[2]);
+        stick_length = stick.magnitude * 0.002f;
+        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.004f;
+        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
+        RightUpperLeg.transform.localPosition = new Vector3((stickPos[0] + stickPos_b[0]) * 0.5f, (-stickPos[1] - stickPos_b[1]) * 0.5f, (stickPos[2] + stickPos_b[2]) * 0.5f) * 0.008f;
+        RightUpperLeg.transform.LookAt(RightHipStick.transform.position);
+        RightUpperLeg.transform.Rotate(90, 0, 0);
+        RightUpperLeg.transform.localScale = new Vector3(0.2f, 1.2f, 0.2f);
+
+        stickJoint = joint_data_list.data[19];
+        stickJoint_b = joint_data_list.data[20];
+        stickPos = stickJoint.Position;
+        stickPos_b = stickJoint_b.Position;
+        stickOrientation = stickJoint.Orientation;
+        stick = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) - new Vector3(stickPos_b[0], -stickPos_b[1], stickPos_b[2]);
+        stick_length = stick.magnitude * 0.002f;
+        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.004f;
+        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
+        LeftLowerLeg.transform.localPosition = new Vector3((stickPos[0] + stickPos_b[0]) * 0.5f, (-stickPos[1] - stickPos_b[1]) * 0.5f, (stickPos[2] + stickPos_b[2]) * 0.5f) * 0.008f;
+        LeftLowerLeg.transform.LookAt(LeftKneeStick.transform.position);
+        LeftLowerLeg.transform.Rotate(90, 0, 0);
+        LeftLowerLeg.transform.localScale = new Vector3(0.2f, 1.2f, 0.2f);
+
+        stickJoint = joint_data_list.data[23];
+        stickJoint_b = joint_data_list.data[24];
+        stickPos = stickJoint.Position;
+        stickPos_b = stickJoint_b.Position;
+        stickOrientation = stickJoint.Orientation;
+        stick = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) - new Vector3(stickPos_b[0], -stickPos_b[1], stickPos_b[2]);
+        stick_length = stick.magnitude * 0.002f;
+        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.004f;
+        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
+        RightLowerLeg.transform.localPosition = new Vector3((stickPos[0] + stickPos_b[0]) * 0.5f, (-stickPos[1] - stickPos_b[1]) * 0.5f, (stickPos[2] + stickPos_b[2]) * 0.5f) * 0.008f;
+        RightLowerLeg.transform.LookAt(RightKneeStick.transform.position);
+        RightLowerLeg.transform.Rotate(90, 0, 0);
+        RightLowerLeg.transform.localScale = new Vector3(0.2f, 1.2f, 0.2f);
+    }
+
+    public void SetActive(bool active)
+    {
+        stick.SetActive(active);
+    }
+
+
+}
+
+// Class that contains information about the robot and joints contained in an AvatarGo object
+class RobotContainer : Container
+{
+    // stick needed for Move calculations
+    // CONSIDER: own stick or global stick for avatar?
+    //      is this realistic enough or should MovePerson be changed to container?
+    //      "If way to apply pose to a humanoid rig is discovered, that would work directly and be simpler"
+    public StickContainer stickContainer;
+    public GameObject robot;
+
+    // CONSIDER references to parts ( ?= stick person parts)
+
+    public RobotContainer(GameObject container, StickContainer stickSkeleton)
+    {
+        robot = container;
+        stickContainer = stickSkeleton;
+    }
+
+    public void MovePerson(JointDataListLive joint_data_list)
+    {
+        // CONSIDER: depending on how moving the various containers are invoked, this might be redundant
+        //      if joint_data shows delta movements, invoking this function redundantly breaks it 
+        //      (right now I think we are good)
+        stickContainer.MovePerson(joint_data_list);
+        
+
+        // Below the orientation of the stick figure parts is applied to the robot avatar, with some additional calculations
+        // TODO: is there a simpler way to do this?
+        // If way to apply pose to a humanoid rig is discovered, that would work directly and be simpler
+
+
+        // Get Robot body parts references
+        GameObject right_shoulder_joint, right_upper_arm_joint, right_forearm_joint, left_upper_arm_joint, left_forearm_joint;
+        GameObject left_thigh_joint, left_knee_joint, right_thigh_joint, right_knee_joint;
+        GameObject robotKyle = robot.transform.Find("Robot Kyle").gameObject;
+        GameObject robotRoot = robotKyle.transform.Find("Root").gameObject;
+        GameObject hip = robotRoot.transform.Find("Hip").gameObject;
+        GameObject ribs = robotRoot.transform.Find("Ribs").gameObject;
+        GameObject left_shoulder_joint = ribs.transform.Find("Left_Shoulder_Joint_01").gameObject;
+
+        right_shoulder_joint = ribs.transform.Find("Right_Shoulder_Joint_01").gameObject;
+        bool set = false;
+        if (right_shoulder_joint.transform.childCount == 1)
+        {
+            set = true;
+            right_upper_arm_joint = right_shoulder_joint.transform.Find("Right_Upper_Arm_Joint_01").gameObject;
+            left_upper_arm_joint = left_shoulder_joint.transform.Find("Left_Upper_Arm_Joint_01").gameObject;
+            right_thigh_joint = hip.transform.Find("Right_Thigh_Joint_01").gameObject;
+            left_thigh_joint = hip.transform.Find("Left_Thigh_Joint_01").gameObject;
+        }
+        else
+        {
+            right_upper_arm_joint = robot.transform.Find("Right_Upper_Arm_Joint_01").gameObject;
+            left_upper_arm_joint = robot.transform.Find("Left_Upper_Arm_Joint_01").gameObject;
+            right_thigh_joint = robot.transform.Find("Right_Thigh_Joint_01").gameObject;
+            left_thigh_joint = robot.transform.Find("Left_Thigh_Joint_01").gameObject;
+        }
+        right_forearm_joint = right_upper_arm_joint.transform.Find("Right_Forearm_Joint_01").gameObject;
+        left_forearm_joint = left_upper_arm_joint.transform.Find("Left_Forearm_Joint_01").gameObject;
+        right_knee_joint = right_thigh_joint.transform.Find("Right_Knee_Joint_01").gameObject;
+        left_knee_joint = left_thigh_joint.transform.Find("Left_Knee_Joint_01").gameObject;
+
+        // TODO were these unused? 
+        /*Quaternion rootTransform = Quaternion.FromToRotation(robotRoot.transform.rotation.eulerAngles, stickContainer.stick.transform.rotation.eulerAngles);
+        Quaternion relativeTransform = Quaternion.FromToRotation(transform.up, stickContainer.LeftUpperArm.transform.localRotation.eulerAngles);
+        Vector3 ea = stickContainer.RightUpperArm.transform.rotation.eulerAngles;*/
+
+        // Change parents of body part to all be in global coordinates of avatar
+        if (set == true)
+        {
+            right_upper_arm_joint.transform.SetParent(robot.transform);
+            left_upper_arm_joint.transform.SetParent(robot.transform);
+            right_thigh_joint.transform.SetParent(robot.transform);
+            left_thigh_joint.transform.SetParent(robot.transform);
+        }
+
+        // Some manually tested rotations are applied after the calculated pose, as there are offsets
+        right_upper_arm_joint.transform.localRotation = stickContainer.RightUpperArm.transform.localRotation;
+        right_upper_arm_joint.transform.Rotate(0, 0, 90);
+
+        right_forearm_joint.transform.localRotation = Quaternion.Inverse(right_upper_arm_joint.transform.localRotation) * stickContainer.RightLowerArm.transform.localRotation;
+        right_forearm_joint.transform.Rotate(0, 0, 90);
+
+        left_upper_arm_joint.transform.localRotation = stickContainer.LeftUpperArm.transform.localRotation;
+        left_upper_arm_joint.transform.Rotate(180, 0, 90);
+        left_forearm_joint.transform.localRotation = Quaternion.Inverse(left_upper_arm_joint.transform.localRotation) * stickContainer.LeftLowerArm.transform.localRotation;
+        left_forearm_joint.transform.Rotate(180, 90, 45);
+
+        left_thigh_joint.transform.localRotation = stickContainer.LeftUpperLeg.transform.localRotation;
+        left_thigh_joint.transform.Rotate(0, 0, 90);
+        left_knee_joint.transform.localRotation = Quaternion.Inverse(left_thigh_joint.transform.localRotation) * stickContainer.LeftKneeStick.transform.localRotation;
+        left_knee_joint.transform.Rotate(0, 0, 170);
+
+        right_thigh_joint.transform.localRotation = stickContainer.RightUpperLeg.transform.localRotation;
+        right_thigh_joint.transform.Rotate(0, 0, -90);
+        right_knee_joint.transform.localRotation = Quaternion.Inverse(right_thigh_joint.transform.localRotation) * stickContainer.RightKneeStick.transform.localRotation;
+        right_knee_joint.transform.Rotate(180, 0, -170);
+    }
+
+    public void SetActive(bool active)
+    {
+        robot.SetActive(active);
+    }
+}
+
+// Class that contains information about the skinned multi-person linear body model contained in an AvatarGo object
+class SmplContainer : Container
+{
+    // stick needed for Move calculations
+    // CONSIDER: see robot
+    public StickContainer stickContainer;
+    public GameObject smpl;
+
+    // CONSIDER references to parts ( ?= stick person parts)
+
+    public SmplContainer(GameObject container, StickContainer stickSkeleton)
+    {
+        smpl = container;
+        stickContainer = stickSkeleton;
+    }
+
+    public void MovePerson(JointDataListLive joint_data_list)
+    {
+        // CONSIDER: depending on how moving the various containers are invoked, this might be redundant
+        //      if joint_data shows delta movements, invoking this function redundantly breaks it 
+        //      (right now I think we are good)
+        stickContainer.MovePerson(joint_data_list);
+
+
+        // Below the orientation of the stick figure parts is applied to the SMPL avatar, ith some additional calculations
+        // TODO: <check TODO moveRobotPerson, same as there>
+
+        // get SMPL body parts
+        GameObject smpl_body;
+        GameObject smpl_male = smpl.transform.Find("SMPL_m_unityDoubleBlends_lbs_10_scale5_207_v1.0.0").gameObject;
+        GameObject smpl_female = smpl.transform.Find("SMPL_f_unityDoubleBlends_lbs_10_scale5_207_v1.0.0").gameObject;
+        GameObject L_hip, R_hip, L_Shoulder, R_Shoulder, R_Elbow, L_Elbow, L_Knee, R_Knee;
+        bool set = false;
+        if (smpl_male.activeSelf == true)
+        {
+            smpl_body = smpl_male;
+            //GameObject L_hip, R_hip, L_Shoulder, R_Shoulder;
+            GameObject SMPLRoot = smpl_body.transform.Find("m_avg_root").gameObject;
+            GameObject pelvis = SMPLRoot.transform.Find("m_avg_Pelvis").gameObject;
+
+            GameObject Spine1 = pelvis.transform.Find("m_avg_Spine1").gameObject;
+            GameObject Spine2 = Spine1.transform.Find("m_avg_Spine2").gameObject;
+            GameObject Spine3 = Spine2.transform.Find("m_avg_Spine3").gameObject;
+
+            // we don't need the spine
+            GameObject L_Collar = Spine3.transform.Find("m_avg_L_Collar").gameObject;
+
+            // we don't need the hand
+            GameObject R_Collar = Spine3.transform.Find("m_avg_R_Collar").gameObject;
+
+            GameObject Neck = Spine3.transform.Find("m_avg_Neck").gameObject;
+
+            if (L_Collar.transform.childCount == 1)
+            {
+                set = true;
+                L_Shoulder = L_Collar.transform.Find("m_avg_L_Shoulder").gameObject;
+                R_Shoulder = R_Collar.transform.Find("m_avg_R_Shoulder").gameObject;
+                L_hip = pelvis.transform.Find("m_avg_L_Hip").gameObject;
+                R_hip = pelvis.transform.Find("m_avg_R_Hip").gameObject;
+            }
+            else
+            {
+                L_Shoulder = smpl.transform.Find("m_avg_L_Shoulder").gameObject;
+                R_Shoulder = smpl.transform.Find("m_avg_R_Shoulder").gameObject;
+                L_hip = smpl.transform.Find("m_avg_L_Hip").gameObject;
+                R_hip = smpl.transform.Find("m_avg_R_Hip").gameObject;
+            }
+
+            L_Knee = L_hip.transform.Find("m_avg_L_Knee").gameObject;
+            GameObject L_Ankle = L_Knee.transform.Find("m_avg_L_Ankle").gameObject;
+            // we don't need the foot and the ankle not much either
+
+            R_Knee = R_hip.transform.Find("m_avg_R_Knee").gameObject;
+            GameObject R_Ankle = R_Knee.transform.Find("m_avg_R_Ankle").gameObject;
+
+            L_Elbow = L_Shoulder.transform.Find("m_avg_L_Elbow").gameObject;
+            GameObject L_Wrist = L_Elbow.transform.Find("m_avg_L_Wrist").gameObject;
+            R_Elbow = R_Shoulder.transform.Find("m_avg_R_Elbow").gameObject;
+            GameObject R_Wrist = R_Elbow.transform.Find("m_avg_R_Wrist").gameObject;
+
+        }
+        else
+        {
+            smpl_body = smpl_female;
+            //GameObject L_hip, R_hip, L_Shoulder, R_Shoulder;
+            GameObject SMPLRoot = smpl_body.transform.Find("f_avg_root").gameObject;
+            GameObject pelvis = SMPLRoot.transform.Find("f_avg_Pelvis").gameObject;
+
+            GameObject Spine1 = pelvis.transform.Find("f_avg_Spine1").gameObject;
+            GameObject Spine2 = Spine1.transform.Find("f_avg_Spine2").gameObject;
+            GameObject Spine3 = Spine2.transform.Find("f_avg_Spine3").gameObject;
+
+            // we don't need the spine
+            GameObject L_Collar = Spine3.transform.Find("f_avg_L_Collar").gameObject;
+
+            // we don't need the hand
+            GameObject R_Collar = Spine3.transform.Find("f_avg_R_Collar").gameObject;
+
+            GameObject Neck = Spine3.transform.Find("f_avg_Neck").gameObject;
+
+            //right_shoulder_joint = ribs.transform.Find("Right_Shoulder_Joint_01").gameObject;
+            //bool set = false;
+            if (L_Collar.transform.childCount == 1)
+            {
+                set = true;
+                L_Shoulder = L_Collar.transform.Find("f_avg_L_Shoulder").gameObject;
+                R_Shoulder = R_Collar.transform.Find("f_avg_R_Shoulder").gameObject;
+                L_hip = pelvis.transform.Find("f_avg_L_Hip").gameObject;
+                R_hip = pelvis.transform.Find("f_avg_R_Hip").gameObject;
+            }
+            else
+            {
+                L_Shoulder = smpl.transform.Find("f_avg_L_Shoulder").gameObject;
+                R_Shoulder = smpl.transform.Find("f_avg_R_Shoulder").gameObject;
+                L_hip = smpl.transform.Find("f_avg_L_Hip").gameObject;
+                R_hip = smpl.transform.Find("f_avg_R_Hip").gameObject;
+            }
+            L_Knee = L_hip.transform.Find("f_avg_L_Knee").gameObject;
+            GameObject L_Ankle = L_Knee.transform.Find("f_avg_L_Ankle").gameObject;
+            // we don't need the foot and the ankle not much either
+
+            R_Knee = R_hip.transform.Find("f_avg_R_Knee").gameObject;
+            GameObject R_Ankle = R_Knee.transform.Find("f_avg_R_Ankle").gameObject;
+
+            L_Elbow = L_Shoulder.transform.Find("f_avg_L_Elbow").gameObject;
+            GameObject L_Wrist = L_Elbow.transform.Find("f_avg_L_Wrist").gameObject;
+            R_Elbow = R_Shoulder.transform.Find("f_avg_R_Elbow").gameObject;
+            GameObject R_Wrist = R_Elbow.transform.Find("f_avg_R_Wrist").gameObject;
+        }
+
+
+        if (set == true)
+        {
+            L_Shoulder.transform.SetParent(smpl.transform);
+            R_Shoulder.transform.SetParent(smpl.transform);
+            L_hip.transform.SetParent(smpl.transform);
+            R_hip.transform.SetParent(smpl.transform);
+        }
+
+        // Some manually tested rotations are applied after the calculated pose, as there are offsets
+        R_Shoulder.transform.localRotation = stickContainer.RightUpperArm.transform.localRotation;
+        R_Shoulder.transform.Rotate(0, 180, 90);
+        R_Elbow.transform.localRotation = Quaternion.Inverse(R_Shoulder.transform.localRotation) * stickContainer.RightLowerArm.transform.localRotation;
+        R_Elbow.transform.Rotate(0, 180, 90);
+
+        L_Shoulder.transform.localRotation = stickContainer.LeftUpperArm.transform.localRotation;
+        L_Shoulder.transform.Rotate(180, 0, 90);
+        L_Elbow.transform.localRotation = Quaternion.Inverse(L_Shoulder.transform.localRotation) * stickContainer.LeftLowerArm.transform.localRotation;
+        L_Elbow.transform.Rotate(180, 0, 90);
+
+        L_hip.transform.localRotation = stickContainer.LeftUpperLeg.transform.localRotation;
+        L_hip.transform.Rotate(0, 90, 0);
+        L_Knee.transform.localRotation = Quaternion.Inverse(L_hip.transform.localRotation) * stickContainer.LeftKneeStick.transform.localRotation;
+        L_Knee.transform.Rotate(-90, 180, -90);
+
+        R_hip.transform.localRotation = stickContainer.RightUpperLeg.transform.localRotation;
+        R_hip.transform.Rotate(0, 90, 0);
+        R_Knee.transform.localRotation = Quaternion.Inverse(R_hip.transform.localRotation) * stickContainer.RightKneeStick.transform.localRotation;
+        R_Knee.transform.Rotate(90, 180, 90);
+    }
+
+    public void SetActive(bool active)
+    {
+        smpl.SetActive(active);
+    }
+}
+
+// Label for various containers
+enum AvatarType
+{
+    CUBE, STICK, ROBOT, SMPL
+}
 
 // Class that keeps references to sub-objects in the scene of a avatar container
 // Probably use this when refactoring as the base class for the script attached to avatar containers
 // TODO: 
-// implement functions for changing the currently used avatar, and keep state to not have to setActive on all avatars. (Use enum for current avatar?)
-// transfer functions for moving the avatars into here
-// rename class
-public class AvatarGo
+//      implement functions for changing the currently used avatar (done), 
+//      and keep state to not have to setActive on all avatars. (Use enum for current avatar?) (done)
+//      transfer functions for moving the avatars into here (moved to Containers, done)
+//   !  rename class (include comments, use VS rename function!)
+class AvatarGo
 {
 
     // TODO: if cube avatar class is created, migrate this to there. Otherwise move the getting of other refrences from init to here
@@ -39,74 +756,47 @@ public class AvatarGo
         
     }
 
-    // References to avatar objets in scene part of the container
-    public GameObject avatarContainer, cubeContainer, stickContainer, robotContainer, smplContainer;
+    // References to avatar objects in scene part of the container
+    public GameObject avatarContainer;
+    public CubeContainer cubeContainer;
+    public StickContainer stickContainer;
+    public RobotContainer robotContainer;
+    public SmplContainer smplContainer;
+    public Dictionary<AvatarType, Container> containers;
 
-    // References to cubes of the cubes avatar
-    // TODO: Could be put in separate class cube avatar, and handled there.
-    public GameObject[] debugObjects;
+    // state flags for the contained avatar objects
+    // CONSIDER: public/private
+    public bool isMirrored = true;  // PREVIOUS COMMENT "can probably be changed to private (if no UI elements use it)"
+    public AvatarType activeType = AvatarType.STICK;
 
-    // References to parts of the stick person avatar
-    // TODO: Could be put in separate class stick person, and handled there. 
-    public GameObject LeftLowerLeg, RightLowerLeg, LeftUpperArm, RightUpperArm, LeftUpperLeg, RightUpperLeg, TorsoLeft,
-       TorsoRight, HipStick, LeftLowerArm, RightLowerArm, LeftEye, RightEye, Shoulders, MouthStick, NoseStick, LeftEar, RightEar;
-    public GameObject LeftShoulderStick, RightShoulderStick, LeftHipStick, RightHipStick, LeftElbowStick, RightElbowStick, LeftWristStick, RightWristStick,
-        LeftKneeStick, RightKneeStick, LeftAnkleStick, RightAnkleStick;
 
     // Initialization of class object
     public AvatarGo(GameObject avatarContainer)
     {
         this.avatarContainer = avatarContainer;
 
-        // TODO: already mentionned above:
-        // if the function stays, it should assign direcly to the field of the class
-        GameObject[] debugObjects = {};
-        prepareGameObjects(avatarContainer, ref debugObjects);
-        this.debugObjects = debugObjects;
-
+        
         // Find child object avatars in scene and save references in fields
         GameObject cubeC = avatarContainer.transform.Find("CubeContainer").gameObject;
         GameObject stickC = avatarContainer.transform.Find("StickContainer").gameObject;
         GameObject robotC = avatarContainer.transform.Find("RobotContainer").gameObject;
         GameObject smplC = avatarContainer.transform.Find("SMPLContainer").gameObject;
-        cubeContainer = cubeC;
-        stickContainer = stickC;
-        robotContainer = robotC;
-        smplContainer = smplC;
+        cubeContainer = new CubeContainer(cubeC);
+        stickContainer = new StickContainer(stickC);
+        robotContainer = new RobotContainer(robotC, stickContainer);
+        smplContainer = new SmplContainer(smplC, stickContainer);
 
-        // Find children of the stick person avatar in scene and save references in fields
-        LeftLowerLeg = stickC.transform.Find("LLLeg").gameObject;
-        RightLowerLeg = stickC.transform.Find("RLLeg").gameObject;
-        LeftUpperArm = stickC.transform.Find("LeftUpperArm").gameObject;
-        RightUpperArm = stickC.transform.Find("RightUpperArm").gameObject;
-        LeftUpperLeg = stickC.transform.Find("LeftUpperLeg").gameObject; // HipLeft 18 KneeLeft 19 AnkleLeft 20
-        RightUpperLeg = stickC.transform.Find("RightUpperLeg").gameObject; // HipRight 22 KneeRight 23 AnkleRight 24
-        TorsoLeft = stickC.transform.Find("TorsoLeft").gameObject; // ShoulderLeft 5 HipLeft 18
-        TorsoRight = stickC.transform.Find("TorsoRight").gameObject; // ShoulderRight 12 HipRight 22
-        HipStick = stickC.transform.Find("HipStick").gameObject; // HipLeft 18 HipRight 22
-        LeftLowerArm = stickC.transform.Find("LeftLowerArm").gameObject; // = ElbowLeft 6 WristLeft 7
-        RightLowerArm = stickC.transform.Find("RightLowerArm").gameObject; // = ElbowRight 13 WristRight 14
-        LeftEye = stickC.transform.Find("LeftEye").gameObject; // 28
-        RightEye = stickC.transform.Find("RightEye").gameObject; // 30
-        Shoulders = stickC.transform.Find("Shoulders").gameObject; // ShoulderLeft 5 ShoulderRight 12
-        MouthStick = stickC.transform.Find("MouthStick").gameObject; // = Neck 3
-        NoseStick = stickC.transform.Find("NoseStick").gameObject; // 27
-        LeftEar = stickC.transform.Find("LeftEar").gameObject; // 29
-        RightEar = stickC.transform.Find("RightEar").gameObject; // 31
+        containers = new Dictionary<AvatarType, Container>();
+        containers.Add(AvatarType.CUBE, cubeContainer);
+        containers.Add(AvatarType.STICK, stickContainer);
+        containers.Add(AvatarType.ROBOT, robotContainer);
+        containers.Add(AvatarType.SMPL, smplContainer);
 
-        LeftShoulderStick = stickC.transform.Find("LeftShoulderStick").gameObject;
-        RightShoulderStick = stickC.transform.Find("RightShoulderStick").gameObject;
-        LeftHipStick = stickC.transform.Find("LeftHipStick").gameObject;
-        RightHipStick = stickC.transform.Find("RightHipStick").gameObject;
-        LeftElbowStick = stickC.transform.Find("LeftElbowStick").gameObject;
-        RightElbowStick = stickC.transform.Find("RightElbowStick").gameObject;
-        LeftWristStick = stickC.transform.Find("LeftWristStick").gameObject;
-        RightWristStick = stickC.transform.Find("RightWristStick").gameObject;
-        LeftKneeStick = stickC.transform.Find("LeftKneeStick").gameObject;
-        RightKneeStick = stickC.transform.Find("RightKneeStick").gameObject;
-        LeftAnkleStick = stickC.transform.Find("LeftAnkleStick").gameObject;
-        RightAnkleStick = stickC.transform.Find("RightAnkleStick").gameObject;
-
+        // TODO: already mentionned above:
+        // if the function stays, it should assign direcly to the field of the class
+        GameObject[] debugObjects = { };
+        prepareGameObjects(avatarContainer, ref debugObjects);
+        this.cubeContainer.debugObjects = debugObjects;
 
         // Deactivate all other avatars except stickContainer
         // Note: it is necessary to do this after getting references, otherwise objects can't be found in scene
@@ -115,6 +805,55 @@ public class AvatarGo
         robotContainer.SetActive(false);
         smplContainer.SetActive(false);
     }
+
+    // Move active avatar based on the input JointData
+    public void MovePerson(JointDataListLive live_data)
+    {
+        switch (activeType)
+        {
+            case AvatarType.CUBE:
+                cubeContainer.MovePerson(live_data);
+                break;
+
+            case AvatarType.STICK:
+                stickContainer.MovePerson(live_data);
+                break;
+
+            case AvatarType.ROBOT:
+                robotContainer.MovePerson(live_data);
+                break;
+
+            case AvatarType.SMPL:
+                smplContainer.MovePerson(live_data);
+                break;
+        }
+    }
+
+    // Change the currently active container-type of the avatar. (Change between stick, robot etc.)
+    public void ChangeActiveType(AvatarType type)
+    {
+        containers[activeType].SetActive(false);
+        containers[type].SetActive(true);
+        activeType = type;
+    }
+
+    // Mirrors the avatar
+    public void Mirror()
+    {
+        if (isMirrored == true)
+        {
+            isMirrored = false;
+            avatarContainer.transform.localScale = new Vector3(1.0f, 1.0f, 1.0f);
+        }
+        else
+        {
+            isMirrored = true;
+            avatarContainer.transform.localScale = new Vector3(-1.0f, 1.0f, 1.0f);
+        }
+    }
+
+   
+
 }
 
 // Main script
@@ -133,12 +872,14 @@ public class PoseteacherMain : MonoBehaviour
     GameObject videoCube;
 
     // Refrences to containers in scene
-    // TODO: change it to list(s) or other flexible datastructure to allow more
+    // TODO: change it to list(s) or other flexible datastructure to allow more (partially done)
+    // TODO find good way to reference objects. @Unity might do this for us
     AvatarGo avatarSelf;
     AvatarGo avatarTeacher;
     AvatarGo avatarSelf2;
     AvatarGo avatarTeacher2;
-
+    List<AvatarGo> avatarListSelf;
+    List<AvatarGo> avatarListTeacher;
     
     GameObject spatialAwarenessSystem;
     
@@ -172,11 +913,11 @@ public class PoseteacherMain : MonoBehaviour
     // can be changed in the UI
     // TODO: probaly change to using functions to toggle
     public bool isMaleSMPL = true; 
-    public bool usingKinectAlternative = false;
+    public bool usingKinectAlternative = true;
     
 
     public bool mirroring = true; // can probably be changed to private (if no UI elements use it)
-    public bool debugMode = false;
+    public bool debugMode = true;
     private bool loadedFakeData = false;
 
     // Web socket is currently used only for Kinect Alternative
@@ -191,17 +932,25 @@ public class PoseteacherMain : MonoBehaviour
     public float correctionThresh = 30.0f;
 
     // Mirror all avatar containers
-    // TODO: Move code to AvatarGo class
+    // TODO: Move code to AvatarGo class (partial done)
+    //      Conform to naming conventions
+    // Consider: what to do with videoCube and streamCanvas?
+    //      Do we really need this function, or we will just set this one-by-one?
     public void do_mirror()
     {
 
         if (mirroring == true)
         {
             mirroring = false;
-            avatarSelf.avatarContainer.transform.localScale = new Vector3(1.0f, 1.0f, 1.0f);
-            avatarTeacher.avatarContainer.transform.localScale = new Vector3(1.0f, 1.0f, 1.0f);
-            avatarSelf2.avatarContainer.transform.localScale = new Vector3(1.0f, 1.0f, 1.0f);
-            avatarTeacher2.avatarContainer.transform.localScale = new Vector3(1.0f, 1.0f, 1.0f);
+            // TODO figure out how to handle selection of mirrored avatar
+            foreach (AvatarGo avatar in avatarListSelf)
+            {
+                avatar.Mirror();
+            }
+            foreach (AvatarGo avatar in avatarListTeacher)
+            {
+                avatar.Mirror();
+            }
 
             videoCube.transform.localScale = new Vector3(-1f, 0.6f, 0.1f);
             streamCanvas.transform.localScale = new Vector3(32f, 16f, 1f);
@@ -209,10 +958,14 @@ public class PoseteacherMain : MonoBehaviour
         else
         {
             mirroring = true;
-            avatarSelf.avatarContainer.transform.localScale = new Vector3(-1.0f, 1.0f, 1.0f);
-            avatarTeacher.avatarContainer.transform.localScale = new Vector3(-1.0f, 1.0f, 1.0f);
-            avatarSelf2.avatarContainer.transform.localScale = new Vector3(-1.0f, 1.0f, 1.0f);
-            avatarTeacher2.avatarContainer.transform.localScale = new Vector3(-1.0f, 1.0f, 1.0f);
+            foreach (AvatarGo avatar in avatarListSelf)
+            {
+                avatar.Mirror();
+            }
+            foreach (AvatarGo avatar in avatarListTeacher)
+            {
+                avatar.Mirror();
+            }
 
             videoCube.transform.localScale = new Vector3(1f, 0.6f, 0.1f);
             streamCanvas.transform.localScale = new Vector3(-32f, 16f, 1f);
@@ -356,22 +1109,27 @@ public class PoseteacherMain : MonoBehaviour
         GameObject avatarContainer2 = GameObject.Find("AvatarContainer2");
         GameObject avatarContainerT2 = GameObject.Find("AvatarContainerT2");
 
-        avatarSelf = new AvatarGo(avatarContainer);
+        avatarListSelf = new List<AvatarGo>();
+        avatarListTeacher = new List<AvatarGo>();
+        avatarListSelf.Add(new AvatarGo(avatarContainer));
+        avatarListSelf.Add(new AvatarGo(avatarContainer2));
+        avatarListTeacher.Add(new AvatarGo(avatarContainerT));
+        avatarListTeacher.Add(new AvatarGo(avatarContainerT2));
+        /*avatarSelf = new AvatarGo(avatarContainer);
         avatarTeacher = new AvatarGo(avatarContainerT);
         avatarSelf2 = new AvatarGo(avatarContainer2);
-        avatarTeacher2 = new AvatarGo(avatarContainerT2);
+        avatarTeacher2 = new AvatarGo(avatarContainerT2);*/
 
         // Set unused containers to inactive
-        avatarTeacher.avatarContainer.gameObject.SetActive(false);
-        avatarSelf2.avatarContainer.gameObject.SetActive(false);
-        avatarTeacher2.avatarContainer.gameObject.SetActive(false);
+        avatarListTeacher[0].avatarContainer.gameObject.SetActive(false);
+        avatarListSelf[1].avatarContainer.gameObject.SetActive(false);
+        avatarListTeacher[1].avatarContainer.gameObject.SetActive(false);
 
 
-        //usingKinectAlternative = false;
         // Setup device and tracker for Azure Kinect Body Tracking
         if (usingKinectAlternative == false)
         {
-            // Test print to log
+            // Print to log
             Debug.Log("Try loading device");
             this.device = Device.Open(0);
             var config = new DeviceConfiguration
@@ -382,8 +1140,9 @@ public class PoseteacherMain : MonoBehaviour
             };
             device.StartCameras(config);
 
-            if(device != null)
+            if (device != null)
             {
+                Debug.Log("Found non-null device");
                 Debug.Log(device);
             }
 
@@ -444,1271 +1203,37 @@ public class PoseteacherMain : MonoBehaviour
         }
     }
 
-    // Functions for moving different avatars to a JointDataListLive pose
-    // TODO: move functions to AvatarGo class
-    // remove code duplication
-    // remove unused lines of code 
+    // (REMOVED) Functions for moving different avatars to a JointDataListLive pose
+    // TODO: move functions to AvatarGo class (done)
+    //      remove code duplication (done)
+    //   !  remove unused lines of code -> see various container classes
 
-    // Move the stick person avatar contained in avatarSelf
-    void moveStickPerson(JointDataListLive joint_data_list, AvatarGo avatarSelf)
-    {
-        /************************************Joints**************************************/
-        JointDataLive stickJoint = joint_data_list.data[5];
-        var stickPos = stickJoint.Position;
-        var stickOrientation = stickJoint.Orientation;
-        var stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.008f;
-        var stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-        avatarSelf.LeftShoulderStick.transform.localPosition = stickV;
-        avatarSelf.LeftShoulderStick.transform.localRotation = stickR;
-
-        stickJoint = joint_data_list.data[12];
-        stickPos = stickJoint.Position;
-        stickOrientation = stickJoint.Orientation;
-        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.008f;
-        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-        avatarSelf.RightShoulderStick.transform.localPosition = stickV;
-        avatarSelf.RightShoulderStick.transform.localRotation = stickR;
-
-        stickJoint = joint_data_list.data[18];
-        stickPos = stickJoint.Position;
-        stickOrientation = stickJoint.Orientation;
-        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.008f;
-        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-        avatarSelf.LeftHipStick.transform.localPosition = stickV;
-        avatarSelf.LeftHipStick.transform.localRotation = stickR;
-
-        stickJoint = joint_data_list.data[22];
-        stickPos = stickJoint.Position;
-        stickOrientation = stickJoint.Orientation;
-        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.008f;
-        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-        avatarSelf.RightHipStick.transform.localPosition = stickV;
-        avatarSelf.RightHipStick.transform.localRotation = stickR;
-
-        stickJoint = joint_data_list.data[6];
-        stickPos = stickJoint.Position;
-        stickOrientation = stickJoint.Orientation;
-        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.008f;
-        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-        avatarSelf.LeftElbowStick.transform.localPosition = stickV;
-        avatarSelf.LeftElbowStick.transform.localRotation = stickR;
-
-        stickJoint = joint_data_list.data[13];
-        stickPos = stickJoint.Position;
-        stickOrientation = stickJoint.Orientation;
-        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.008f;
-        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-        avatarSelf.RightElbowStick.transform.localPosition = stickV;
-        avatarSelf.RightElbowStick.transform.localRotation = stickR;
-
-        stickJoint = joint_data_list.data[7];
-        stickPos = stickJoint.Position;
-        stickOrientation = stickJoint.Orientation;
-        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.008f;
-        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-        avatarSelf.LeftWristStick.transform.localPosition = stickV;
-        avatarSelf.LeftWristStick.transform.localRotation = stickR;
-
-        stickJoint = joint_data_list.data[14];
-        stickPos = stickJoint.Position;
-        stickOrientation = stickJoint.Orientation;
-        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.008f;
-        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-        avatarSelf.RightWristStick.transform.localPosition = stickV;
-        avatarSelf.RightWristStick.transform.localRotation = stickR;
-
-        stickJoint = joint_data_list.data[19];
-        stickPos = stickJoint.Position;
-        stickOrientation = stickJoint.Orientation;
-        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.008f;
-        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-        avatarSelf.LeftKneeStick.transform.localPosition = stickV;
-        avatarSelf.LeftKneeStick.transform.localRotation = stickR;
-
-        stickJoint = joint_data_list.data[23];
-        stickPos = stickJoint.Position;
-        stickOrientation = stickJoint.Orientation;
-        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.008f;
-        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-        avatarSelf.RightKneeStick.transform.localPosition = stickV;
-        avatarSelf.RightKneeStick.transform.localRotation = stickR;
-
-        stickJoint = joint_data_list.data[20];
-        stickPos = stickJoint.Position;
-        stickOrientation = stickJoint.Orientation;
-        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.008f;
-        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-        avatarSelf.LeftAnkleStick.transform.localPosition = stickV;
-        avatarSelf.LeftAnkleStick.transform.localRotation = stickR;
-
-        stickJoint = joint_data_list.data[24];
-        stickPos = stickJoint.Position;
-        stickOrientation = stickJoint.Orientation;
-        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.008f;
-        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-        avatarSelf.RightAnkleStick.transform.localPosition = stickV;
-        avatarSelf.RightAnkleStick.transform.localRotation = stickR;
-
-
-        /************************************Head**************************************/
-        stickJoint = joint_data_list.data[28];
-        stickPos = stickJoint.Position;
-        stickOrientation = stickJoint.Orientation;
-        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.008f;
-        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-        avatarSelf.LeftEye.transform.localPosition = stickV;
-        avatarSelf.LeftEye.transform.localRotation = stickR;
-        avatarSelf.LeftEye.transform.localScale = new Vector3(0.3f, 0.2f, 0.2f);
-
-        stickJoint = joint_data_list.data[30];
-        stickPos = stickJoint.Position;
-        stickOrientation = stickJoint.Orientation;
-        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.008f;
-        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-        avatarSelf.RightEye.transform.localPosition = stickV;
-        avatarSelf.RightEye.transform.localRotation = stickR;
-        avatarSelf.RightEye.transform.localScale = new Vector3(0.3f, 0.2f, 0.2f);
-
-        stickJoint = joint_data_list.data[27];
-        stickPos = stickJoint.Position;
-        stickOrientation = stickJoint.Orientation;
-        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.008f;
-        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-        avatarSelf.NoseStick.transform.localPosition = stickV;
-        avatarSelf.NoseStick.transform.localRotation = stickR;
-        avatarSelf.NoseStick.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
-
-        stickJoint = joint_data_list.data[29];
-        stickPos = stickJoint.Position;
-        stickOrientation = stickJoint.Orientation;
-        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.008f;
-        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-        avatarSelf.LeftEar.transform.localPosition = stickV;
-        avatarSelf.LeftEar.transform.localRotation = stickR;
-        avatarSelf.LeftEar.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
-        avatarSelf.LeftEar.transform.LookAt(avatarSelf.LeftShoulderStick.transform.position);
-        avatarSelf.LeftEar.transform.Rotate(90, 0, 0);
-
-        stickJoint = joint_data_list.data[31];
-        stickPos = stickJoint.Position;
-        stickOrientation = stickJoint.Orientation;
-        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.008f;
-        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-        avatarSelf.RightEar.transform.localPosition = stickV;
-        avatarSelf.RightEar.transform.localRotation = stickR;
-        avatarSelf.RightEar.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
-        avatarSelf.RightEar.transform.LookAt(avatarSelf.RightShoulderStick.transform.position);
-        avatarSelf.RightEar.transform.Rotate(90, 0, 0);
-
-        stickJoint = joint_data_list.data[27]; 
-        stickPos = stickJoint.Position;
-        stickOrientation = stickJoint.Orientation;
-        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.008f;
-        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-        avatarSelf.MouthStick.transform.localPosition = stickV;
-        avatarSelf.MouthStick.transform.localRotation = stickR;
-        avatarSelf.MouthStick.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
-
-
-        /************************************Body**************************************/
-        stickJoint = joint_data_list.data[5];
-        var stickJoint_b = joint_data_list.data[12];
-        stickPos = stickJoint.Position;
-        var stickPos_b = stickJoint_b.Position;
-        stickOrientation = stickJoint.Orientation;
-        Vector3 stick = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) - new Vector3(stickPos_b[0], -stickPos_b[1], stickPos_b[2]);
-        float stick_length = stick.magnitude * 0.002f;
-        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.004f;
-        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-        avatarSelf.Shoulders.transform.localPosition = new Vector3((stickPos[0] + stickPos_b[0]) * 0.5f, (-stickPos[1] - stickPos_b[1]) * 0.5f, (stickPos[2] + stickPos_b[2]) * 0.5f) * 0.008f;
-        avatarSelf.Shoulders.transform.LookAt(avatarSelf.RightShoulderStick.transform.position);
-        avatarSelf.Shoulders.transform.Rotate(90, 0, 0);
-        avatarSelf.Shoulders.transform.localScale = new Vector3(0.2f, stick_length, 0.2f);
-
-        stickJoint = joint_data_list.data[18];
-        stickJoint_b = joint_data_list.data[22];
-        stickPos = stickJoint.Position;
-        stickPos_b = stickJoint_b.Position;
-        stickOrientation = stickJoint.Orientation;
-        stick = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) - new Vector3(stickPos_b[0], -stickPos_b[1], stickPos_b[2]);
-        stick_length = stick.magnitude * 0.002f;
-        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.004f;
-        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-        avatarSelf.HipStick.transform.localPosition = new Vector3((stickPos[0] + stickPos_b[0]) * 0.5f, (-stickPos[1] - stickPos_b[1]) * 0.5f, (stickPos[2] + stickPos_b[2]) * 0.5f) * 0.008f;
-        avatarSelf.HipStick.transform.LookAt(avatarSelf.RightHipStick.transform.position);
-        avatarSelf.HipStick.transform.Rotate(90, 0, 0);
-        avatarSelf.HipStick.transform.localScale = new Vector3(0.2f, stick_length, 0.2f);
-
-        stickJoint = joint_data_list.data[18];
-        stickJoint_b = joint_data_list.data[5];
-        stickPos = stickJoint.Position;
-        stickPos_b = stickJoint_b.Position;
-        stickOrientation = stickJoint.Orientation;
-        stick = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) - new Vector3(stickPos_b[0], -stickPos_b[1], stickPos_b[2]);
-        stick_length = stick.magnitude * 0.002f;
-        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.004f;
-        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-        avatarSelf.TorsoLeft.transform.localPosition = new Vector3((stickPos[0] + stickPos_b[0]) * 0.5f, (-stickPos[1] - stickPos_b[1]) * 0.5f, (stickPos[2] + stickPos_b[2]) * 0.5f) * 0.008f;
-        avatarSelf.TorsoLeft.transform.LookAt(avatarSelf.LeftShoulderStick.transform.position);
-        avatarSelf.TorsoLeft.transform.Rotate(90, 0, 0);
-        avatarSelf.TorsoLeft.transform.localScale = new Vector3(0.2f, stick_length, 0.2f);
-
-        stickJoint = joint_data_list.data[12];
-        stickJoint_b = joint_data_list.data[22];
-        stickPos = stickJoint.Position;
-        stickPos_b = stickJoint_b.Position;
-        stickOrientation = stickJoint.Orientation;
-        stick = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) - new Vector3(stickPos_b[0], -stickPos_b[1], stickPos_b[2]);
-        stick_length = stick.magnitude * 0.002f;
-        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.004f;
-        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-        avatarSelf.TorsoRight.transform.localPosition = new Vector3((stickPos[0] + stickPos_b[0]) * 0.5f, (-stickPos[1] - stickPos_b[1]) * 0.5f, (stickPos[2] + stickPos_b[2]) * 0.5f) * 0.008f;
-        avatarSelf.TorsoRight.transform.LookAt(avatarSelf.RightShoulderStick.transform.position);
-        avatarSelf.TorsoRight.transform.Rotate(90, 0, 0);
-        avatarSelf.TorsoRight.transform.localScale = new Vector3(0.2f, stick_length, 0.2f);
-
-
-        /************************************Arms**************************************/
-        stickJoint = joint_data_list.data[5];
-        stickJoint_b = joint_data_list.data[6];
-        stickPos = stickJoint.Position;
-        stickPos_b = stickJoint_b.Position;
-        stickOrientation = stickJoint.Orientation;
-        stick = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) - new Vector3(stickPos_b[0], -stickPos_b[1], stickPos_b[2]);
-        stick_length = stick.magnitude * 0.002f;
-        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.004f;
-        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-        avatarSelf.LeftUpperArm.transform.localPosition = new Vector3((stickPos[0] + stickPos_b[0]) * 0.5f, (-stickPos[1] - stickPos_b[1]) * 0.5f, (stickPos[2] + stickPos_b[2]) * 0.5f) * 0.008f;
-        avatarSelf.LeftUpperArm.transform.LookAt(avatarSelf.LeftElbowStick.transform.position);
-        avatarSelf.LeftUpperArm.transform.Rotate(90, 0, 0);
-        avatarSelf.LeftUpperArm.transform.localScale = new Vector3(0.2f, 1.2f, 0.2f);
-
-        stickJoint = joint_data_list.data[12];
-        stickJoint_b = joint_data_list.data[13];
-        stickPos = stickJoint.Position;
-        stickPos_b = stickJoint_b.Position;
-        stickOrientation = stickJoint.Orientation;
-        stick = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) - new Vector3(stickPos_b[0], -stickPos_b[1], stickPos_b[2]);
-        stick_length = stick.magnitude * 0.002f;
-        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.004f;
-        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-        avatarSelf.RightUpperArm.transform.localPosition = new Vector3((stickPos[0] + stickPos_b[0]) * 0.5f, (-stickPos[1] - stickPos_b[1]) * 0.5f, (stickPos[2] + stickPos_b[2]) * 0.5f) * 0.008f;
-        avatarSelf.RightUpperArm.transform.LookAt(avatarSelf.RightElbowStick.transform.position);
-        avatarSelf.RightUpperArm.transform.Rotate(90, 0, 0);
-        avatarSelf.RightUpperArm.transform.localScale = new Vector3(0.2f, 1.2f, 0.2f);
-
-        stickJoint = joint_data_list.data[6];
-        stickJoint_b = joint_data_list.data[7];
-        stickPos = stickJoint.Position;
-        stickPos_b = stickJoint_b.Position;
-        stickOrientation = stickJoint.Orientation;
-        stick = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) - new Vector3(stickPos_b[0], -stickPos_b[1], stickPos_b[2]);
-        stick_length = stick.magnitude * 0.002f;
-        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.004f;
-        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-        avatarSelf.LeftLowerArm.transform.localPosition = new Vector3((stickPos[0] + stickPos_b[0]) * 0.5f, (-stickPos[1] - stickPos_b[1]) * 0.5f, (stickPos[2] + stickPos_b[2]) * 0.5f) * 0.008f;
-        avatarSelf.LeftLowerArm.transform.LookAt(avatarSelf.LeftWristStick.transform.position);
-        avatarSelf.LeftLowerArm.transform.Rotate(90, 0, 0);
-        avatarSelf.LeftLowerArm.transform.localScale = new Vector3(0.2f, 1.2f, 0.2f);
-
-        stickJoint = joint_data_list.data[13];
-        stickJoint_b = joint_data_list.data[14];
-        stickPos = stickJoint.Position;
-        stickPos_b = stickJoint_b.Position;
-        stickOrientation = stickJoint.Orientation;
-        stick = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) - new Vector3(stickPos_b[0], -stickPos_b[1], stickPos_b[2]);
-        stick_length = stick.magnitude * 0.002f;
-        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.004f;
-        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-        avatarSelf.RightLowerArm.transform.localPosition = new Vector3((stickPos[0] + stickPos_b[0]) * 0.5f, (-stickPos[1] - stickPos_b[1]) * 0.5f, (stickPos[2] + stickPos_b[2]) * 0.5f) * 0.008f;
-        avatarSelf.RightLowerArm.transform.LookAt(avatarSelf.RightWristStick.transform.position);
-        avatarSelf.RightLowerArm.transform.Rotate(90, 0, 0);
-        avatarSelf.RightLowerArm.transform.localScale = new Vector3(0.2f, 1.2f, 0.2f);
-
-
-        /************************************Legs**************************************/
-        stickJoint = joint_data_list.data[18];
-        stickJoint_b = joint_data_list.data[19];
-        stickPos = stickJoint.Position;
-        stickPos_b = stickJoint_b.Position;
-        stickOrientation = stickJoint.Orientation;
-        stick = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) - new Vector3(stickPos_b[0], -stickPos_b[1], stickPos_b[2]);
-        stick_length = stick.magnitude * 0.002f;
-        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.004f;
-        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-        avatarSelf.LeftUpperLeg.transform.localPosition = new Vector3((stickPos[0] + stickPos_b[0]) * 0.5f, (-stickPos[1] - stickPos_b[1]) * 0.5f, (stickPos[2] + stickPos_b[2]) * 0.5f) * 0.008f;
-        avatarSelf.LeftUpperLeg.transform.LookAt(avatarSelf.LeftHipStick.transform.position);
-        avatarSelf.LeftUpperLeg.transform.Rotate(90, 0, 0);
-        avatarSelf.LeftUpperLeg.transform.localScale = new Vector3(0.2f, 1.2f, 0.2f);
-
-        stickJoint = joint_data_list.data[22];
-        stickJoint_b = joint_data_list.data[23];
-        stickPos = stickJoint.Position;
-        stickPos_b = stickJoint_b.Position;
-        stickOrientation = stickJoint.Orientation;
-        stick = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) - new Vector3(stickPos_b[0], -stickPos_b[1], stickPos_b[2]);
-        stick_length = stick.magnitude * 0.002f;
-        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.004f;
-        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-        avatarSelf.RightUpperLeg.transform.localPosition = new Vector3((stickPos[0] + stickPos_b[0]) * 0.5f, (-stickPos[1] - stickPos_b[1]) * 0.5f, (stickPos[2] + stickPos_b[2]) * 0.5f) * 0.008f;
-        avatarSelf.RightUpperLeg.transform.LookAt(avatarSelf.RightHipStick.transform.position);
-        avatarSelf.RightUpperLeg.transform.Rotate(90, 0, 0);
-        avatarSelf.RightUpperLeg.transform.localScale = new Vector3(0.2f, 1.2f, 0.2f);
-
-        stickJoint = joint_data_list.data[19];
-        stickJoint_b = joint_data_list.data[20];
-        stickPos = stickJoint.Position;
-        stickPos_b = stickJoint_b.Position;
-        stickOrientation = stickJoint.Orientation;
-        stick = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) - new Vector3(stickPos_b[0], -stickPos_b[1], stickPos_b[2]);
-        stick_length = stick.magnitude * 0.002f;
-        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.004f;
-        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-        avatarSelf.LeftLowerLeg.transform.localPosition = new Vector3((stickPos[0] + stickPos_b[0]) * 0.5f, (-stickPos[1] - stickPos_b[1]) * 0.5f, (stickPos[2] + stickPos_b[2]) * 0.5f) * 0.008f;
-        avatarSelf.LeftLowerLeg.transform.LookAt(avatarSelf.LeftKneeStick.transform.position);
-        avatarSelf.LeftLowerLeg.transform.Rotate(90, 0, 0);
-        avatarSelf.LeftLowerLeg.transform.localScale = new Vector3(0.2f, 1.2f, 0.2f);
-
-        stickJoint = joint_data_list.data[23];
-        stickJoint_b = joint_data_list.data[24];
-        stickPos = stickJoint.Position;
-        stickPos_b = stickJoint_b.Position;
-        stickOrientation = stickJoint.Orientation;
-        stick = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) - new Vector3(stickPos_b[0], -stickPos_b[1], stickPos_b[2]);
-        stick_length = stick.magnitude * 0.002f;
-        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.004f;
-        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-        avatarSelf.RightLowerLeg.transform.localPosition = new Vector3((stickPos[0] + stickPos_b[0]) * 0.5f, (-stickPos[1] - stickPos_b[1]) * 0.5f, (stickPos[2] + stickPos_b[2]) * 0.5f) * 0.008f;
-        avatarSelf.RightLowerLeg.transform.LookAt(avatarSelf.RightKneeStick.transform.position);
-        avatarSelf.RightLowerLeg.transform.Rotate(90, 0, 0);
-        avatarSelf.RightLowerLeg.transform.localScale = new Vector3(0.2f, 1.2f, 0.2f);
-    }
-    // Move the cube avatar contained in avatarSelf
-    void moveCubePerson(JointDataListLive joint_data_list, AvatarGo avatarSelf)
-    {
-        //Place cubes at position and orietation of joints
-        for (JointType jt = 0; jt < JointType.Count; jt++)
-        {
-            var joint = joint_data_list.data[(int)jt];
-            var pos = joint.Position;
-            var orientation = joint.Orientation;
-            var v = new Vector3(pos[0], -pos[1], pos[2]) * 0.004f;
-            var r = new Quaternion(orientation[0], orientation[1], orientation[2], orientation[3]);
-            var obj = avatarSelf.debugObjects[(int)jt];
-            obj.transform.localPosition = v;
-            obj.transform.localRotation = r;
-            obj.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
-        }
-    }
-    // Move the robot avatar contained in avatarSelf
-    void moveRobotPerson(JointDataListLive joint_data_list, AvatarGo avatarSelf)
-    {
-        // Copied from stick person move
-        JointDataLive stickJoint = joint_data_list.data[5];
-        var stickPos = stickJoint.Position;
-        var stickOrientation = stickJoint.Orientation;
-        var stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.008f;
-        var stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-        avatarSelf.LeftShoulderStick.transform.localPosition = stickV;
-        avatarSelf.LeftShoulderStick.transform.localRotation = stickR;
-
-        stickJoint = joint_data_list.data[12];
-        stickPos = stickJoint.Position;
-        stickOrientation = stickJoint.Orientation;
-        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.008f;
-        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-        avatarSelf.RightShoulderStick.transform.localPosition = stickV;
-        avatarSelf.RightShoulderStick.transform.localRotation = stickR;
-
-        stickJoint = joint_data_list.data[18];
-        stickPos = stickJoint.Position;
-        stickOrientation = stickJoint.Orientation;
-        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.008f;
-        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-        avatarSelf.LeftHipStick.transform.localPosition = stickV;
-        avatarSelf.LeftHipStick.transform.localRotation = stickR;
-
-        stickJoint = joint_data_list.data[22];
-        stickPos = stickJoint.Position;
-        stickOrientation = stickJoint.Orientation;
-        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.008f;
-        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-        avatarSelf.RightHipStick.transform.localPosition = stickV;
-        avatarSelf.RightHipStick.transform.localRotation = stickR;
-
-        stickJoint = joint_data_list.data[6];
-        stickPos = stickJoint.Position;
-        stickOrientation = stickJoint.Orientation;
-        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.008f;
-        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-        avatarSelf.LeftElbowStick.transform.localPosition = stickV;
-        avatarSelf.LeftElbowStick.transform.localRotation = stickR;
-
-        stickJoint = joint_data_list.data[13];
-        stickPos = stickJoint.Position;
-        stickOrientation = stickJoint.Orientation;
-        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.008f;
-        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-        avatarSelf.RightElbowStick.transform.localPosition = stickV;
-        avatarSelf.RightElbowStick.transform.localRotation = stickR;
-
-        stickJoint = joint_data_list.data[7];
-        stickPos = stickJoint.Position;
-        stickOrientation = stickJoint.Orientation;
-        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.008f;
-        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-        avatarSelf.LeftWristStick.transform.localPosition = stickV;
-        avatarSelf.LeftWristStick.transform.localRotation = stickR;
-
-        stickJoint = joint_data_list.data[14];
-        stickPos = stickJoint.Position;
-        stickOrientation = stickJoint.Orientation;
-        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.008f;
-        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-        avatarSelf.RightWristStick.transform.localPosition = stickV;
-        avatarSelf.RightWristStick.transform.localRotation = stickR;
-
-        stickJoint = joint_data_list.data[19];
-        stickPos = stickJoint.Position;
-        stickOrientation = stickJoint.Orientation;
-        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.008f;
-        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-        avatarSelf.LeftKneeStick.transform.localPosition = stickV;
-        avatarSelf.LeftKneeStick.transform.localRotation = stickR;
-
-        stickJoint = joint_data_list.data[23];
-        stickPos = stickJoint.Position;
-        stickOrientation = stickJoint.Orientation;
-        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.008f;
-        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-        avatarSelf.RightKneeStick.transform.localPosition = stickV;
-        avatarSelf.RightKneeStick.transform.localRotation = stickR;
-
-        stickJoint = joint_data_list.data[20];
-        stickPos = stickJoint.Position;
-        stickOrientation = stickJoint.Orientation;
-        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.008f;
-        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-        avatarSelf.LeftAnkleStick.transform.localPosition = stickV;
-        avatarSelf.LeftAnkleStick.transform.localRotation = stickR;
-
-        stickJoint = joint_data_list.data[24];
-        stickPos = stickJoint.Position;
-        stickOrientation = stickJoint.Orientation;
-        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.008f;
-        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-        avatarSelf.RightAnkleStick.transform.localPosition = stickV;
-        avatarSelf.RightAnkleStick.transform.localRotation = stickR;
-
-
-        /************************************Head**************************************/
-        stickJoint = joint_data_list.data[28];
-        stickPos = stickJoint.Position;
-        stickOrientation = stickJoint.Orientation;
-        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.008f;
-        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-        avatarSelf.LeftEye.transform.localPosition = stickV;
-        avatarSelf.LeftEye.transform.localRotation = stickR;
-        avatarSelf.LeftEye.transform.localScale = new Vector3(0.3f, 0.2f, 0.2f);
-
-        stickJoint = joint_data_list.data[30];
-        stickPos = stickJoint.Position;
-        stickOrientation = stickJoint.Orientation;
-        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.008f;
-        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-        avatarSelf.RightEye.transform.localPosition = stickV;
-        avatarSelf.RightEye.transform.localRotation = stickR;
-        avatarSelf.RightEye.transform.localScale = new Vector3(0.3f, 0.2f, 0.2f);
-
-        stickJoint = joint_data_list.data[27];
-        stickPos = stickJoint.Position;
-        stickOrientation = stickJoint.Orientation;
-        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.008f;
-        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-        avatarSelf.NoseStick.transform.localPosition = stickV;
-        avatarSelf.NoseStick.transform.localRotation = stickR;
-        avatarSelf.NoseStick.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
-
-        stickJoint = joint_data_list.data[29];
-        stickPos = stickJoint.Position;
-        stickOrientation = stickJoint.Orientation;
-        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.008f;
-        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-        avatarSelf.LeftEar.transform.localPosition = stickV;
-        avatarSelf.LeftEar.transform.localRotation = stickR;
-        avatarSelf.LeftEar.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
-        avatarSelf.LeftEar.transform.LookAt(avatarSelf.LeftShoulderStick.transform.position);
-        avatarSelf.LeftEar.transform.Rotate(90, 0, 0);
-
-        stickJoint = joint_data_list.data[31];
-        stickPos = stickJoint.Position;
-        stickOrientation = stickJoint.Orientation;
-        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.008f;
-        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-        avatarSelf.RightEar.transform.localPosition = stickV;
-        avatarSelf.RightEar.transform.localRotation = stickR;
-        avatarSelf.RightEar.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
-        avatarSelf.RightEar.transform.LookAt(avatarSelf.RightShoulderStick.transform.position);
-        avatarSelf.RightEar.transform.Rotate(90, 0, 0);
-
-        stickJoint = joint_data_list.data[27];
-        stickPos = stickJoint.Position;
-        stickOrientation = stickJoint.Orientation;
-        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.008f;
-        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-        avatarSelf.MouthStick.transform.localPosition = stickV;
-        avatarSelf.MouthStick.transform.localRotation = stickR;
-        avatarSelf.MouthStick.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
-
-
-        /************************************Body**************************************/
-        stickJoint = joint_data_list.data[5];
-        var stickJoint_b = joint_data_list.data[12];
-        stickPos = stickJoint.Position;
-        var stickPos_b = stickJoint_b.Position;
-        stickOrientation = stickJoint.Orientation;
-        Vector3 stick = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) - new Vector3(stickPos_b[0], -stickPos_b[1], stickPos_b[2]);
-        float stick_length = stick.magnitude * 0.002f;
-        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.004f;
-        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-        avatarSelf.Shoulders.transform.localPosition = new Vector3((stickPos[0] + stickPos_b[0]) * 0.5f, (-stickPos[1] - stickPos_b[1]) * 0.5f, (stickPos[2] + stickPos_b[2]) * 0.5f) * 0.008f;
-        avatarSelf.Shoulders.transform.LookAt(avatarSelf.RightShoulderStick.transform.position);
-        avatarSelf.Shoulders.transform.Rotate(90, 0, 0);
-        avatarSelf.Shoulders.transform.localScale = new Vector3(0.2f, stick_length, 0.2f);
-
-        stickJoint = joint_data_list.data[18];
-        stickJoint_b = joint_data_list.data[22];
-        stickPos = stickJoint.Position;
-        stickPos_b = stickJoint_b.Position;
-        stickOrientation = stickJoint.Orientation;
-        stick = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) - new Vector3(stickPos_b[0], -stickPos_b[1], stickPos_b[2]);
-        stick_length = stick.magnitude * 0.002f;
-        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.004f;
-        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-        avatarSelf.HipStick.transform.localPosition = new Vector3((stickPos[0] + stickPos_b[0]) * 0.5f, (-stickPos[1] - stickPos_b[1]) * 0.5f, (stickPos[2] + stickPos_b[2]) * 0.5f) * 0.008f;
-        avatarSelf.HipStick.transform.LookAt(avatarSelf.RightHipStick.transform.position);
-        avatarSelf.HipStick.transform.Rotate(90, 0, 0);
-        avatarSelf.HipStick.transform.localScale = new Vector3(0.2f, stick_length, 0.2f);
-
-        stickJoint = joint_data_list.data[18];
-        stickJoint_b = joint_data_list.data[5];
-        stickPos = stickJoint.Position;
-        stickPos_b = stickJoint_b.Position;
-        stickOrientation = stickJoint.Orientation;
-        stick = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) - new Vector3(stickPos_b[0], -stickPos_b[1], stickPos_b[2]);
-        stick_length = stick.magnitude * 0.002f;
-        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.004f;
-        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-        avatarSelf.TorsoLeft.transform.localPosition = new Vector3((stickPos[0] + stickPos_b[0]) * 0.5f, (-stickPos[1] - stickPos_b[1]) * 0.5f, (stickPos[2] + stickPos_b[2]) * 0.5f) * 0.008f;
-        avatarSelf.TorsoLeft.transform.LookAt(avatarSelf.LeftShoulderStick.transform.position);
-        avatarSelf.TorsoLeft.transform.Rotate(90, 0, 0);
-        avatarSelf.TorsoLeft.transform.localScale = new Vector3(0.2f, stick_length, 0.2f);
-
-        stickJoint = joint_data_list.data[12];
-        stickJoint_b = joint_data_list.data[22];
-        stickPos = stickJoint.Position;
-        stickPos_b = stickJoint_b.Position;
-        stickOrientation = stickJoint.Orientation;
-        stick = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) - new Vector3(stickPos_b[0], -stickPos_b[1], stickPos_b[2]);
-        stick_length = stick.magnitude * 0.002f;
-        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.004f;
-        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-        avatarSelf.TorsoRight.transform.localPosition = new Vector3((stickPos[0] + stickPos_b[0]) * 0.5f, (-stickPos[1] - stickPos_b[1]) * 0.5f, (stickPos[2] + stickPos_b[2]) * 0.5f) * 0.008f;
-        avatarSelf.TorsoRight.transform.LookAt(avatarSelf.RightShoulderStick.transform.position);
-        avatarSelf.TorsoRight.transform.Rotate(90, 0, 0);
-        avatarSelf.TorsoRight.transform.localScale = new Vector3(0.2f, stick_length, 0.2f);
-
-
-        /************************************Arms**************************************/
-        stickJoint = joint_data_list.data[5];
-        stickJoint_b = joint_data_list.data[6];
-        stickPos = stickJoint.Position;
-        stickPos_b = stickJoint_b.Position;
-        stickOrientation = stickJoint.Orientation;
-        stick = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) - new Vector3(stickPos_b[0], -stickPos_b[1], stickPos_b[2]);
-        stick_length = stick.magnitude * 0.002f;
-        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.004f;
-        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-        avatarSelf.LeftUpperArm.transform.localPosition = new Vector3((stickPos[0] + stickPos_b[0]) * 0.5f, (-stickPos[1] - stickPos_b[1]) * 0.5f, (stickPos[2] + stickPos_b[2]) * 0.5f) * 0.008f;
-        avatarSelf.LeftUpperArm.transform.LookAt(avatarSelf.LeftElbowStick.transform.position);
-        avatarSelf.LeftUpperArm.transform.Rotate(90, 0, 0);
-        avatarSelf.LeftUpperArm.transform.localScale = new Vector3(0.2f, 1.2f, 0.2f);
-
-        stickJoint = joint_data_list.data[12];
-        stickJoint_b = joint_data_list.data[13];
-        stickPos = stickJoint.Position;
-        stickPos_b = stickJoint_b.Position;
-        stickOrientation = stickJoint.Orientation;
-        stick = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) - new Vector3(stickPos_b[0], -stickPos_b[1], stickPos_b[2]);
-        stick_length = stick.magnitude * 0.002f;
-        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.004f;
-        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-        avatarSelf.RightUpperArm.transform.localPosition = new Vector3((stickPos[0] + stickPos_b[0]) * 0.5f, (-stickPos[1] - stickPos_b[1]) * 0.5f, (stickPos[2] + stickPos_b[2]) * 0.5f) * 0.008f;
-        avatarSelf.RightUpperArm.transform.LookAt(avatarSelf.RightElbowStick.transform.position);
-        avatarSelf.RightUpperArm.transform.Rotate(90, 0, 0);
-        avatarSelf.RightUpperArm.transform.localScale = new Vector3(0.2f, 1.2f, 0.2f);
-
-        stickJoint = joint_data_list.data[6];
-        stickJoint_b = joint_data_list.data[7];
-        stickPos = stickJoint.Position;
-        stickPos_b = stickJoint_b.Position;
-        stickOrientation = stickJoint.Orientation;
-        stick = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) - new Vector3(stickPos_b[0], -stickPos_b[1], stickPos_b[2]);
-        stick_length = stick.magnitude * 0.002f;
-        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.004f;
-        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-        avatarSelf.LeftLowerArm.transform.localPosition = new Vector3((stickPos[0] + stickPos_b[0]) * 0.5f, (-stickPos[1] - stickPos_b[1]) * 0.5f, (stickPos[2] + stickPos_b[2]) * 0.5f) * 0.008f;
-        avatarSelf.LeftLowerArm.transform.LookAt(avatarSelf.LeftWristStick.transform.position);
-        avatarSelf.LeftLowerArm.transform.Rotate(90, 0, 0);
-        avatarSelf.LeftLowerArm.transform.localScale = new Vector3(0.2f, 1.2f, 0.2f);
-
-        stickJoint = joint_data_list.data[13];
-        stickJoint_b = joint_data_list.data[14];
-        stickPos = stickJoint.Position;
-        stickPos_b = stickJoint_b.Position;
-        stickOrientation = stickJoint.Orientation;
-        stick = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) - new Vector3(stickPos_b[0], -stickPos_b[1], stickPos_b[2]);
-        stick_length = stick.magnitude * 0.002f;
-        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.004f;
-        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-        avatarSelf.RightLowerArm.transform.localPosition = new Vector3((stickPos[0] + stickPos_b[0]) * 0.5f, (-stickPos[1] - stickPos_b[1]) * 0.5f, (stickPos[2] + stickPos_b[2]) * 0.5f) * 0.008f;
-        avatarSelf.RightLowerArm.transform.LookAt(avatarSelf.RightWristStick.transform.position);
-        avatarSelf.RightLowerArm.transform.Rotate(90, 0, 0);
-        avatarSelf.RightLowerArm.transform.localScale = new Vector3(0.2f, 1.2f, 0.2f);
-
-
-        /************************************Legs**************************************/
-        stickJoint = joint_data_list.data[18];
-        stickJoint_b = joint_data_list.data[19];
-        stickPos = stickJoint.Position;
-        stickPos_b = stickJoint_b.Position;
-        stickOrientation = stickJoint.Orientation;
-        stick = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) - new Vector3(stickPos_b[0], -stickPos_b[1], stickPos_b[2]);
-        stick_length = stick.magnitude * 0.002f;
-        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.004f;
-        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-        avatarSelf.LeftUpperLeg.transform.localPosition = new Vector3((stickPos[0] + stickPos_b[0]) * 0.5f, (-stickPos[1] - stickPos_b[1]) * 0.5f, (stickPos[2] + stickPos_b[2]) * 0.5f) * 0.008f;
-        avatarSelf.LeftUpperLeg.transform.LookAt(avatarSelf.LeftHipStick.transform.position);
-        avatarSelf.LeftUpperLeg.transform.Rotate(90, 0, 0);
-        avatarSelf.LeftUpperLeg.transform.localScale = new Vector3(0.2f, 1.2f, 0.2f);
-
-        stickJoint = joint_data_list.data[22];
-        stickJoint_b = joint_data_list.data[23];
-        stickPos = stickJoint.Position;
-        stickPos_b = stickJoint_b.Position;
-        stickOrientation = stickJoint.Orientation;
-        stick = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) - new Vector3(stickPos_b[0], -stickPos_b[1], stickPos_b[2]);
-        stick_length = stick.magnitude * 0.002f;
-        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.004f;
-        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-        avatarSelf.RightUpperLeg.transform.localPosition = new Vector3((stickPos[0] + stickPos_b[0]) * 0.5f, (-stickPos[1] - stickPos_b[1]) * 0.5f, (stickPos[2] + stickPos_b[2]) * 0.5f) * 0.008f;
-        avatarSelf.RightUpperLeg.transform.LookAt(avatarSelf.RightHipStick.transform.position);
-        avatarSelf.RightUpperLeg.transform.Rotate(90, 0, 0);
-        avatarSelf.RightUpperLeg.transform.localScale = new Vector3(0.2f, 1.2f, 0.2f);
-
-        stickJoint = joint_data_list.data[19];
-        stickJoint_b = joint_data_list.data[20];
-        stickPos = stickJoint.Position;
-        stickPos_b = stickJoint_b.Position;
-        stickOrientation = stickJoint.Orientation;
-        stick = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) - new Vector3(stickPos_b[0], -stickPos_b[1], stickPos_b[2]);
-        stick_length = stick.magnitude * 0.002f;
-        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.004f;
-        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-        avatarSelf.LeftLowerLeg.transform.localPosition = new Vector3((stickPos[0] + stickPos_b[0]) * 0.5f, (-stickPos[1] - stickPos_b[1]) * 0.5f, (stickPos[2] + stickPos_b[2]) * 0.5f) * 0.008f;
-        avatarSelf.LeftLowerLeg.transform.LookAt(avatarSelf.LeftKneeStick.transform.position);
-        avatarSelf.LeftLowerLeg.transform.Rotate(90, 0, 0);
-        avatarSelf.LeftLowerLeg.transform.localScale = new Vector3(0.2f, 1.2f, 0.2f);
-
-        stickJoint = joint_data_list.data[23];
-        stickJoint_b = joint_data_list.data[24];
-        stickPos = stickJoint.Position;
-        stickPos_b = stickJoint_b.Position;
-        stickOrientation = stickJoint.Orientation;
-        stick = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) - new Vector3(stickPos_b[0], -stickPos_b[1], stickPos_b[2]);
-        stick_length = stick.magnitude * 0.002f;
-        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.004f;
-        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-        avatarSelf.RightLowerLeg.transform.localPosition = new Vector3((stickPos[0] + stickPos_b[0]) * 0.5f, (-stickPos[1] - stickPos_b[1]) * 0.5f, (stickPos[2] + stickPos_b[2]) * 0.5f) * 0.008f;
-        avatarSelf.RightLowerLeg.transform.LookAt(avatarSelf.RightKneeStick.transform.position);
-        avatarSelf.RightLowerLeg.transform.Rotate(90, 0, 0);
-        avatarSelf.RightLowerLeg.transform.localScale = new Vector3(0.2f, 1.2f, 0.2f);
-
-        // Code above is copied from stick person move
-        // TODO: probably could just call move stickperson function?
-
-        // Below the orientation of the stick figure parts is applied to the robot avatar, ith some additional calculations
-        // TODO: is there a simpler way to do this?
-        // If way to apply pose to a humanoid rig is discovered, that would work directly and be simpler
-
-
-        // Get Robot body parts references
-        GameObject right_shoulder_joint, right_upper_arm_joint, right_forearm_joint, left_upper_arm_joint, left_forearm_joint;
-        GameObject left_thigh_joint, left_knee_joint, right_thigh_joint, right_knee_joint;
-        GameObject robotKyle = avatarSelf.robotContainer.transform.Find("Robot Kyle").gameObject;
-        GameObject robotRoot = robotKyle.transform.Find("Root").gameObject;
-        GameObject hip = robotRoot.transform.Find("Hip").gameObject;
-        GameObject ribs = robotRoot.transform.Find("Ribs").gameObject;
-        GameObject left_shoulder_joint = ribs.transform.Find("Left_Shoulder_Joint_01").gameObject;
-
-        right_shoulder_joint = ribs.transform.Find("Right_Shoulder_Joint_01").gameObject;
-        bool set = false;
-        if (right_shoulder_joint.transform.childCount == 1)
-        {
-            set = true;
-            right_upper_arm_joint = right_shoulder_joint.transform.Find("Right_Upper_Arm_Joint_01").gameObject;
-            left_upper_arm_joint = left_shoulder_joint.transform.Find("Left_Upper_Arm_Joint_01").gameObject;
-            right_thigh_joint = hip.transform.Find("Right_Thigh_Joint_01").gameObject;
-            left_thigh_joint = hip.transform.Find("Left_Thigh_Joint_01").gameObject;
-        }
-        else
-        {
-            right_upper_arm_joint = avatarSelf.robotContainer.transform.Find("Right_Upper_Arm_Joint_01").gameObject;
-            left_upper_arm_joint = avatarSelf.robotContainer.transform.Find("Left_Upper_Arm_Joint_01").gameObject;
-            right_thigh_joint = avatarSelf.robotContainer.transform.Find("Right_Thigh_Joint_01").gameObject;
-            left_thigh_joint = avatarSelf.robotContainer.transform.Find("Left_Thigh_Joint_01").gameObject;
-        }
-        right_forearm_joint = right_upper_arm_joint.transform.Find("Right_Forearm_Joint_01").gameObject;
-        left_forearm_joint = left_upper_arm_joint.transform.Find("Left_Forearm_Joint_01").gameObject;
-        right_knee_joint = right_thigh_joint.transform.Find("Right_Knee_Joint_01").gameObject;
-        left_knee_joint = left_thigh_joint.transform.Find("Left_Knee_Joint_01").gameObject;
-
-
-        Quaternion rootTransform = Quaternion.FromToRotation(robotRoot.transform.rotation.eulerAngles, avatarSelf.stickContainer.transform.rotation.eulerAngles);
-        Quaternion relativeTransform = Quaternion.FromToRotation(transform.up, avatarSelf.LeftUpperArm.transform.localRotation.eulerAngles);
-        Vector3 ea = avatarSelf.RightUpperArm.transform.rotation.eulerAngles;
-
-        // Change parents of body part to all be in global coordinates of avatar
-        if (set == true)
-        {
-            right_upper_arm_joint.transform.SetParent(avatarSelf.robotContainer.transform);
-            left_upper_arm_joint.transform.SetParent(avatarSelf.robotContainer.transform);
-            right_thigh_joint.transform.SetParent(avatarSelf.robotContainer.transform);
-            left_thigh_joint.transform.SetParent(avatarSelf.robotContainer.transform);
-        }
-
-        // Some manually tested rotations are applied after the calculated pose, as there are offsets
-        right_upper_arm_joint.transform.localRotation = avatarSelf.RightUpperArm.transform.localRotation;
-        right_upper_arm_joint.transform.Rotate(0, 0, 90);
-
-        right_forearm_joint.transform.localRotation = Quaternion.Inverse(right_upper_arm_joint.transform.localRotation) * avatarSelf.RightLowerArm.transform.localRotation;
-        right_forearm_joint.transform.Rotate(0, 0, 90);
-
-        left_upper_arm_joint.transform.localRotation = avatarSelf.LeftUpperArm.transform.localRotation;
-        left_upper_arm_joint.transform.Rotate(180, 0, 90);
-        left_forearm_joint.transform.localRotation = Quaternion.Inverse(left_upper_arm_joint.transform.localRotation) * avatarSelf.LeftLowerArm.transform.localRotation;
-        left_forearm_joint.transform.Rotate(180, 90, 45);
-
-        left_thigh_joint.transform.localRotation = avatarSelf.LeftUpperLeg.transform.localRotation;
-        left_thigh_joint.transform.Rotate(0, 0, 90);
-        left_knee_joint.transform.localRotation = Quaternion.Inverse(left_thigh_joint.transform.localRotation) * avatarSelf.LeftKneeStick.transform.localRotation;
-        left_knee_joint.transform.Rotate(0, 0, 170);
-
-        right_thigh_joint.transform.localRotation = avatarSelf.RightUpperLeg.transform.localRotation;
-        right_thigh_joint.transform.Rotate(0, 0, -90);
-        right_knee_joint.transform.localRotation = Quaternion.Inverse(right_thigh_joint.transform.localRotation) * avatarSelf.RightKneeStick.transform.localRotation;
-        right_knee_joint.transform.Rotate(180, 0, -170);
-    }
-    // Move the SMPL avatar contained in avatarSelf
-    void moveSMPLPerson(JointDataListLive joint_data_list, AvatarGo avatarSelf)
-    {
-        JointDataLive stickJoint = joint_data_list.data[5];
-        var stickPos = stickJoint.Position;
-        var stickOrientation = stickJoint.Orientation;
-        var stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.008f;
-        var stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-        avatarSelf.LeftShoulderStick.transform.localPosition = stickV;
-        avatarSelf.LeftShoulderStick.transform.localRotation = stickR;
-
-        stickJoint = joint_data_list.data[12];
-        stickPos = stickJoint.Position;
-        stickOrientation = stickJoint.Orientation;
-        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.008f;
-        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-        avatarSelf.RightShoulderStick.transform.localPosition = stickV;
-        avatarSelf.RightShoulderStick.transform.localRotation = stickR;
-
-        stickJoint = joint_data_list.data[18];
-        stickPos = stickJoint.Position;
-        stickOrientation = stickJoint.Orientation;
-        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.008f;
-        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-        avatarSelf.LeftHipStick.transform.localPosition = stickV;
-        avatarSelf.LeftHipStick.transform.localRotation = stickR;
-
-        stickJoint = joint_data_list.data[22];
-        stickPos = stickJoint.Position;
-        stickOrientation = stickJoint.Orientation;
-        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.008f;
-        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-        avatarSelf.RightHipStick.transform.localPosition = stickV;
-        avatarSelf.RightHipStick.transform.localRotation = stickR;
-
-        stickJoint = joint_data_list.data[6];
-        stickPos = stickJoint.Position;
-        stickOrientation = stickJoint.Orientation;
-        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.008f;
-        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-        avatarSelf.LeftElbowStick.transform.localPosition = stickV;
-        avatarSelf.LeftElbowStick.transform.localRotation = stickR;
-
-        stickJoint = joint_data_list.data[13];
-        stickPos = stickJoint.Position;
-        stickOrientation = stickJoint.Orientation;
-        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.008f;
-        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-        avatarSelf.RightElbowStick.transform.localPosition = stickV;
-        avatarSelf.RightElbowStick.transform.localRotation = stickR;
-
-        stickJoint = joint_data_list.data[7];
-        stickPos = stickJoint.Position;
-        stickOrientation = stickJoint.Orientation;
-        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.008f;
-        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-        avatarSelf.LeftWristStick.transform.localPosition = stickV;
-        avatarSelf.LeftWristStick.transform.localRotation = stickR;
-
-        stickJoint = joint_data_list.data[14];
-        stickPos = stickJoint.Position;
-        stickOrientation = stickJoint.Orientation;
-        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.008f;
-        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-        avatarSelf.RightWristStick.transform.localPosition = stickV;
-        avatarSelf.RightWristStick.transform.localRotation = stickR;
-
-        stickJoint = joint_data_list.data[19];
-        stickPos = stickJoint.Position;
-        stickOrientation = stickJoint.Orientation;
-        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.008f;
-        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-        avatarSelf.LeftKneeStick.transform.localPosition = stickV;
-        avatarSelf.LeftKneeStick.transform.localRotation = stickR;
-
-        stickJoint = joint_data_list.data[23];
-        stickPos = stickJoint.Position;
-        stickOrientation = stickJoint.Orientation;
-        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.008f;
-        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-        avatarSelf.RightKneeStick.transform.localPosition = stickV;
-        avatarSelf.RightKneeStick.transform.localRotation = stickR;
-
-        stickJoint = joint_data_list.data[20];
-        stickPos = stickJoint.Position;
-        stickOrientation = stickJoint.Orientation;
-        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.008f;
-        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-        avatarSelf.LeftAnkleStick.transform.localPosition = stickV;
-        avatarSelf.LeftAnkleStick.transform.localRotation = stickR;
-
-        stickJoint = joint_data_list.data[24];
-        stickPos = stickJoint.Position;
-        stickOrientation = stickJoint.Orientation;
-        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.008f;
-        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-        avatarSelf.RightAnkleStick.transform.localPosition = stickV;
-        avatarSelf.RightAnkleStick.transform.localRotation = stickR;
-
-
-        /************************************Head**************************************/
-        stickJoint = joint_data_list.data[28];
-        stickPos = stickJoint.Position;
-        stickOrientation = stickJoint.Orientation;
-        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.008f;
-        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-        avatarSelf.LeftEye.transform.localPosition = stickV;
-        avatarSelf.LeftEye.transform.localRotation = stickR;
-        avatarSelf.LeftEye.transform.localScale = new Vector3(0.3f, 0.2f, 0.2f);
-        //LeftEye.transform.Rotate(90, 90, 0);
-
-        stickJoint = joint_data_list.data[30];
-        stickPos = stickJoint.Position;
-        stickOrientation = stickJoint.Orientation;
-        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.008f;
-        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-        avatarSelf.RightEye.transform.localPosition = stickV;
-        avatarSelf.RightEye.transform.localRotation = stickR;
-        avatarSelf.RightEye.transform.localScale = new Vector3(0.3f, 0.2f, 0.2f);
-        //RightEye.transform.Rotate(90, 90, 0);
-
-        stickJoint = joint_data_list.data[27];
-        stickPos = stickJoint.Position;
-        stickOrientation = stickJoint.Orientation;
-        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.008f;
-        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-        avatarSelf.NoseStick.transform.localPosition = stickV;
-        avatarSelf.NoseStick.transform.localRotation = stickR;
-        avatarSelf.NoseStick.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
-
-        stickJoint = joint_data_list.data[29];
-        stickPos = stickJoint.Position;
-        stickOrientation = stickJoint.Orientation;
-        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.008f;
-        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-        avatarSelf.LeftEar.transform.localPosition = stickV;
-        avatarSelf.LeftEar.transform.localRotation = stickR;
-        avatarSelf.LeftEar.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
-        avatarSelf.LeftEar.transform.LookAt(avatarSelf.LeftShoulderStick.transform.position);
-        avatarSelf.LeftEar.transform.Rotate(90, 0, 0);
-
-        stickJoint = joint_data_list.data[31];
-        stickPos = stickJoint.Position;
-        stickOrientation = stickJoint.Orientation;
-        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.008f;
-        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-        avatarSelf.RightEar.transform.localPosition = stickV;
-        avatarSelf.RightEar.transform.localRotation = stickR;
-        avatarSelf.RightEar.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
-        avatarSelf.RightEar.transform.LookAt(avatarSelf.RightShoulderStick.transform.position);
-        avatarSelf.RightEar.transform.Rotate(90, 0, 0);
-
-        stickJoint = joint_data_list.data[27];
-        stickPos = stickJoint.Position;
-        stickOrientation = stickJoint.Orientation;
-        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.008f;
-        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-        avatarSelf.MouthStick.transform.localPosition = stickV;
-        avatarSelf.MouthStick.transform.localRotation = stickR;
-        avatarSelf.MouthStick.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
-
-
-        /************************************Body**************************************/
-        stickJoint = joint_data_list.data[5];
-        var stickJoint_b = joint_data_list.data[12];
-        stickPos = stickJoint.Position;
-        var stickPos_b = stickJoint_b.Position;
-        stickOrientation = stickJoint.Orientation;
-        Vector3 stick = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) - new Vector3(stickPos_b[0], -stickPos_b[1], stickPos_b[2]);
-        float stick_length = stick.magnitude * 0.002f;
-        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.004f;
-        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-        avatarSelf.Shoulders.transform.localPosition = new Vector3((stickPos[0] + stickPos_b[0]) * 0.5f, (-stickPos[1] - stickPos_b[1]) * 0.5f, (stickPos[2] + stickPos_b[2]) * 0.5f) * 0.008f;
-        avatarSelf.Shoulders.transform.LookAt(avatarSelf.RightShoulderStick.transform.position);
-        avatarSelf.Shoulders.transform.Rotate(90, 0, 0);
-        avatarSelf.Shoulders.transform.localScale = new Vector3(0.2f, stick_length, 0.2f);
-
-        stickJoint = joint_data_list.data[18];
-        stickJoint_b = joint_data_list.data[22];
-        stickPos = stickJoint.Position;
-        stickPos_b = stickJoint_b.Position;
-        stickOrientation = stickJoint.Orientation;
-        stick = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) - new Vector3(stickPos_b[0], -stickPos_b[1], stickPos_b[2]);
-        stick_length = stick.magnitude * 0.002f;
-        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.004f;
-        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-        avatarSelf.HipStick.transform.localPosition = new Vector3((stickPos[0] + stickPos_b[0]) * 0.5f, (-stickPos[1] - stickPos_b[1]) * 0.5f, (stickPos[2] + stickPos_b[2]) * 0.5f) * 0.008f;
-        avatarSelf.HipStick.transform.LookAt(avatarSelf.RightHipStick.transform.position);
-        avatarSelf.HipStick.transform.Rotate(90, 0, 0);
-        avatarSelf.HipStick.transform.localScale = new Vector3(0.2f, stick_length, 0.2f);
-
-        stickJoint = joint_data_list.data[18];
-        stickJoint_b = joint_data_list.data[5];
-        stickPos = stickJoint.Position;
-        stickPos_b = stickJoint_b.Position;
-        stickOrientation = stickJoint.Orientation;
-        stick = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) - new Vector3(stickPos_b[0], -stickPos_b[1], stickPos_b[2]);
-        stick_length = stick.magnitude * 0.002f;
-        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.004f;
-        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-        avatarSelf.TorsoLeft.transform.localPosition = new Vector3((stickPos[0] + stickPos_b[0]) * 0.5f, (-stickPos[1] - stickPos_b[1]) * 0.5f, (stickPos[2] + stickPos_b[2]) * 0.5f) * 0.008f;
-        avatarSelf.TorsoLeft.transform.LookAt(avatarSelf.LeftShoulderStick.transform.position);
-        avatarSelf.TorsoLeft.transform.Rotate(90, 0, 0);
-        avatarSelf.TorsoLeft.transform.localScale = new Vector3(0.2f, stick_length, 0.2f);
-
-        stickJoint = joint_data_list.data[12];
-        stickJoint_b = joint_data_list.data[22];
-        stickPos = stickJoint.Position;
-        stickPos_b = stickJoint_b.Position;
-        stickOrientation = stickJoint.Orientation;
-        stick = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) - new Vector3(stickPos_b[0], -stickPos_b[1], stickPos_b[2]);
-        stick_length = stick.magnitude * 0.002f;
-        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.004f;
-        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-        avatarSelf.TorsoRight.transform.localPosition = new Vector3((stickPos[0] + stickPos_b[0]) * 0.5f, (-stickPos[1] - stickPos_b[1]) * 0.5f, (stickPos[2] + stickPos_b[2]) * 0.5f) * 0.008f;
-        avatarSelf.TorsoRight.transform.LookAt(avatarSelf.RightShoulderStick.transform.position);
-        avatarSelf.TorsoRight.transform.Rotate(90, 0, 0);
-        avatarSelf.TorsoRight.transform.localScale = new Vector3(0.2f, stick_length, 0.2f);
-
-
-        /************************************Arms**************************************/
-        stickJoint = joint_data_list.data[5];
-        stickJoint_b = joint_data_list.data[6];
-        stickPos = stickJoint.Position;
-        stickPos_b = stickJoint_b.Position;
-        stickOrientation = stickJoint.Orientation;
-        stick = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) - new Vector3(stickPos_b[0], -stickPos_b[1], stickPos_b[2]);
-        stick_length = stick.magnitude * 0.002f;
-        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.004f;
-        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-        avatarSelf.LeftUpperArm.transform.localPosition = new Vector3((stickPos[0] + stickPos_b[0]) * 0.5f, (-stickPos[1] - stickPos_b[1]) * 0.5f, (stickPos[2] + stickPos_b[2]) * 0.5f) * 0.008f;
-        avatarSelf.LeftUpperArm.transform.LookAt(avatarSelf.LeftElbowStick.transform.position);
-        avatarSelf.LeftUpperArm.transform.Rotate(90, 0, 0);
-        avatarSelf.LeftUpperArm.transform.localScale = new Vector3(0.2f, 1.2f, 0.2f);
-
-        stickJoint = joint_data_list.data[12];
-        stickJoint_b = joint_data_list.data[13];
-        stickPos = stickJoint.Position;
-        stickPos_b = stickJoint_b.Position;
-        stickOrientation = stickJoint.Orientation;
-        stick = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) - new Vector3(stickPos_b[0], -stickPos_b[1], stickPos_b[2]);
-        stick_length = stick.magnitude * 0.002f;
-        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.004f;
-        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-        avatarSelf.RightUpperArm.transform.localPosition = new Vector3((stickPos[0] + stickPos_b[0]) * 0.5f, (-stickPos[1] - stickPos_b[1]) * 0.5f, (stickPos[2] + stickPos_b[2]) * 0.5f) * 0.008f;
-        avatarSelf.RightUpperArm.transform.LookAt(avatarSelf.RightElbowStick.transform.position);
-        avatarSelf.RightUpperArm.transform.Rotate(90, 0, 0);
-        avatarSelf.RightUpperArm.transform.localScale = new Vector3(0.2f, 1.2f, 0.2f);
-
-        stickJoint = joint_data_list.data[6];
-        stickJoint_b = joint_data_list.data[7];
-        stickPos = stickJoint.Position;
-        stickPos_b = stickJoint_b.Position;
-        stickOrientation = stickJoint.Orientation;
-        stick = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) - new Vector3(stickPos_b[0], -stickPos_b[1], stickPos_b[2]);
-        stick_length = stick.magnitude * 0.002f;
-        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.004f;
-        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-        avatarSelf.LeftLowerArm.transform.localPosition = new Vector3((stickPos[0] + stickPos_b[0]) * 0.5f, (-stickPos[1] - stickPos_b[1]) * 0.5f, (stickPos[2] + stickPos_b[2]) * 0.5f) * 0.008f;
-        //LeftLowerArm.transform.LookAt(stickV);
-        avatarSelf.LeftLowerArm.transform.LookAt(avatarSelf.LeftWristStick.transform.position);
-        avatarSelf.LeftLowerArm.transform.Rotate(90, 0, 0);
-        avatarSelf.LeftLowerArm.transform.localScale = new Vector3(0.2f, 1.2f, 0.2f);
-
-        stickJoint = joint_data_list.data[13];
-        stickJoint_b = joint_data_list.data[14];
-        stickPos = stickJoint.Position;
-        stickPos_b = stickJoint_b.Position;
-        stickOrientation = stickJoint.Orientation;
-        stick = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) - new Vector3(stickPos_b[0], -stickPos_b[1], stickPos_b[2]);
-        stick_length = stick.magnitude * 0.002f;
-        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.004f;
-        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-        avatarSelf.RightLowerArm.transform.localPosition = new Vector3((stickPos[0] + stickPos_b[0]) * 0.5f, (-stickPos[1] - stickPos_b[1]) * 0.5f, (stickPos[2] + stickPos_b[2]) * 0.5f) * 0.008f;
-        avatarSelf.RightLowerArm.transform.LookAt(avatarSelf.RightWristStick.transform.position);
-        avatarSelf.RightLowerArm.transform.Rotate(90, 0, 0);
-        avatarSelf.RightLowerArm.transform.localScale = new Vector3(0.2f, 1.2f, 0.2f);
-
-
-        /************************************Legs**************************************/
-        stickJoint = joint_data_list.data[18];
-        stickJoint_b = joint_data_list.data[19];
-        stickPos = stickJoint.Position;
-        stickPos_b = stickJoint_b.Position;
-        stickOrientation = stickJoint.Orientation;
-        stick = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) - new Vector3(stickPos_b[0], -stickPos_b[1], stickPos_b[2]);
-        stick_length = stick.magnitude * 0.002f;
-        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.004f;
-        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-        avatarSelf.LeftUpperLeg.transform.localPosition = new Vector3((stickPos[0] + stickPos_b[0]) * 0.5f, (-stickPos[1] - stickPos_b[1]) * 0.5f, (stickPos[2] + stickPos_b[2]) * 0.5f) * 0.008f;
-        avatarSelf.LeftUpperLeg.transform.LookAt(avatarSelf.LeftHipStick.transform.position);
-        avatarSelf.LeftUpperLeg.transform.Rotate(90, 0, 0);
-        avatarSelf.LeftUpperLeg.transform.localScale = new Vector3(0.2f, 1.2f, 0.2f);
-
-        stickJoint = joint_data_list.data[22];
-        stickJoint_b = joint_data_list.data[23];
-        stickPos = stickJoint.Position;
-        stickPos_b = stickJoint_b.Position;
-        stickOrientation = stickJoint.Orientation;
-        stick = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) - new Vector3(stickPos_b[0], -stickPos_b[1], stickPos_b[2]);
-        stick_length = stick.magnitude * 0.002f;
-        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.004f;
-        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-        avatarSelf.RightUpperLeg.transform.localPosition = new Vector3((stickPos[0] + stickPos_b[0]) * 0.5f, (-stickPos[1] - stickPos_b[1]) * 0.5f, (stickPos[2] + stickPos_b[2]) * 0.5f) * 0.008f;
-        avatarSelf.RightUpperLeg.transform.LookAt(avatarSelf.RightHipStick.transform.position);
-        avatarSelf.RightUpperLeg.transform.Rotate(90, 0, 0);
-        avatarSelf.RightUpperLeg.transform.localScale = new Vector3(0.2f, 1.2f, 0.2f);
-
-        stickJoint = joint_data_list.data[19];
-        stickJoint_b = joint_data_list.data[20];
-        stickPos = stickJoint.Position;
-        stickPos_b = stickJoint_b.Position;
-        stickOrientation = stickJoint.Orientation;
-        stick = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) - new Vector3(stickPos_b[0], -stickPos_b[1], stickPos_b[2]);
-        stick_length = stick.magnitude * 0.002f;
-        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.004f;
-        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-        avatarSelf.LeftLowerLeg.transform.localPosition = new Vector3((stickPos[0] + stickPos_b[0]) * 0.5f, (-stickPos[1] - stickPos_b[1]) * 0.5f, (stickPos[2] + stickPos_b[2]) * 0.5f) * 0.008f;
-        avatarSelf.LeftLowerLeg.transform.LookAt(avatarSelf.LeftKneeStick.transform.position);
-        avatarSelf.LeftLowerLeg.transform.Rotate(90, 0, 0);
-        avatarSelf.LeftLowerLeg.transform.localScale = new Vector3(0.2f, 1.2f, 0.2f);
-
-        stickJoint = joint_data_list.data[23];
-        stickJoint_b = joint_data_list.data[24];
-        stickPos = stickJoint.Position;
-        stickPos_b = stickJoint_b.Position;
-        stickOrientation = stickJoint.Orientation;
-        stick = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) - new Vector3(stickPos_b[0], -stickPos_b[1], stickPos_b[2]);
-        stick_length = stick.magnitude * 0.002f;
-        stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.004f;
-        stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-        avatarSelf.RightLowerLeg.transform.localPosition = new Vector3((stickPos[0] + stickPos_b[0]) * 0.5f, (-stickPos[1] - stickPos_b[1]) * 0.5f, (stickPos[2] + stickPos_b[2]) * 0.5f) * 0.008f;
-        avatarSelf.RightLowerLeg.transform.LookAt(avatarSelf.RightKneeStick.transform.position);
-        avatarSelf.RightLowerLeg.transform.Rotate(90, 0, 0);
-        avatarSelf.RightLowerLeg.transform.localScale = new Vector3(0.2f, 1.2f, 0.2f);
-
-        // Code above is copied from stick person move
-        // TODO: probably could just call move stickperson function?
-
-        // Below the orientation of the stick figure parts is applied to the SMPL avatar, ith some additional calculations
-        // TODO: <check TODO moveRobotPerson, same as there>
-
-        // get SMPL body parts
-        GameObject smpl_body;
-        GameObject smpl_male = avatarSelf.smplContainer.transform.Find("SMPL_m_unityDoubleBlends_lbs_10_scale5_207_v1.0.0").gameObject;
-        GameObject smpl_female = avatarSelf.smplContainer.transform.Find("SMPL_f_unityDoubleBlends_lbs_10_scale5_207_v1.0.0").gameObject;
-        GameObject L_hip, R_hip, L_Shoulder, R_Shoulder, R_Elbow, L_Elbow, L_Knee, R_Knee;
-        bool set = false;
-        if (smpl_male.activeSelf == true)
-        {
-            smpl_body = smpl_male;
-            //GameObject L_hip, R_hip, L_Shoulder, R_Shoulder;
-            GameObject SMPLRoot = smpl_body.transform.Find("m_avg_root").gameObject;
-            GameObject pelvis = SMPLRoot.transform.Find("m_avg_Pelvis").gameObject;
-
-            GameObject Spine1 = pelvis.transform.Find("m_avg_Spine1").gameObject;
-            GameObject Spine2 = Spine1.transform.Find("m_avg_Spine2").gameObject;
-            GameObject Spine3 = Spine2.transform.Find("m_avg_Spine3").gameObject;
-
-            // we don't need the spine
-            GameObject L_Collar = Spine3.transform.Find("m_avg_L_Collar").gameObject;
-
-            // we don't need the hand
-            GameObject R_Collar = Spine3.transform.Find("m_avg_R_Collar").gameObject;
-
-            GameObject Neck = Spine3.transform.Find("m_avg_Neck").gameObject;
-
-            if (L_Collar.transform.childCount == 1)
-            {
-                set = true;
-                L_Shoulder = L_Collar.transform.Find("m_avg_L_Shoulder").gameObject;
-                R_Shoulder = R_Collar.transform.Find("m_avg_R_Shoulder").gameObject;
-                L_hip = pelvis.transform.Find("m_avg_L_Hip").gameObject;
-                R_hip = pelvis.transform.Find("m_avg_R_Hip").gameObject;
-            }
-            else
-            {
-                L_Shoulder = avatarSelf.smplContainer.transform.Find("m_avg_L_Shoulder").gameObject;
-                R_Shoulder = avatarSelf.smplContainer.transform.Find("m_avg_R_Shoulder").gameObject;
-                L_hip = avatarSelf.smplContainer.transform.Find("m_avg_L_Hip").gameObject;
-                R_hip = avatarSelf.smplContainer.transform.Find("m_avg_R_Hip").gameObject;
-            }
-
-            L_Knee = L_hip.transform.Find("m_avg_L_Knee").gameObject;
-            GameObject L_Ankle = L_Knee.transform.Find("m_avg_L_Ankle").gameObject;
-            // we don't need the foot and the ankle not much either
-
-            R_Knee = R_hip.transform.Find("m_avg_R_Knee").gameObject;
-            GameObject R_Ankle = R_Knee.transform.Find("m_avg_R_Ankle").gameObject;
-
-            L_Elbow = L_Shoulder.transform.Find("m_avg_L_Elbow").gameObject;
-            GameObject L_Wrist = L_Elbow.transform.Find("m_avg_L_Wrist").gameObject;
-            R_Elbow = R_Shoulder.transform.Find("m_avg_R_Elbow").gameObject;
-            GameObject R_Wrist = R_Elbow.transform.Find("m_avg_R_Wrist").gameObject;
-
-        }
-        else
-        {
-            smpl_body = smpl_female;
-            //GameObject L_hip, R_hip, L_Shoulder, R_Shoulder;
-            GameObject SMPLRoot = smpl_body.transform.Find("f_avg_root").gameObject;
-            GameObject pelvis = SMPLRoot.transform.Find("f_avg_Pelvis").gameObject;
-
-            GameObject Spine1 = pelvis.transform.Find("f_avg_Spine1").gameObject;
-            GameObject Spine2 = Spine1.transform.Find("f_avg_Spine2").gameObject;
-            GameObject Spine3 = Spine2.transform.Find("f_avg_Spine3").gameObject;
-
-            // we don't need the spine
-            GameObject L_Collar = Spine3.transform.Find("f_avg_L_Collar").gameObject;
-
-            // we don't need the hand
-            GameObject R_Collar = Spine3.transform.Find("f_avg_R_Collar").gameObject;
-
-            GameObject Neck = Spine3.transform.Find("f_avg_Neck").gameObject;
-
-            //right_shoulder_joint = ribs.transform.Find("Right_Shoulder_Joint_01").gameObject;
-            //bool set = false;
-            if (L_Collar.transform.childCount == 1)
-            {
-                set = true;
-                L_Shoulder = L_Collar.transform.Find("f_avg_L_Shoulder").gameObject;
-                R_Shoulder = R_Collar.transform.Find("f_avg_R_Shoulder").gameObject;
-                L_hip = pelvis.transform.Find("f_avg_L_Hip").gameObject;
-                R_hip = pelvis.transform.Find("f_avg_R_Hip").gameObject;
-            }
-            else
-            {
-                L_Shoulder = avatarSelf.smplContainer.transform.Find("f_avg_L_Shoulder").gameObject;
-                R_Shoulder = avatarSelf.smplContainer.transform.Find("f_avg_R_Shoulder").gameObject;
-                L_hip = avatarSelf.smplContainer.transform.Find("f_avg_L_Hip").gameObject;
-                R_hip = avatarSelf.smplContainer.transform.Find("f_avg_R_Hip").gameObject;
-            }
-            L_Knee = L_hip.transform.Find("f_avg_L_Knee").gameObject;
-            GameObject L_Ankle = L_Knee.transform.Find("f_avg_L_Ankle").gameObject;
-            // we don't need the foot and the ankle not much either
-
-            R_Knee = R_hip.transform.Find("f_avg_R_Knee").gameObject;
-            GameObject R_Ankle = R_Knee.transform.Find("f_avg_R_Ankle").gameObject;
-
-            L_Elbow = L_Shoulder.transform.Find("f_avg_L_Elbow").gameObject;
-            GameObject L_Wrist = L_Elbow.transform.Find("f_avg_L_Wrist").gameObject;
-            R_Elbow = R_Shoulder.transform.Find("f_avg_R_Elbow").gameObject;
-            GameObject R_Wrist = R_Elbow.transform.Find("f_avg_R_Wrist").gameObject;
-        }
-
-
-        if (set == true)
-        {
-            L_Shoulder.transform.SetParent(avatarSelf.smplContainer.transform);
-            R_Shoulder.transform.SetParent(avatarSelf.smplContainer.transform);
-            L_hip.transform.SetParent(avatarSelf.smplContainer.transform);
-            R_hip.transform.SetParent(avatarSelf.smplContainer.transform);
-        }
-
-        // Some manually tested rotations are applied after the calculated pose, as there are offsets
-        R_Shoulder.transform.localRotation = avatarSelf.RightUpperArm.transform.localRotation;
-        R_Shoulder.transform.Rotate(0, 180, 90);
-        R_Elbow.transform.localRotation = Quaternion.Inverse(R_Shoulder.transform.localRotation) * avatarSelf.RightLowerArm.transform.localRotation;
-        R_Elbow.transform.Rotate(0, 180, 90);
-
-        L_Shoulder.transform.localRotation = avatarSelf.LeftUpperArm.transform.localRotation;
-        L_Shoulder.transform.Rotate(180, 0, 90);
-        L_Elbow.transform.localRotation = Quaternion.Inverse(L_Shoulder.transform.localRotation) * avatarSelf.LeftLowerArm.transform.localRotation;
-        L_Elbow.transform.Rotate(180, 0, 90);
-
-        L_hip.transform.localRotation = avatarSelf.LeftUpperLeg.transform.localRotation;
-        L_hip.transform.Rotate(0, 90, 0);
-        L_Knee.transform.localRotation = Quaternion.Inverse(L_hip.transform.localRotation) * avatarSelf.LeftKneeStick.transform.localRotation;
-        L_Knee.transform.Rotate(-90, 180, -90);
-
-        R_hip.transform.localRotation = avatarSelf.RightUpperLeg.transform.localRotation;
-        R_hip.transform.Rotate(0, 90, 0);
-        R_Knee.transform.localRotation = Quaternion.Inverse(R_hip.transform.localRotation) * avatarSelf.RightKneeStick.transform.localRotation;
-        R_Knee.transform.Rotate(90, 180, 90);
-    }
 
 
     // Change material of stickContainer avatar if not close enough to teacher pose
+    // CONSIDER: move (part of it) to AvatarGo or Containers
     void showCorrection(AvatarGo avatarSelf, AvatarGo avatarTeacher)
     {
-        float LeftUpperArm_difference = Quaternion.Angle(avatarSelf.LeftUpperArm.transform.localRotation, avatarTeacher.LeftUpperArm.transform.localRotation);
-        float LeftLowerArm_difference = Quaternion.Angle(avatarSelf.LeftLowerArm.transform.localRotation, avatarTeacher.LeftLowerArm.transform.localRotation);
-        float RightUpperArm_difference = Quaternion.Angle(avatarSelf.RightUpperArm.transform.localRotation, avatarTeacher.RightUpperArm.transform.localRotation);
-        float RightLowerArm_difference = Quaternion.Angle(avatarSelf.RightLowerArm.transform.localRotation, avatarTeacher.RightLowerArm.transform.localRotation);
-        float LeftUpperLeg_difference = Quaternion.Angle(avatarSelf.LeftUpperLeg.transform.localRotation, avatarTeacher.LeftUpperLeg.transform.localRotation);
-        float LeftLowerLeg_difference = Quaternion.Angle(avatarSelf.LeftLowerLeg.transform.localRotation, avatarTeacher.LeftLowerLeg.transform.localRotation);
-        float RightUpperLeg_difference = Quaternion.Angle(avatarSelf.RightUpperLeg.transform.localRotation, avatarTeacher.RightUpperLeg.transform.localRotation);
-        float RightLowerLeg_difference = Quaternion.Angle(avatarSelf.RightLowerLeg.transform.localRotation, avatarTeacher.RightLowerLeg.transform.localRotation);
+        float LeftUpperArm_difference = Quaternion.Angle(avatarSelf.stickContainer.LeftUpperArm.transform.localRotation, avatarTeacher.stickContainer.LeftUpperArm.transform.localRotation);
+        float LeftLowerArm_difference = Quaternion.Angle(avatarSelf.stickContainer.LeftLowerArm.transform.localRotation, avatarTeacher.stickContainer.LeftLowerArm.transform.localRotation);
+        float RightUpperArm_difference = Quaternion.Angle(avatarSelf.stickContainer.RightUpperArm.transform.localRotation, avatarTeacher.stickContainer.RightUpperArm.transform.localRotation);
+        float RightLowerArm_difference = Quaternion.Angle(avatarSelf.stickContainer.RightLowerArm.transform.localRotation, avatarTeacher.stickContainer.RightLowerArm.transform.localRotation);
+        float LeftUpperLeg_difference = Quaternion.Angle(avatarSelf.stickContainer.LeftUpperLeg.transform.localRotation, avatarTeacher.stickContainer.LeftUpperLeg.transform.localRotation);
+        float LeftLowerLeg_difference = Quaternion.Angle(avatarSelf.stickContainer.LeftLowerLeg.transform.localRotation, avatarTeacher.stickContainer.LeftLowerLeg.transform.localRotation);
+        float RightUpperLeg_difference = Quaternion.Angle(avatarSelf.stickContainer.RightUpperLeg.transform.localRotation, avatarTeacher.stickContainer.RightUpperLeg.transform.localRotation);
+        float RightLowerLeg_difference = Quaternion.Angle(avatarSelf.stickContainer.RightLowerLeg.transform.localRotation, avatarTeacher.stickContainer.RightLowerLeg.transform.localRotation);
         float thresh = correctionThresh;
 
-        if (avatarSelf.stickContainer.activeSelf)
+        if (avatarSelf.stickContainer.stick.activeSelf)
         {
-            avatarSelf.LeftUpperArm.GetComponent<Renderer>().material = (LeftUpperArm_difference > thresh) ? incorrect_material : correct_material;
-            avatarSelf.LeftLowerArm.GetComponent<Renderer>().material = (LeftLowerArm_difference > thresh) ? incorrect_material : correct_material;
-            avatarSelf.RightUpperArm.GetComponent<Renderer>().material = (RightUpperArm_difference > thresh) ? incorrect_material : correct_material;
-            avatarSelf.RightLowerArm.GetComponent<Renderer>().material = (RightLowerArm_difference > thresh) ? incorrect_material : correct_material;
-            avatarSelf.LeftUpperLeg.GetComponent<Renderer>().material = (LeftUpperLeg_difference > thresh) ? incorrect_material : correct_material;
-            avatarSelf.LeftLowerLeg.GetComponent<Renderer>().material = (LeftLowerLeg_difference > thresh) ? incorrect_material : correct_material;
-            avatarSelf.RightUpperLeg.GetComponent<Renderer>().material = (RightUpperLeg_difference > thresh) ? incorrect_material : correct_material;
-            avatarSelf.RightLowerLeg.GetComponent<Renderer>().material = (RightLowerLeg_difference > thresh) ? incorrect_material : correct_material;
+            avatarSelf.stickContainer.LeftUpperArm.GetComponent<Renderer>().material = (LeftUpperArm_difference > thresh) ? incorrect_material : correct_material;
+            avatarSelf.stickContainer.LeftLowerArm.GetComponent<Renderer>().material = (LeftLowerArm_difference > thresh) ? incorrect_material : correct_material;
+            avatarSelf.stickContainer.RightUpperArm.GetComponent<Renderer>().material = (RightUpperArm_difference > thresh) ? incorrect_material : correct_material;
+            avatarSelf.stickContainer.RightLowerArm.GetComponent<Renderer>().material = (RightLowerArm_difference > thresh) ? incorrect_material : correct_material;
+            avatarSelf.stickContainer.LeftUpperLeg.GetComponent<Renderer>().material = (LeftUpperLeg_difference > thresh) ? incorrect_material : correct_material;
+            avatarSelf.stickContainer.LeftLowerLeg.GetComponent<Renderer>().material = (LeftLowerLeg_difference > thresh) ? incorrect_material : correct_material;
+            avatarSelf.stickContainer.RightUpperLeg.GetComponent<Renderer>().material = (RightUpperLeg_difference > thresh) ? incorrect_material : correct_material;
+            avatarSelf.stickContainer.RightLowerLeg.GetComponent<Renderer>().material = (RightLowerLeg_difference > thresh) ? incorrect_material : correct_material;
         }
     }
 
@@ -1917,84 +1442,94 @@ public class PoseteacherMain : MonoBehaviour
         Debug.Log("reset recording file");
     }
 
+    // TODO: see inside
+    //      comment function when TODO resolved
     void animateAvatars(AvatarGo avatarSelf, JointDataListLive live_data)
     {
-        if (avatarSelf.stickContainer.activeSelf)
+        // MovePerson() considers which container to move
+        foreach (AvatarGo avatar in avatarListSelf)
         {
-            moveStickPerson(live_data, avatarSelf);
-            moveStickPerson(live_data, avatarSelf2);
+            avatar.MovePerson(live_data);
+        }
+        // TODO: can we remove this / move it to AvatarGo or containers?
+        //      using avatarSelf(2), avatarTeacher(2) is deprecated!
+        if (avatarSelf.stickContainer.stick.activeSelf)
+        {
+            //moveStickPerson(live_data, avatarSelf); (all moveXXPerson() done at the begininng of function)
+            //moveStickPerson(live_data, avatarSelf2);
+            
 
-            avatarSelf2.stickContainer.gameObject.SetActive(true);
-            avatarSelf2.cubeContainer.gameObject.SetActive(false);
-            avatarSelf2.robotContainer.gameObject.SetActive(false);
-            avatarSelf2.smplContainer.gameObject.SetActive(false);
+            avatarSelf2.stickContainer.stick.gameObject.SetActive(true);
+            avatarSelf2.cubeContainer.cube.gameObject.SetActive(false);
+            avatarSelf2.robotContainer.robot.gameObject.SetActive(false);
+            avatarSelf2.smplContainer.smpl.gameObject.SetActive(false);
 
-            avatarTeacher.stickContainer.gameObject.SetActive(true);
-            avatarTeacher.cubeContainer.gameObject.SetActive(false);
-            avatarTeacher.robotContainer.gameObject.SetActive(false);
-            avatarTeacher.smplContainer.gameObject.SetActive(false);
+            avatarTeacher.stickContainer.stick.gameObject.SetActive(true);
+            avatarTeacher.cubeContainer.cube.gameObject.SetActive(false);
+            avatarTeacher.robotContainer.robot.gameObject.SetActive(false);
+            avatarTeacher.smplContainer.smpl.gameObject.SetActive(false);
 
-            avatarTeacher2.stickContainer.gameObject.SetActive(true);
-            avatarTeacher2.cubeContainer.gameObject.SetActive(false);
-            avatarTeacher2.robotContainer.gameObject.SetActive(false);
-            avatarTeacher2.smplContainer.gameObject.SetActive(false);
+            avatarTeacher2.stickContainer.stick.gameObject.SetActive(true);
+            avatarTeacher2.cubeContainer.cube.gameObject.SetActive(false);
+            avatarTeacher2.robotContainer.robot.gameObject.SetActive(false);
+            avatarTeacher2.smplContainer.smpl.gameObject.SetActive(false);
 
         }
-        else if (avatarSelf.cubeContainer.activeSelf)
+        else if (avatarSelf.cubeContainer.cube.activeSelf)
         {
-            moveCubePerson(live_data, avatarSelf);
-            moveCubePerson(live_data, avatarSelf2);
+            //moveCubePerson(live_data, avatarSelf);
+            //moveCubePerson(live_data, avatarSelf2);
 
-            avatarSelf2.stickContainer.gameObject.SetActive(false);
-            avatarSelf2.cubeContainer.gameObject.SetActive(true);
-            avatarSelf2.robotContainer.gameObject.SetActive(false);
-            avatarSelf2.smplContainer.gameObject.SetActive(false);
+            avatarSelf2.stickContainer.stick.gameObject.SetActive(false);
+            avatarSelf2.cubeContainer.cube.gameObject.SetActive(true);
+            avatarSelf2.robotContainer.robot.gameObject.SetActive(false);
+            avatarSelf2.smplContainer.smpl.gameObject.SetActive(false);
 
-            avatarTeacher.stickContainer.gameObject.SetActive(false);
-            avatarTeacher.cubeContainer.gameObject.SetActive(true);
-            avatarTeacher.robotContainer.gameObject.SetActive(false);
-            avatarTeacher.smplContainer.gameObject.SetActive(false);
+            avatarTeacher.stickContainer.stick.gameObject.SetActive(false);
+            avatarTeacher.cubeContainer.cube.gameObject.SetActive(true);
+            avatarTeacher.robotContainer.robot.gameObject.SetActive(false);
+            avatarTeacher.smplContainer.smpl.gameObject.SetActive(false);
 
-            avatarTeacher2.stickContainer.gameObject.SetActive(false);
-            avatarTeacher2.cubeContainer.gameObject.SetActive(true);
-            avatarTeacher2.robotContainer.gameObject.SetActive(false);
-            avatarTeacher2.smplContainer.gameObject.SetActive(false);
+            avatarTeacher2.stickContainer.stick.gameObject.SetActive(false);
+            avatarTeacher2.cubeContainer.cube.gameObject.SetActive(true);
+            avatarTeacher2.robotContainer.robot.gameObject.SetActive(false);
+            avatarTeacher2.smplContainer.smpl.gameObject.SetActive(false);
 
         }
-        else if (avatarSelf.robotContainer.activeSelf)
+        else if (avatarSelf.robotContainer.robot.activeSelf)
         {
-            moveRobotPerson(live_data, avatarSelf);
-            moveRobotPerson(live_data, avatarSelf2);
+            //moveRobotPerson(live_data, avatarSelf);
+            //moveRobotPerson(live_data, avatarSelf2);
 
-            avatarSelf2.stickContainer.gameObject.SetActive(false);
-            avatarSelf2.cubeContainer.gameObject.SetActive(false);
-            avatarSelf2.robotContainer.gameObject.SetActive(true);
-            avatarSelf2.smplContainer.gameObject.SetActive(false);
+            avatarSelf2.stickContainer.stick.gameObject.SetActive(false);
+            avatarSelf2.cubeContainer.cube.gameObject.SetActive(false);
+            avatarSelf2.robotContainer.robot.gameObject.SetActive(true);
+            avatarSelf2.smplContainer.smpl.gameObject.SetActive(false);
 
-            avatarTeacher.stickContainer.gameObject.SetActive(false);
-            avatarTeacher.cubeContainer.gameObject.SetActive(false);
-            avatarTeacher.robotContainer.gameObject.SetActive(true);
-            avatarTeacher.smplContainer.gameObject.SetActive(false);
+            avatarTeacher.stickContainer.stick.gameObject.SetActive(false);
+            avatarTeacher.cubeContainer.cube.gameObject.SetActive(false);
+            avatarTeacher.robotContainer.robot.gameObject.SetActive(true);
+            avatarTeacher.smplContainer.smpl.gameObject.SetActive(false);
 
-            avatarTeacher2.stickContainer.gameObject.SetActive(false);
-            avatarTeacher2.cubeContainer.gameObject.SetActive(false);
-            avatarTeacher2.robotContainer.gameObject.SetActive(true);
-            avatarTeacher2.smplContainer.gameObject.SetActive(false);
+            avatarTeacher2.stickContainer.stick.gameObject.SetActive(false);
+            avatarTeacher2.cubeContainer.cube.gameObject.SetActive(false);
+            avatarTeacher2.robotContainer.robot.gameObject.SetActive(true);
+            avatarTeacher2.smplContainer.smpl.gameObject.SetActive(false);
 
         }
-        else if (avatarSelf.smplContainer.activeSelf)
+        else if (avatarSelf.smplContainer.smpl.activeSelf)
         {
-            moveSMPLPerson(live_data, avatarSelf);
-            moveSMPLPerson(live_data, avatarSelf2);
+            //moveSMPLPerson(live_data, avatarSelf);
+            //moveSMPLPerson(live_data, avatarSelf2);
 
-            GameObject SMPL_male = avatarSelf.smplContainer.transform.Find("SMPL_m_unityDoubleBlends_lbs_10_scale5_207_v1.0.0").gameObject;
-            GameObject SMPL_female = avatarSelf.smplContainer.transform.Find("SMPL_f_unityDoubleBlends_lbs_10_scale5_207_v1.0.0").gameObject;
-            GameObject SMPL_male2 = avatarSelf2.smplContainer.transform.Find("SMPL_m_unityDoubleBlends_lbs_10_scale5_207_v1.0.0").gameObject;
-            GameObject SMPL_female2 = avatarSelf2.smplContainer.transform.Find("SMPL_f_unityDoubleBlends_lbs_10_scale5_207_v1.0.0").gameObject;
-            GameObject SMPL_maleT = avatarTeacher.smplContainer.transform.Find("SMPL_m_unityDoubleBlends_lbs_10_scale5_207_v1.0.0").gameObject;
-            GameObject SMPL_femaleT = avatarTeacher.smplContainer.transform.Find("SMPL_f_unityDoubleBlends_lbs_10_scale5_207_v1.0.0").gameObject;
-            GameObject SMPL_maleT2 = avatarTeacher2.smplContainer.transform.Find("SMPL_m_unityDoubleBlends_lbs_10_scale5_207_v1.0.0").gameObject;
-            GameObject SMPL_femaleT2 = avatarTeacher2.smplContainer.transform.Find("SMPL_f_unityDoubleBlends_lbs_10_scale5_207_v1.0.0").gameObject;
+            GameObject SMPL_male = avatarSelf.smplContainer.smpl.transform.Find("SMPL_m_unityDoubleBlends_lbs_10_scale5_207_v1.0.0").gameObject;
+            GameObject SMPL_female = avatarSelf.smplContainer.smpl.transform.Find("SMPL_f_unityDoubleBlends_lbs_10_scale5_207_v1.0.0").gameObject;
+            GameObject SMPL_male2 = avatarSelf2.smplContainer.smpl.transform.Find("SMPL_m_unityDoubleBlends_lbs_10_scale5_207_v1.0.0").gameObject;
+            GameObject SMPL_female2 = avatarSelf2.smplContainer.smpl.transform.Find("SMPL_f_unityDoubleBlends_lbs_10_scale5_207_v1.0.0").gameObject;
+            GameObject SMPL_maleT = avatarTeacher.smplContainer.smpl.transform.Find("SMPL_m_unityDoubleBlends_lbs_10_scale5_207_v1.0.0").gameObject;
+            GameObject SMPL_femaleT = avatarTeacher.smplContainer.smpl.transform.Find("SMPL_f_unityDoubleBlends_lbs_10_scale5_207_v1.0.0").gameObject;
+            GameObject SMPL_maleT2 = avatarTeacher2.smplContainer.smpl.transform.Find("SMPL_m_unityDoubleBlends_lbs_10_scale5_207_v1.0.0").gameObject;
+            GameObject SMPL_femaleT2 = avatarTeacher2.smplContainer.smpl.transform.Find("SMPL_f_unityDoubleBlends_lbs_10_scale5_207_v1.0.0").gameObject;
             if (isMaleSMPL)
             // It checks here whether male or female is selected in the settings
             // note: the surrounding section only gets executed if a body is found
@@ -2022,47 +1557,134 @@ public class PoseteacherMain : MonoBehaviour
                 SMPL_femaleT2.SetActive(true);
             }
 
-            avatarSelf2.stickContainer.gameObject.SetActive(false);
-            avatarSelf2.cubeContainer.gameObject.SetActive(false);
-            avatarSelf2.robotContainer.gameObject.SetActive(false);
-            avatarSelf2.smplContainer.gameObject.SetActive(true);
+            avatarSelf2.stickContainer.stick.gameObject.SetActive(false);
+            avatarSelf2.cubeContainer.cube.gameObject.SetActive(false);
+            avatarSelf2.robotContainer.robot.gameObject.SetActive(false);
+            avatarSelf2.smplContainer.smpl.gameObject.SetActive(true);
 
-            avatarTeacher.stickContainer.gameObject.SetActive(false);
-            avatarTeacher.cubeContainer.gameObject.SetActive(false);
-            avatarTeacher.robotContainer.gameObject.SetActive(false);
-            avatarTeacher.smplContainer.gameObject.SetActive(true);
+            avatarTeacher.stickContainer.stick.gameObject.SetActive(false);
+            avatarTeacher.cubeContainer.cube.gameObject.SetActive(false);
+            avatarTeacher.robotContainer.robot.gameObject.SetActive(false);
+            avatarTeacher.smplContainer.smpl.gameObject.SetActive(true);
 
-            avatarTeacher2.stickContainer.gameObject.SetActive(false);
-            avatarTeacher2.cubeContainer.gameObject.SetActive(false);
-            avatarTeacher2.robotContainer.gameObject.SetActive(false);
-            avatarTeacher2.smplContainer.gameObject.SetActive(true);
+            avatarTeacher2.stickContainer.stick.gameObject.SetActive(false);
+            avatarTeacher2.cubeContainer.cube.gameObject.SetActive(false);
+            avatarTeacher2.robotContainer.robot.gameObject.SetActive(false);
+            avatarTeacher2.smplContainer.smpl.gameObject.SetActive(true);
 
         }
     }
+    // Animates all teacher avatars based on the JointData provided
     void animateTeacher(AvatarGo avatarTeacher, JointDataListLive recorded_data)
     {
-        if (avatarTeacher.stickContainer.activeSelf)
+        foreach (AvatarGo avatar in avatarListTeacher)
         {
-            moveStickPerson(recorded_data, avatarTeacher);
-            moveStickPerson(recorded_data, avatarTeacher2);
-        }
-        else if (avatarTeacher.cubeContainer.activeSelf)
-        {
-            moveCubePerson(recorded_data, avatarTeacher);
-            moveCubePerson(recorded_data, avatarTeacher2);
-        }
-        else if (avatarTeacher.robotContainer.activeSelf)
-        {
-            moveRobotPerson(recorded_data, avatarTeacher);
-            moveRobotPerson(recorded_data, avatarTeacher2);
-        }
-        else if (avatarTeacher.smplContainer.activeSelf)
-        {
-            moveSMPLPerson(recorded_data, avatarTeacher);
-            moveSMPLPerson(recorded_data, avatarTeacher2);
+            avatar.MovePerson(recorded_data);
         }
     }
 
+
+    // get similarity of pose between 2 avatars
+    double GetSimilarity(AvatarGo object1, AvatarGo object2)
+    {
+        // define all stick names (should be actually moved to a parameter file)
+        List<string> stickNames = new List<string>(new string[] {
+            "LLLeg",
+            "RLLeg",
+            "LeftUpperArm",
+            "RightUpperArm",
+            "LeftUpperLeg",
+            "RightUpperLeg",
+            "TorsoLeft",
+            "TorsoRight",
+            "HipStick",
+            "LeftLowerArm",
+            "RightLowerArm",
+            "LeftEye",
+            "RightEye",
+            "Shoulders",
+            "MouthStick",
+            "NoseStick",
+            "LeftEar",
+            "RightEar",
+            "LeftShoulderStick",
+            "RightShoulderStick",
+            "LeftHipStick",
+            "RightHipStick",
+            "LeftElbowStick",
+            "RightElbowStick",
+            "LeftWristStick",
+            "RightWristStick",
+            "LeftKneeStick",
+            "RightKneeStick",
+            "LeftAnkleStick",
+            "RightAnkleStick"
+        });
+        int stickNumber = stickNames.Count;
+
+        // weight each stick
+        List<double> stickWeights = new List<double>(new double[] {
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+        });
+        double stickWeightSum = 0.0;
+        foreach (double stickWeight in stickWeights)
+        {
+            stickWeightSum += stickWeight;
+        }
+
+        // get similarity (between 0 and 1) of orientation between all sticks
+        double similarity = 0.0;
+        for (int i = 0; i < stickNumber; i++)
+        {
+            // get position and orientation of relevant game objects
+            object1.smplContainer.smpl.gameObject.SetActive(true);
+            Vector3 vec1Position = GameObject.Find(stickNames[i]).transform.position;
+            Quaternion vec1Rotation = GameObject.Find(stickNames[i]).transform.rotation;
+            object1.smplContainer.smpl.gameObject.SetActive(false);
+            object2.smplContainer.smpl.gameObject.SetActive(true);
+            Vector3 vec2Position = GameObject.Find(stickNames[i]).transform.position;
+            Quaternion vec2Rotation = GameObject.Find(stickNames[i]).transform.rotation;
+            object2.smplContainer.smpl.gameObject.SetActive(false);
+
+            // get cosine similarity from quaternion 
+            // background: https://www.researchgate.net/publication/316447858_Similarity_analysis_of_motion_based_on_motion_capture_technology
+            // background: https://gdalgorithms-list.narkive.com/9TaVDT9G/quaternion-similarity-measure
+            double cos_angle = vec1Rotation.w * vec2Rotation.w + vec1Rotation.x * vec2Rotation.x + vec1Rotation.y * vec2Rotation.y + vec1Rotation.z * vec2Rotation.z;
+            cos_angle = Math.Abs(cos_angle);
+            similarity += cos_angle * stickWeights[i];
+        }
+        similarity /= stickWeightSum;
+        return similarity;
+    }
 
     // Done at each application update
     void Update()
@@ -2106,7 +1728,6 @@ public class PoseteacherMain : MonoBehaviour
         }
         else if (device != null)
         {
-            
             // TODO: move to function?
             // potentially simplify by not using "using" scopes
             using (Capture capture = device.GetCapture())
@@ -2162,10 +1783,10 @@ public class PoseteacherMain : MonoBehaviour
                     }
                 }
             }
-        } 
+        }
         else
         {
-            Debug.Log("No device loaded!");
+            Debug.Log("device is null!");
         }
 
 
