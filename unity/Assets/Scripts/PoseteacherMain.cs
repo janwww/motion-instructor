@@ -167,16 +167,16 @@ public class PoseteacherMain : MonoBehaviour
     JointDataListLive remote_joints_live = null; // Live (newest) joint data
 
     // File that is being read from
-    string current_file = "jsondata.txt";
+    string current_file = "jsondata/2020_05_26-22_55_32.txt";
 
     // can be changed in the UI
     // TODO: probaly change to using functions to toggle
     public bool isMaleSMPL = true; 
-    public bool usingKinectAlternative = true;
+    public bool usingKinectAlternative = false;
     
 
     public bool mirroring = true; // can probably be changed to private (if no UI elements use it)
-    public bool debugMode = true;
+    public bool debugMode = false;
     private bool loadedFakeData = false;
 
     // Web socket is currently used only for Kinect Alternative
@@ -366,12 +366,13 @@ public class PoseteacherMain : MonoBehaviour
         avatarSelf2.avatarContainer.gameObject.SetActive(false);
         avatarTeacher2.avatarContainer.gameObject.SetActive(false);
 
-        // Test print to log
-        Debug.Log(streamCanvas);
 
+        //usingKinectAlternative = false;
         // Setup device and tracker for Azure Kinect Body Tracking
         if (usingKinectAlternative == false)
         {
+            // Test print to log
+            Debug.Log("Try loading device");
             this.device = Device.Open(0);
             var config = new DeviceConfiguration
             {
@@ -380,6 +381,11 @@ public class PoseteacherMain : MonoBehaviour
                 DepthMode = DepthMode.NFOV_Unbinned
             };
             device.StartCameras(config);
+
+            if(device != null)
+            {
+                Debug.Log(device);
+            }
 
             var calibration = device.GetCalibration(config.DepthMode, config.ColorResolution);
 
@@ -1732,7 +1738,7 @@ public class PoseteacherMain : MonoBehaviour
         JointDataLive[] joint_data_recorded_array = new JointDataLive[(int)JointType.Count];
         JointDataListLive recorded_data = new JointDataListLive { data = { } };
 
-        Debug.Log(frame_json);
+        //Debug.Log(frame_json);
         saved_joint_data = JsonUtility.FromJson<JointDataList>(frame_json);
         for (JointType jt = 0; jt < JointType.Count; jt++)
         {
@@ -2093,13 +2099,14 @@ public class PoseteacherMain : MonoBehaviour
                 sequenceEnum.MoveNext();
                 string frame_json = sequenceEnum.Current;
                 JointDataListLive fake_live_data = JSON_to_JDL_Live(frame_json);
-                Debug.Log(avatarSelf);
+                //Debug.Log(avatarSelf);
                 animateAvatars(avatarSelf, fake_live_data);
             }
 
         }
-        else
+        else if (device != null)
         {
+            
             // TODO: move to function?
             // potentially simplify by not using "using" scopes
             using (Capture capture = device.GetCapture())
@@ -2155,6 +2162,10 @@ public class PoseteacherMain : MonoBehaviour
                     }
                 }
             }
+        } 
+        else
+        {
+            Debug.Log("No device loaded!");
         }
 
 
