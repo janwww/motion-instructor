@@ -553,6 +553,7 @@ class RobotContainer : Container
 }
 
 // Class that contains information about the skinned multi-person linear body model contained in an AvatarGo object
+// TODO: add changer function for male/female
 class SmplContainer : Container
 {
     // stick needed for Move calculations
@@ -575,9 +576,8 @@ class SmplContainer : Container
         //      (right now I think we are good)
         stickContainer.MovePerson(joint_data_list);
 
-
         // Below the orientation of the stick figure parts is applied to the SMPL avatar, ith some additional calculations
-        // TODO: <check TODO moveRobotPerson, same as there>
+        // TODO: Rewriite <check TODO moveRobotPerson, same as there>
 
         // get SMPL body parts
         GameObject smpl_body;
@@ -720,7 +720,7 @@ class SmplContainer : Container
 }
 
 // Label for various containers
-enum AvatarType
+public enum AvatarType
 {
     CUBE, STICK, ROBOT, SMPL
 }
@@ -859,6 +859,7 @@ class AvatarGo
 // Main script
 // TODO:
 // Reorder functions (need to define placeholders first for somoe)
+[CLSCompliant(false)]
 public class PoseteacherMain : MonoBehaviour
 {
 
@@ -866,7 +867,7 @@ public class PoseteacherMain : MonoBehaviour
     BodyTracker tracker;
 
     // Used for displaying RGB Kinect video
-    public Renderer renderer;
+    public Renderer videoRenderer;
     RawImage m_RawImage;
     GameObject streamCanvas;
     GameObject videoCube;
@@ -874,10 +875,10 @@ public class PoseteacherMain : MonoBehaviour
     // Refrences to containers in scene
     // TODO: change it to list(s) or other flexible datastructure to allow more (partially done)
     // TODO find good way to reference objects. @Unity might do this for us
-    AvatarGo avatarSelf;
-    AvatarGo avatarTeacher;
-    AvatarGo avatarSelf2;
-    AvatarGo avatarTeacher2;
+    //AvatarGo avatarSelf;
+    //AvatarGo avatarTeacher;
+    //AvatarGo avatarSelf2;
+    //AvatarGo avatarTeacher2;
     List<AvatarGo> avatarListSelf;
     List<AvatarGo> avatarListTeacher;
     
@@ -1000,6 +1001,27 @@ public class PoseteacherMain : MonoBehaviour
         current_file = curr;
     }
 
+    // For setting in menu
+    // TODO maybe organize wrapper functions in separate class for menu?
+    public void SetAvatarTypesCube() => SetAvatarTypes(AvatarType.CUBE);
+    public void SetAvatarTypesStick() => SetAvatarTypes(AvatarType.STICK);
+    public void SetAvatarTypesRobot() => SetAvatarTypes(AvatarType.ROBOT);
+    public void SetAvatarTypesSMPL() => SetAvatarTypes(AvatarType.SMPL);
+
+    // Set the avatar type for all AvatarGos
+    public void SetAvatarTypes(AvatarType type)
+    {
+        foreach (AvatarGo avatar in avatarListSelf)
+        {
+            avatar.ChangeActiveType(type);
+        }
+
+        foreach (AvatarGo avatar in avatarListTeacher)
+        {
+            avatar.ChangeActiveType(type);
+        }
+    }
+
     // Generate new filename with timestamp and set as file to write to
     public void gen_new_current_file()
     {
@@ -1016,6 +1038,27 @@ public class PoseteacherMain : MonoBehaviour
         public List<List<double>> values { get; set; }
     }
 
+
+    // Unity apparently cannot deserialize arrays, so we had to do it manually
+    // TODO: Function only used once in Start, but maybe should be outside
+    RemoteJointList DeserializeRJL(string message)
+    {
+        string[] joints3D = message.Split(new string[] { "], [" }, StringSplitOptions.None);
+        joints3D[0] = joints3D[0].Substring(3);
+        joints3D[18] = joints3D[18].Split(']')[0];
+
+        List<List<double>> joints = new List<List<double>>();
+        for (int i = 0; i < 19; i++)
+        {
+            string[] joint = joints3D[i].Split(',');
+            List<double> dbl = new List<double> { Convert.ToDouble(joint[0]), Convert.ToDouble(joint[1]), Convert.ToDouble(joint[2]) };
+            joints.Add(dbl);
+        }
+        RemoteJointList rjl = new RemoteJointList { values = joints };
+        return rjl;
+    }
+
+
     // Do once on scene startup
     async void Start()
     {
@@ -1023,25 +1066,6 @@ public class PoseteacherMain : MonoBehaviour
         // Web socket is currently used only for Kinect Alternative
 
 
-        // Unity apparently cannot deserialize arrays, so we had to do it manually
-        // TODO: Function only used once in Start, but maybe should be outside
-        RemoteJointList DeserializeRJL(string message)
-        {
-            string[] joints3D = message.Split(new string[] { "], [" }, StringSplitOptions.None);
-            joints3D[0] = joints3D[0].Substring(3);
-            joints3D[18] = joints3D[18].Split(']')[0];
-            
-            List<List<double>> joints = new List<List<double>>();
-            for (int i = 0; i < 19; i++)
-            {   
-                string [] joint = joints3D[i].Split(',');
-                List<double> dbl = new List<double> { Convert.ToDouble(joint[0]), Convert.ToDouble(joint[1]), Convert.ToDouble(joint[2]) };
-                joints.Add(dbl);
-            }
-            RemoteJointList rjl = new RemoteJointList { values = joints };
-            return rjl;
-        }
-        
         // TODO: remove static socket ip , replace from field
         websocket = new WebSocket("ws://localhost:2567");
 
@@ -1154,6 +1178,7 @@ public class PoseteacherMain : MonoBehaviour
                 CpuOnlyMode = false
             };
             this.tracker = BodyTracker.Create(calibration, trackerConfiguration);
+            Debug.Log("Device loading finished");
         }
 
         
@@ -1408,7 +1433,7 @@ public class PoseteacherMain : MonoBehaviour
 
     // Appends the passed pose (JointDataList format) to the file as JSON
     // TODO: remove unused parameter avatarSelf
-    void appendRecordedFrame(JointDataList jdl, AvatarGo avatarSelf, string filename)
+    void appendRecordedFrame(JointDataList jdl, string filename)
     {
         string json = JsonUtility.ToJson(jdl) + Environment.NewLine;
         File.AppendAllText(filename, json);
@@ -1444,138 +1469,16 @@ public class PoseteacherMain : MonoBehaviour
 
     // TODO: see inside
     //      comment function when TODO resolved
-    void animateAvatars(AvatarGo avatarSelf, JointDataListLive live_data)
+    void AnimateSelf(JointDataListLive live_data)
     {
         // MovePerson() considers which container to move
         foreach (AvatarGo avatar in avatarListSelf)
         {
             avatar.MovePerson(live_data);
         }
-        // TODO: can we remove this / move it to AvatarGo or containers?
-        //      using avatarSelf(2), avatarTeacher(2) is deprecated!
-        if (avatarSelf.stickContainer.stick.activeSelf)
-        {
-            //moveStickPerson(live_data, avatarSelf); (all moveXXPerson() done at the begininng of function)
-            //moveStickPerson(live_data, avatarSelf2);
-            
-
-            avatarSelf2.stickContainer.stick.gameObject.SetActive(true);
-            avatarSelf2.cubeContainer.cube.gameObject.SetActive(false);
-            avatarSelf2.robotContainer.robot.gameObject.SetActive(false);
-            avatarSelf2.smplContainer.smpl.gameObject.SetActive(false);
-
-            avatarTeacher.stickContainer.stick.gameObject.SetActive(true);
-            avatarTeacher.cubeContainer.cube.gameObject.SetActive(false);
-            avatarTeacher.robotContainer.robot.gameObject.SetActive(false);
-            avatarTeacher.smplContainer.smpl.gameObject.SetActive(false);
-
-            avatarTeacher2.stickContainer.stick.gameObject.SetActive(true);
-            avatarTeacher2.cubeContainer.cube.gameObject.SetActive(false);
-            avatarTeacher2.robotContainer.robot.gameObject.SetActive(false);
-            avatarTeacher2.smplContainer.smpl.gameObject.SetActive(false);
-
-        }
-        else if (avatarSelf.cubeContainer.cube.activeSelf)
-        {
-            //moveCubePerson(live_data, avatarSelf);
-            //moveCubePerson(live_data, avatarSelf2);
-
-            avatarSelf2.stickContainer.stick.gameObject.SetActive(false);
-            avatarSelf2.cubeContainer.cube.gameObject.SetActive(true);
-            avatarSelf2.robotContainer.robot.gameObject.SetActive(false);
-            avatarSelf2.smplContainer.smpl.gameObject.SetActive(false);
-
-            avatarTeacher.stickContainer.stick.gameObject.SetActive(false);
-            avatarTeacher.cubeContainer.cube.gameObject.SetActive(true);
-            avatarTeacher.robotContainer.robot.gameObject.SetActive(false);
-            avatarTeacher.smplContainer.smpl.gameObject.SetActive(false);
-
-            avatarTeacher2.stickContainer.stick.gameObject.SetActive(false);
-            avatarTeacher2.cubeContainer.cube.gameObject.SetActive(true);
-            avatarTeacher2.robotContainer.robot.gameObject.SetActive(false);
-            avatarTeacher2.smplContainer.smpl.gameObject.SetActive(false);
-
-        }
-        else if (avatarSelf.robotContainer.robot.activeSelf)
-        {
-            //moveRobotPerson(live_data, avatarSelf);
-            //moveRobotPerson(live_data, avatarSelf2);
-
-            avatarSelf2.stickContainer.stick.gameObject.SetActive(false);
-            avatarSelf2.cubeContainer.cube.gameObject.SetActive(false);
-            avatarSelf2.robotContainer.robot.gameObject.SetActive(true);
-            avatarSelf2.smplContainer.smpl.gameObject.SetActive(false);
-
-            avatarTeacher.stickContainer.stick.gameObject.SetActive(false);
-            avatarTeacher.cubeContainer.cube.gameObject.SetActive(false);
-            avatarTeacher.robotContainer.robot.gameObject.SetActive(true);
-            avatarTeacher.smplContainer.smpl.gameObject.SetActive(false);
-
-            avatarTeacher2.stickContainer.stick.gameObject.SetActive(false);
-            avatarTeacher2.cubeContainer.cube.gameObject.SetActive(false);
-            avatarTeacher2.robotContainer.robot.gameObject.SetActive(true);
-            avatarTeacher2.smplContainer.smpl.gameObject.SetActive(false);
-
-        }
-        else if (avatarSelf.smplContainer.smpl.activeSelf)
-        {
-            //moveSMPLPerson(live_data, avatarSelf);
-            //moveSMPLPerson(live_data, avatarSelf2);
-
-            GameObject SMPL_male = avatarSelf.smplContainer.smpl.transform.Find("SMPL_m_unityDoubleBlends_lbs_10_scale5_207_v1.0.0").gameObject;
-            GameObject SMPL_female = avatarSelf.smplContainer.smpl.transform.Find("SMPL_f_unityDoubleBlends_lbs_10_scale5_207_v1.0.0").gameObject;
-            GameObject SMPL_male2 = avatarSelf2.smplContainer.smpl.transform.Find("SMPL_m_unityDoubleBlends_lbs_10_scale5_207_v1.0.0").gameObject;
-            GameObject SMPL_female2 = avatarSelf2.smplContainer.smpl.transform.Find("SMPL_f_unityDoubleBlends_lbs_10_scale5_207_v1.0.0").gameObject;
-            GameObject SMPL_maleT = avatarTeacher.smplContainer.smpl.transform.Find("SMPL_m_unityDoubleBlends_lbs_10_scale5_207_v1.0.0").gameObject;
-            GameObject SMPL_femaleT = avatarTeacher.smplContainer.smpl.transform.Find("SMPL_f_unityDoubleBlends_lbs_10_scale5_207_v1.0.0").gameObject;
-            GameObject SMPL_maleT2 = avatarTeacher2.smplContainer.smpl.transform.Find("SMPL_m_unityDoubleBlends_lbs_10_scale5_207_v1.0.0").gameObject;
-            GameObject SMPL_femaleT2 = avatarTeacher2.smplContainer.smpl.transform.Find("SMPL_f_unityDoubleBlends_lbs_10_scale5_207_v1.0.0").gameObject;
-            if (isMaleSMPL)
-            // It checks here whether male or female is selected in the settings
-            // note: the surrounding section only gets executed if a body is found
-            {
-                SMPL_male.SetActive(true);
-                SMPL_male2.SetActive(true);
-                SMPL_maleT.SetActive(true);
-                SMPL_maleT2.SetActive(true);
-                SMPL_female.SetActive(false);
-                SMPL_female2.SetActive(false);
-                SMPL_femaleT.SetActive(false);
-                SMPL_femaleT2.SetActive(false);
-
-
-            }
-            else
-            {
-                SMPL_male.SetActive(false);
-                SMPL_male2.SetActive(false);
-                SMPL_maleT.SetActive(false);
-                SMPL_maleT2.SetActive(false);
-                SMPL_female.SetActive(true);
-                SMPL_female2.SetActive(true);
-                SMPL_femaleT.SetActive(true);
-                SMPL_femaleT2.SetActive(true);
-            }
-
-            avatarSelf2.stickContainer.stick.gameObject.SetActive(false);
-            avatarSelf2.cubeContainer.cube.gameObject.SetActive(false);
-            avatarSelf2.robotContainer.robot.gameObject.SetActive(false);
-            avatarSelf2.smplContainer.smpl.gameObject.SetActive(true);
-
-            avatarTeacher.stickContainer.stick.gameObject.SetActive(false);
-            avatarTeacher.cubeContainer.cube.gameObject.SetActive(false);
-            avatarTeacher.robotContainer.robot.gameObject.SetActive(false);
-            avatarTeacher.smplContainer.smpl.gameObject.SetActive(true);
-
-            avatarTeacher2.stickContainer.stick.gameObject.SetActive(false);
-            avatarTeacher2.cubeContainer.cube.gameObject.SetActive(false);
-            avatarTeacher2.robotContainer.robot.gameObject.SetActive(false);
-            avatarTeacher2.smplContainer.smpl.gameObject.SetActive(true);
-
-        }
     }
     // Animates all teacher avatars based on the JointData provided
-    void animateTeacher(AvatarGo avatarTeacher, JointDataListLive recorded_data)
+    void AnimateTeacher(JointDataListLive recorded_data)
     {
         foreach (AvatarGo avatar in avatarListTeacher)
         {
@@ -1702,7 +1605,7 @@ public class PoseteacherMain : MonoBehaviour
             if (remote_joints_live != null)
             {
                 JointDataListLive live_data = remote_joints_live;
-                animateAvatars(avatarSelf, live_data);
+                AnimateSelf(live_data);
             }
             // no data being recieved over websocket and debug mode
             else if(debugMode == true)
@@ -1722,7 +1625,7 @@ public class PoseteacherMain : MonoBehaviour
                 string frame_json = sequenceEnum.Current;
                 JointDataListLive fake_live_data = JSON_to_JDL_Live(frame_json);
                 //Debug.Log(avatarSelf);
-                animateAvatars(avatarSelf, fake_live_data);
+                AnimateSelf(fake_live_data);
             }
 
         }
@@ -1751,7 +1654,7 @@ public class PoseteacherMain : MonoBehaviour
                         if (m_RawImage != null)
                         {
                             m_RawImage.texture = tex;
-                            renderer.material.mainTexture = tex;
+                            videoRenderer.material.mainTexture = tex;
                         }
                     }
 
@@ -1773,13 +1676,13 @@ public class PoseteacherMain : MonoBehaviour
 
                     // Apply pose to user avatar(s)
                     JointDataListLive live_data = Body_to_JDL_Live(body);
-                    animateAvatars(avatarSelf, live_data);
+                    AnimateSelf(live_data);
 
                     // if recording pose, append to current_file file
                     if (recording_mode == 1) // recording
                     {
                         JointDataList jdl = convertBodyToJDL(body);
-                        appendRecordedFrame(jdl, avatarSelf, current_file);
+                        appendRecordedFrame(jdl, current_file);
                     }
                 }
             }
@@ -1828,12 +1731,12 @@ public class PoseteacherMain : MonoBehaviour
             // Get current pose and apply it to teacher avatars
             string frame_json = sequenceEnum.Current;
             JointDataListLive recorded_data = JSON_to_JDL_Live(frame_json);
-            animateTeacher(avatarTeacher, recorded_data);
+            AnimateTeacher(recorded_data);
 
             // TODO: Put this in animate function?
             if (shouldCheckCorrectness)
             {
-                showCorrection(avatarSelf, avatarTeacher);
+                showCorrection(avatarListSelf[0], avatarListTeacher[0]);
             }
 
         }
