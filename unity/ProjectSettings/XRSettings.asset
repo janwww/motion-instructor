@@ -1,10 +1,14 @@
 {
     "m_SettingKeys": [
         "VR Device Disabled",
-        "VR Device User Alert"
+        "VR Device User Alert",
+        "WSARemoting",
+        "VR Device Transitioned Groups"
     ],
     "m_SettingValues": [
-        "False",
-        "False"
+        "True",
+        "True",
+        "True",
+        "WSA"
     ]
 }

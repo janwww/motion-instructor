@@ -47,3 +47,26 @@ As of July 5, 2020, this repo has been tested under the following environment.
     - press Z for playback
     - press L to load playback
     - press R to reset/delete saved playback
+
+## Refactor TODOs
+ - [ ] Add comments to `PoseteacherMain.cs` script to make reading and refactoring easier
+ - [ ] Change settings and code to make it runnable on the Hololens 2. (Necessary for testing refactored code)
+
+Refactored project organization:
+The `PoseteacherMain.cs` script shoud be divided onto relevant objects in the scene:
+ - Avatar Container script (attached to each container) functionalities:
+   - [ ] State of container (current avatar, mirrored, live/file) and setter functions
+   - [ ] Code for applying pose on all avatars it has 
+   Could even be attached in separate script on each avatar type. Then maybe handle each avatar as subtype of a generic avatar class.
+   - [ ] Update function, which takes pose and applies it to current avatar
+ - Pose Interface script (attached to empty object? or called from main) functionalities:
+   - [ ] Get stream of poses from Azure Kinect BT SDK (or websocket)
+   - [ ] Get stream of poses from a `.json` file
+   - [ ] Write stream of poses to file.
+   - [ ] Start/Pause/Restart/Speed for movements from files
+ - Main script (attached to empty object) functionalities:
+   - [ ] List of all avatar Containers in the scene
+   - [ ] Run update on each container, either when a new estimated pose is available for live input or after a set time for files
+   - [ ] (optional) change so that avatar containers are added to scene when needed.
+   
+   
