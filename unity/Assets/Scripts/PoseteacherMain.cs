@@ -912,6 +912,11 @@ public class PoseteacherMain : MonoBehaviour
     // File that is being read from
     string current_file = "jsondata/2020_05_26-22_55_32.txt";
 
+    //For fake data 
+    IEnumerable<string> fake_data;
+    IEnumerator<string> fake_sequenceEnum;
+    string fake_file = "jsondata/2020_05_26-22_55_32.txt";
+
     // can be changed in the UI
     // TODO: probaly change to using functions to toggle
     public bool isMaleSMPL = true; 
@@ -1616,14 +1621,23 @@ public class PoseteacherMain : MonoBehaviour
                 if (loadedFakeData == false)
                 {
                     loadedFakeData = true;
-                    loadRecording();
+                    //loadRecording();
+                    fake_data = File.ReadLines(fake_file);
+                    fake_sequenceEnum = fake_data.GetEnumerator();
                 }
 
                 // use fake data from JSON file for testing
                 // TODO: have different sequenceEnum for fake input not same as used for playback teacher
                 // otherwise advances pose also for teacher
-                sequenceEnum.MoveNext();
-                string frame_json = sequenceEnum.Current;
+                // Quick and dirty way to loop (by reloading file)
+                if (!fake_sequenceEnum.MoveNext()) {
+                    fake_data = File.ReadLines(fake_file);
+                    fake_sequenceEnum = fake_data.GetEnumerator();
+                    fake_sequenceEnum.MoveNext();
+                }
+                    
+
+                string frame_json = fake_sequenceEnum.Current;
                 PoseData fake_live_data = JSON2PoseData(frame_json);
                 //Debug.Log(avatarSelf);
                 AnimateSelf(fake_live_data);
