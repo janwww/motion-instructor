@@ -93,10 +93,11 @@ namespace PoseTeacher
         public float correctionThresh = 30.0f;
 
         // Used for pose similarity calculation
-        public int similarity_body_part = 1; // 1: top, 2: middle, 3: bottom, 4: total
-        public int similarity_self_element = 0; // self list element to compare
-        public int similarity_teacher_element = 0; // teacher list element to compare
-        public double similarity_pose; // similarity value between 0 and 1 for defined body part
+        public String similarityBodyNr = "top"; // "total", "top", "middle", "bottom"
+        public int similaritySelfNr = 0; // self list element to compare
+        public int similarityTeacherNr = 0; // teacher list element to compare
+        public double similarityScore; // similarity value between 0 and 1 for defined body part
+        public List<double> similarityScoreRaw; // similarity value for all body sticks
         AvatarSimilarity avatarSimilarity;
 
 
@@ -304,10 +305,7 @@ namespace PoseTeacher
             }
 
             // initialize similarity calculation instance and assign selected avatars
-            avatarSimilarity = new AvatarSimilarity();
-            avatarSimilarity.self = avatarListSelf[similarity_self_element];
-            avatarSimilarity.teacher = avatarListTeacher[similarity_teacher_element];
-            avatarSimilarity.body_part = similarity_body_part;
+            avatarSimilarity = new AvatarSimilarity(avatarListSelf[similaritySelfNr], avatarListTeacher[similarityTeacherNr], similarityBodyNr);
 
 
         }
@@ -427,7 +425,9 @@ namespace PoseTeacher
             }
 
             // Get pose similarity
-            similarity_pose = avatarSimilarity.GetSimilarity();
+            avatarSimilarity.Update(); // update similarity calculation with each update loop step
+            similarityScore = avatarSimilarity.similarityBodypart; // get single similarity score for selected body part
+            similarityScoreRaw = avatarSimilarity.similarityStick; // get similarity score for each stick element
 
             // Playback for teacher avatar(s)
             if (recording_mode == 2) // playback
