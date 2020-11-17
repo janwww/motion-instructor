@@ -92,6 +92,13 @@ namespace PoseTeacher
         public bool shouldCheckCorrectness = true;
         public float correctionThresh = 30.0f;
 
+        // Used for pose similarity calculation
+        AvatarSimilarity avatarSimilarity;
+        public int body_part; // 1: top, 2: middle, 3: bottom
+        public int self_elemetn = 0; // self list element to compare
+        public int teacher_element = 0; // teacher list element to compare
+        public double pose_similiarity; // similarity value between 0 and 1 for defined body part
+
         // Mirror all avatar containers
         // TODO: Move code to AvatarContainer class (partial done)
         //      Conform to naming conventions
@@ -263,7 +270,6 @@ namespace PoseTeacher
             avatarListTeacher[0].avatarContainer.gameObject.SetActive(false);
             avatarListSelf[1].avatarContainer.gameObject.SetActive(false);
             avatarListTeacher[1].avatarContainer.gameObject.SetActive(false);
-
 
             // Setup device and tracker for Azure Kinect Body Tracking
             if (usingKinectAlternative == false)
@@ -458,6 +464,9 @@ namespace PoseTeacher
                 {
                     showCorrection(avatarListSelf[0], avatarListTeacher[0]);
                 }
+
+                // Get pose similarity
+                pose_similiarity = avatarSimilarity.GetSimilarity(avatarListSelf[0], avatarListTeacher[0]);
 
             }
 

@@ -4,14 +4,15 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+
 namespace PoseTeacher
 { 	
 	[CLSCompliant(false)]
-	public class AvatarSimilarity : MonoBehaviour
+	class AvatarSimilarity : MonoBehaviour
 	{
 		// get similarity of pose between 2 avatars
         // integrate selection which part is weighted how much e.g. 3 setups
-		double GetSimilarity(AvatarContainer object1, AvatarContainer object2)
+		public double GetSimilarity(AvatarContainer object1, AvatarContainer object2)
 		{
 			// define all stick names (should be actually moved to a parameter file)
 			List<string> stickNames = new List<string>(new string[] {
