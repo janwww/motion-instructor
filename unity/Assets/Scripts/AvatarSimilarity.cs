@@ -11,92 +11,94 @@ namespace PoseTeacher
 	{
         public AvatarContainer self; // object containing self avatar
         public AvatarContainer teacher; // object containing teacher avatar
+        public int body_part; // body part we want to show similarity for
+        public List<string> stickNames; // all names of sticks existing in avatar
+        public List<double> stickWeights; // weight to each stick in avatar
+        public int stickNumber; // number of sticks existing in avatar
+        public double stickWeightSum; // sum of all stick weights
 
-        public AvatarSimilarity(AvatarContainer self_in, AvatarContainer teacher_in)
+        // constructor
+        public AvatarSimilarity()
         {
-            self = self_in;
-            teacher = teacher_in;
+            // define all stick names (should be actually moved to a parameter file)
+            stickNames = new List<string>(new string[] {
+                "LLLeg",
+                "RLLeg",
+                "LeftUpperArm",
+                "RightUpperArm",
+                "LeftUpperLeg",
+                "RightUpperLeg",
+                "TorsoLeft",
+                "TorsoRight",
+                "HipStick",
+                "LeftLowerArm",
+                "RightLowerArm",
+                "LeftEye",
+                "RightEye",
+                "Shoulders",
+                "MouthStick",
+                "NoseStick",
+                "LeftEar",
+                "RightEar",
+                "LeftShoulderStick",
+                "RightShoulderStick",
+                "LeftHipStick",
+                "RightHipStick",
+                "LeftElbowStick",
+                "RightElbowStick",
+                "LeftWristStick",
+                "RightWristStick",
+                "LeftKneeStick",
+                "RightKneeStick",
+                "LeftAnkleStick",
+                "RightAnkleStick"
+            });
+            int stickNumber = stickNames.Count;
+
+            // weight each stick
+            stickWeights = new List<double>(new double[] {
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            });
+            stickWeightSum = 0.0;
+            foreach (double stickWeight in stickWeights)
+            {
+                stickWeightSum += stickWeight;
+            }
         }
 
         // get similarity of pose between 2 avatars
         // integrate selection which part is weighted how much e.g. 3 setups
         public double GetSimilarity()
 		{
-            int aaa = 0;
-			// define all stick names (should be actually moved to a parameter file)
-			List<string> stickNames = new List<string>(new string[] {
-				"LLLeg",
-				"RLLeg",
-				"LeftUpperArm",
-				"RightUpperArm",
-				"LeftUpperLeg",
-				"RightUpperLeg",
-				"TorsoLeft",
-				"TorsoRight",
-				"HipStick",
-				"LeftLowerArm",
-				"RightLowerArm",
-				"LeftEye",
-				"RightEye",
-				"Shoulders",
-				"MouthStick",
-				"NoseStick",
-				"LeftEar",
-				"RightEar",
-				"LeftShoulderStick",
-				"RightShoulderStick",
-				"LeftHipStick",
-				"RightHipStick",
-				"LeftElbowStick",
-				"RightElbowStick",
-				"LeftWristStick",
-				"RightWristStick",
-				"LeftKneeStick",
-				"RightKneeStick",
-				"LeftAnkleStick",
-				"RightAnkleStick"
-			});
-			int stickNumber = stickNames.Count;
-
-			// weight each stick
-			List<double> stickWeights = new List<double>(new double[] {
-				1.0,
-				1.0,
-				1.0,
-				1.0,
-				1.0,
-				1.0,
-				1.0,
-				1.0,
-				1.0,
-				1.0,
-				1.0,
-				1.0,
-				1.0,
-				1.0,
-				1.0,
-				1.0,
-				1.0,
-				1.0,
-				1.0,
-				1.0,
-				1.0,
-				1.0,
-				1.0,
-				1.0,
-				1.0,
-				1.0,
-				1.0,
-				1.0,
-				1.0,
-				1.0
-			});
-			double stickWeightSum = 0.0;
-			foreach (double stickWeight in stickWeights)
-			{
-				stickWeightSum += stickWeight;
-			}
-
 			// get similarity (between 0 and 1) of orientation between all sticks
 			double similarity = 0.0;
 			for (int i = 0; i < stickNumber; i++)

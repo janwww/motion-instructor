@@ -303,8 +303,12 @@ namespace PoseTeacher
                 Debug.Log("Device loading finished");
             }
 
-            // initialize similarity calculation instance
-            avatarSimilarity = new AvatarSimilarity(avatarListSelf[similarity_self_element], avatarListTeacher[similarity_teacher_element]);
+            // initialize similarity calculation instance and assign selected avatars
+            avatarSimilarity = new AvatarSimilarity();
+            avatarSimilarity.self = avatarListSelf[similarity_self_element];
+            avatarSimilarity.teacher = avatarListTeacher[similarity_teacher_element];
+            avatarSimilarity.body_part = similarity_body_part;
+
 
         }
 
