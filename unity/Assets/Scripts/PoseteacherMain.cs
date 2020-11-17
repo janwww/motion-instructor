@@ -93,11 +93,12 @@ namespace PoseTeacher
         public float correctionThresh = 30.0f;
 
         // Used for pose similarity calculation
-        AvatarSimilarity avatarSimilarity;
-        public int similarity_body_part; // 1: top, 2: middle, 3: bottom
+        public int similarity_body_part = 1; // 1: top, 2: middle, 3: bottom, 4: total
         public int similarity_self_element = 0; // self list element to compare
         public int similarity_teacher_element = 0; // teacher list element to compare
         public double similarity_pose; // similarity value between 0 and 1 for defined body part
+        AvatarSimilarity avatarSimilarity;
+
 
         // Mirror all avatar containers
         // TODO: Move code to AvatarContainer class (partial done)
@@ -302,8 +303,11 @@ namespace PoseTeacher
                 Debug.Log("Device loading finished");
             }
 
+            // initialize similarity calculation instance
+            avatarSimilarity = new AvatarSimilarity(avatarListSelf[similarity_self_element], avatarListTeacher[similarity_teacher_element]);
 
         }
+
 
         // Done at each application update
         void Update()
@@ -418,6 +422,8 @@ namespace PoseTeacher
                 Debug.Log("device is null!");
             }
 
+            // Get pose similarity
+            similarity_pose = avatarSimilarity.GetSimilarity();
 
             // Playback for teacher avatar(s)
             if (recording_mode == 2) // playback
@@ -465,8 +471,7 @@ namespace PoseTeacher
                     showCorrection(avatarListSelf[0], avatarListTeacher[0]);
                 }
 
-                // Get pose similarity
-                similarity_pose = avatarSimilarity.GetSimilarity(avatarListSelf[similarity_self_element], avatarListTeacher[similarity_teacher_element]);
+
 
             }
 

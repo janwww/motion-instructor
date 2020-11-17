@@ -9,10 +9,20 @@ namespace PoseTeacher
 { 	
 	class AvatarSimilarity : MonoBehaviour
 	{
-		// get similarity of pose between 2 avatars
+        public AvatarContainer self; // object containing self avatar
+        public AvatarContainer teacher; // object containing teacher avatar
+
+        public AvatarSimilarity(AvatarContainer self_in, AvatarContainer teacher_in)
+        {
+            self = self_in;
+            teacher = teacher_in;
+        }
+
+        // get similarity of pose between 2 avatars
         // integrate selection which part is weighted how much e.g. 3 setups
-		public double GetSimilarity(AvatarContainer object1, AvatarContainer object2)
+        public double GetSimilarity()
 		{
+            int aaa = 0;
 			// define all stick names (should be actually moved to a parameter file)
 			List<string> stickNames = new List<string>(new string[] {
 				"LLLeg",
@@ -91,20 +101,16 @@ namespace PoseTeacher
 			double similarity = 0.0;
 			for (int i = 0; i < stickNumber; i++)
 			{
-				// get position and orientation of relevant game objects
-				object1.smplContainer.smpl.gameObject.SetActive(true);
-				Vector3 vec1Position = GameObject.Find(stickNames[i]).transform.position;
-				Quaternion vec1Rotation = GameObject.Find(stickNames[i]).transform.rotation;
-				object1.smplContainer.smpl.gameObject.SetActive(false);
-				object2.smplContainer.smpl.gameObject.SetActive(true);
-				Vector3 vec2Position = GameObject.Find(stickNames[i]).transform.position;
-				Quaternion vec2Rotation = GameObject.Find(stickNames[i]).transform.rotation;
-				object2.smplContainer.smpl.gameObject.SetActive(false);
+                // get position and orientation of relevant game objects
+                Vector3 selfPosition = self.avatarContainer.gameObject.transform.position;
+				Quaternion selfRotation = self.avatarContainer.gameObject.transform.rotation;
+                Vector3 teacherPosition = teacher.avatarContainer.gameObject.transform.position;
+                Quaternion teacherRotation = teacher.avatarContainer.gameObject.transform.rotation;
 
-				// get cosine similarity from quaternion 
-				// background: https://www.researchgate.net/publication/316447858_Similarity_analysis_of_motion_based_on_motion_capture_technology
-				// background: https://gdalgorithms-list.narkive.com/9TaVDT9G/quaternion-similarity-measure
-				double cos_angle = vec1Rotation.w * vec2Rotation.w + vec1Rotation.x * vec2Rotation.x + vec1Rotation.y * vec2Rotation.y + vec1Rotation.z * vec2Rotation.z;
+                // get cosine similarity from quaternion 
+                // background: https://www.researchgate.net/publication/316447858_Similarity_analysis_of_motion_based_on_motion_capture_technology
+                // background: https://gdalgorithms-list.narkive.com/9TaVDT9G/quaternion-similarity-measure
+                double cos_angle = selfRotation.w * teacherRotation.w + selfRotation.x * teacherRotation.x + selfRotation.y * teacherRotation.y + selfRotation.z * teacherRotation.z;
 				cos_angle = Math.Abs(cos_angle);
 				similarity += cos_angle * stickWeights[i];
 			}
