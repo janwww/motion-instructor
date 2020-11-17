@@ -7,7 +7,6 @@ using UnityEngine;
 
 namespace PoseTeacher
 { 	
-	[CLSCompliant(false)]
 	class AvatarSimilarity : MonoBehaviour
 	{
 		// get similarity of pose between 2 avatars

@@ -94,10 +94,10 @@ namespace PoseTeacher
 
         // Used for pose similarity calculation
         AvatarSimilarity avatarSimilarity;
-        public int body_part; // 1: top, 2: middle, 3: bottom
-        public int self_elemetn = 0; // self list element to compare
-        public int teacher_element = 0; // teacher list element to compare
-        public double pose_similiarity; // similarity value between 0 and 1 for defined body part
+        public int similarity_body_part; // 1: top, 2: middle, 3: bottom
+        public int similarity_self_element = 0; // self list element to compare
+        public int similarity_teacher_element = 0; // teacher list element to compare
+        public double similarity_pose; // similarity value between 0 and 1 for defined body part
 
         // Mirror all avatar containers
         // TODO: Move code to AvatarContainer class (partial done)
@@ -466,7 +466,7 @@ namespace PoseTeacher
                 }
 
                 // Get pose similarity
-                pose_similiarity = avatarSimilarity.GetSimilarity(avatarListSelf[0], avatarListTeacher[0]);
+                similarity_pose = avatarSimilarity.GetSimilarity(avatarListSelf[similarity_self_element], avatarListTeacher[similarity_teacher_element]);
 
             }
 
