@@ -9,19 +9,6 @@ depthengine_1_0.dll
 depthengine_2_0.dll
 onnxruntime.dll
 
-# ignore mixed reality toolkit
-/unity/Assets/MixedRealityToolkit/
-/unity/Assets/MixedRealityToolkit.Generated/
-/unity/Assets/MixedRealityToolkit.Providers/
-/unity/Assets/MixedRealityToolkit.SDK/
-/unity/Assets/MixedRealityToolkit.Services/
-/unity/Assets/MixedRealityToolkit.meta
-/unity/Assets/MixedRealityToolkit.Generated.meta
-/unity/Assets/MixedRealityToolkit.Providers.meta
-/unity/Assets/MixedRealityToolkit.SDK.meta
-/unity/Assets/MixedRealityToolkit.Services.meta
-/unity/Assets/MRTK.meta
-
 # Visual Studio cache directory
 .vs/
 
