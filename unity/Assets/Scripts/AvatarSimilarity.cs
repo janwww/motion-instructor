@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace PoseTeacher
 { 	
-	class AvatarSimilarity : MonoBehaviour
+	class AvatarSimilarity //: MonoBehaviour
 	{
         // input
         public AvatarContainer self; // object containing self avatar
