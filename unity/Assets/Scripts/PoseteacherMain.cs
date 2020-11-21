@@ -12,13 +12,19 @@ using Microsoft.MixedReality.Toolkit.UI;
 
 namespace PoseTeacher
 {
-    // Main script
     [CLSCompliant(false)]
     public class PoseteacherMain : MonoBehaviour
     {
 
         PoseInputGetter SelfPoseInputGetter;
         PoseInputGetter TeacherPoseInputGetter;
+
+        private PoseInputSource defaultSelfPoseInputSource = PoseInputSource.FILE;
+        public PoseInputSource SelfPoseInputSource
+        {
+            get { return SelfPoseInputGetter.CurrentPoseInputSource; }
+            set { SelfPoseInputGetter.CurrentPoseInputSource = value; }
+        }
 
         // Used for displaying RGB Kinect video
         public Renderer videoRenderer;
@@ -68,16 +74,6 @@ namespace PoseTeacher
         // can be changed in the UI
         // TODO: probaly change to using functions to toggle
         public bool isMaleSMPL = true;
-        //public bool usingKinectAlternative = true;
-        private PoseInputSource selfPoseInputSource = PoseInputSource.FILE;
-        public PoseInputSource SelfPoseInputSource
-        {
-            get { return SelfPoseInputGetter.CurrentPoseInputSource; }
-            set { SelfPoseInputGetter.CurrentPoseInputSource = value; }
-        }
-
-        
-
         public bool mirroring = true; // can probably be changed to private (if no UI elements use it)
 
         // Used for showing if pose is correct
@@ -185,7 +181,7 @@ namespace PoseTeacher
         {
             Debug.Log("OnEnable");
 
-            //StartWebsocket();
+            OldMenuInitializer.AddAllListeners();
 
             // Get refrences to objects used to show RGB video (Kinect)
             streamCanvas = GameObject.Find("RawImage");
@@ -209,7 +205,7 @@ namespace PoseTeacher
             avatarListSelf[1].avatarContainer.gameObject.SetActive(false);
             avatarListTeacher[1].avatarContainer.gameObject.SetActive(false);
 
-            SelfPoseInputGetter = new PoseInputGetter(selfPoseInputSource);
+            SelfPoseInputGetter = new PoseInputGetter(defaultSelfPoseInputSource);
             SelfReadFilePath = selfReadFilePath;
             TeacherPoseInputGetter = new PoseInputGetter(PoseInputSource.FILE);
             TeacherFilePath = teacherFilePath;
@@ -217,11 +213,6 @@ namespace PoseTeacher
 
             // initialize similarity calculation instance and assign selected avatars
             avatarSimilarity = new AvatarSimilarity(avatarListSelf[similaritySelfNr], avatarListTeacher[similarityTeacherNr], similarityBodyNr);
-
-            // Button event from script test
-            var onClickReceiver = GameObject.Find("ButtonAlternative").GetComponent<Interactable>().GetReceiver<InteractableOnClickReceiver>();
-            onClickReceiver.OnClicked.AddListener(() => Debug.Log("ONtest"));
-            //onFocusReceiver.OnFocusOff.AddListener(() => Debug.Log("OFFtest"));
         }
 
 
