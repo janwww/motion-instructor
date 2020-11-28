@@ -362,6 +362,7 @@ namespace PoseTeacher
         public double similarityScore; // similarity value between 0 and 1 for defined body part
 		public double similarityKalmanQ = 0.000001; // Kalman process noise covariance (model strength)
         public double similarityKalmanR = 0.01; // Kalman sensor noise covariance (observation strength)
+        public double similarityTotalScore = 0.0; // Total score
         public List<double> similarityScoreRaw; // similarity value for all body sticks
         AvatarSimilarity avatarSimilarity;
 
@@ -514,6 +515,7 @@ namespace PoseTeacher
             avatarSimilarity.Update(); // update similarity calculation with each update loop step
             similarityScore = avatarSimilarity.similarityBodypart; // get single similarity score for selected body part
             similarityScoreRaw = avatarSimilarity.similarityStick; // get similarity score for each stick element
+            similarityTotalScore = avatarSimilarity.totalScore; // get total Score
 
             // Playback for teacher avatar(s)
             if (recording_mode == 2) // playback

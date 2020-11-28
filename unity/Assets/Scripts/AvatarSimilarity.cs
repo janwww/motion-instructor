@@ -17,6 +17,7 @@ namespace PoseTeacher
         public List<double> stickWeightCorrect; // correction weight to each stick in avatar
         public int stickNumber; // number of sticks existing in avatar
         public double stickWeightSum; // sum of all stick weights
+        public double totalScore; // total score
 
         // output
         public double similarityBodypart; // similarity for defined bodypart
@@ -322,6 +323,9 @@ namespace PoseTeacher
                 kalmanFilter[i].Reset(0.0);
             }
 
+
+            // total score
+            totalScore = 0.0;
         }
 
         // get similarity of pose between 2 avatars
@@ -551,6 +555,8 @@ namespace PoseTeacher
                 similarityTotal += similarityStick[i] * stickWeight[i];
             }
             similarityBodypart = similarityTotal / stickWeightSum;
-		}
+            totalScore = totalScore + similarityBodypart;
+
+        }
 	}
 }
