@@ -36,6 +36,8 @@ namespace PoseTeacher
         //AvatarContainer avatarTeacher2;
         List<AvatarContainer> avatarListSelf;
         List<AvatarContainer> avatarListTeacher;
+        public GameObject avatarPrefab;
+        public GameObject avatarTPrefab;
 
         GameObject spatialAwarenessSystem;
 
@@ -69,7 +71,7 @@ namespace PoseTeacher
         //For fake data 
         IEnumerable<string> fake_data;
         IEnumerator<string> fake_sequenceEnum;
-        string fake_file = "jsondata/2020_05_26-22_55_32.txt";
+        public string fake_file = "jsondata/2020_05_26-22_55_32.txt";
 
         // can be changed in the UI
         // TODO: probaly change to using functions to toggle
@@ -91,6 +93,31 @@ namespace PoseTeacher
         public Material incorrect_material;
         public bool shouldCheckCorrectness = true;
         public float correctionThresh = 30.0f;
+
+
+        public List<AvatarContainer> GetSelfAvatarContainers()
+        {
+            return avatarListSelf;
+        }
+        public List<AvatarContainer> GetTeacherAvatarContainers()
+        {
+            return avatarListTeacher;
+        }
+
+        public void AddAvatar(bool self)
+        {
+            if (self)
+            {
+            //    GameObject avatarContainer = GameObject.Find("AvatarContainer");
+                GameObject newAvatar = Instantiate(avatarPrefab);
+                avatarListSelf.Add(new AvatarContainer(newAvatar));
+            } else
+            {
+            //    GameObject avatarContainer = GameObject.Find("AvatarContainerT");
+                GameObject newAvatar = Instantiate(avatarTPrefab);
+                avatarListTeacher.Add(new AvatarContainer(newAvatar));
+            }
+        }
 
         // Mirror all avatar containers
         // TODO: Move code to AvatarContainer class (partial done)
@@ -427,14 +454,14 @@ namespace PoseTeacher
                 // TODO: maybe rewrite...
                 if (playback_speed == 1) // x1
                 {
-                    sequenceEnum.MoveNext();
+                    NextTeacherPose();
                 }
                 else if (playback_speed == 2) // x0.5
                 {
                     playback_counter++;
                     if (playback_counter >= 2)
                     {
-                        sequenceEnum.MoveNext();
+                        NextTeacherPose();
                         playback_counter = 0;
                     }
                 }
@@ -443,7 +470,7 @@ namespace PoseTeacher
                     playback_counter++;
                     if (playback_counter >= 4)
                     {
-                        sequenceEnum.MoveNext();
+                        NextTeacherPose();
                         playback_counter = 0;
                     }
                 }
@@ -461,7 +488,43 @@ namespace PoseTeacher
 
             }
 
+            if (sequenceEnum != null)
+            {
+                NextTeacherPose();
+                UpdateIndicators();
+            }
+        }
 
+        private void NextTeacherPose()
+        {
+            currentStepOrCoreotFrame++;
+            // loop if ended. TODO: wire up with appropriate button!
+            if (!sequenceEnum.MoveNext())
+            {
+                loadRecording();
+                sequenceEnum.MoveNext();
+            }
+            
+
+        }
+
+
+        public GameObject TrainingProgressIndicator;
+        public GameObject CoreographyProgressIndicator;
+        public GameObject CoreographyScoreIndicator;
+        public GameObject PulsingCube;
+
+        private int stepOrCoreoLength;
+        private int currentStepOrCoreotFrame;
+
+        private void UpdateIndicators()
+        {
+            if (TrainingProgressIndicator.activeSelf)
+            {
+                float progress = (float)currentStepOrCoreotFrame / stepOrCoreoLength;
+                TrainingProgressIndicator.GetComponent<ProgressIndicator>().SetProgress(progress);
+            }
+            // TODO update other indicators too
         }
 
         // Actions to do before quitting application
@@ -579,6 +642,10 @@ namespace PoseTeacher
             }
             read_recording_data = File.ReadLines(filename);
             sequenceEnum = read_recording_data.GetEnumerator();
+
+            // TODO find better way to count length?
+            stepOrCoreoLength = File.ReadAllLines(filename).Length;
+            currentStepOrCoreotFrame = 0;
             Debug.Log(read_recording_data);
         }
 

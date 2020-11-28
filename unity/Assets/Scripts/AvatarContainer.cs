@@ -6,7 +6,7 @@ using Microsoft.Azure.Kinect.Sensor.BodyTracking;
 namespace PoseTeacher
 {
     // Base interface for different type of containers (cube, stick etc.)
-    interface IContainer
+    public interface IContainer
     {
         // Activates/Deactivates the contained GameObject object
         void SetActive(bool active);
@@ -16,7 +16,7 @@ namespace PoseTeacher
 
     // Class that contains information about the cube contained in an AvatarContainer object
     // TODO move debugObject functionalities from AvatarContainer to CubeContainer
-    class CubeContainer : IContainer
+    public class CubeContainer : IContainer
     {
         // CONSIDER moving GameObject to interface? Change the interface to abstract base class with SetActive function there
         public GameObject cube;
@@ -53,7 +53,7 @@ namespace PoseTeacher
     }
 
     // Class that contains information about the stick figure contained in an AvatarContainer object
-    class StickContainer : IContainer
+    public class StickContainer : IContainer
     {
         public GameObject stick;
 
@@ -444,7 +444,7 @@ namespace PoseTeacher
     }
 
     // Class that contains information about the robot and joints contained in an AvatarContainer object
-    class RobotContainer : IContainer
+    public class RobotContainer : IContainer
     {
         // stick needed for Move calculations
         // CONSIDER: own stick or global stick for avatar?
@@ -550,7 +550,7 @@ namespace PoseTeacher
 
     // Class that contains information about the skinned multi-person linear body model contained in an AvatarContainer object
     // TODO: add changer function for male/female
-    class SmplContainer : IContainer
+    public class SmplContainer : IContainer
     {
         // stick needed for Move calculations
         // CONSIDER: see robot
@@ -728,7 +728,7 @@ namespace PoseTeacher
     //      and keep state to not have to setActive on all avatars. (Use enum for current avatar?) (done)
     //      transfer functions for moving the avatars into here (moved to Containers, done)
     //   !  rename class (include comments, use VS rename function!)
-    class AvatarContainer
+    public class AvatarContainer
     {
 
         // TODO: if cube avatar class is created, migrate this to there. Otherwise move the getting of other refrences from init to here
