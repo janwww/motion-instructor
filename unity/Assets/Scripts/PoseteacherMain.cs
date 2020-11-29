@@ -590,8 +590,8 @@ namespace PoseTeacher
         public GameObject CoreographyScoreIndicator;
         public GameObject PulsingCube;
 
-        private int stepOrCoreoLength;
-        private int currentStepOrCoreotFrame;
+        private int stepOrCoreoLength = 3;
+        private int currentStepOrCoreotFrame = 1;
 
         private void UpdateIndicators()
         {
@@ -686,6 +686,12 @@ namespace PoseTeacher
             {
                 avatar.MovePerson(recorded_data);
             }
+        }
+
+        public void SetTeacherFile(string path)
+        {
+            TeacherPoseInputGetter.ReadDataPath = path;
+            SelfPoseInputGetter.ReadDataPath = path;
         }
     }
 }

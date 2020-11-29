@@ -124,8 +124,9 @@ namespace PoseTeacher
                 
                 onFocusReciever.OnFocusOn.AddListener(() => CourseDetails.SetActive(true));
                 onFocusReciever.OnFocusOn.AddListener(() => CourseMenuHelperObject.GetComponent<CourseMenuHelper>().SetDetails(pos));
-                onFocusReciever.OnFocusOn.AddListener(() => MainObject.GetComponent<PoseteacherMain>().loadRecording(movementLocation));
-                onFocusReciever.OnFocusOn.AddListener(() => MainObject.GetComponent<PoseteacherMain>().fake_file = movementLocation);
+                onFocusReciever.OnFocusOn.AddListener(() => MainObject.GetComponent<PoseteacherMain>().SetTeacherFile(movementLocation));
+                //onFocusReciever.OnFocusOn.AddListener(() => MainObject.GetComponent<PoseteacherMain>().loadRecording(movementLocation));
+                //onFocusReciever.OnFocusOn.AddListener(() => MainObject.GetComponent<PoseteacherMain>().fake_file = movementLocation);
                 onFocusReciever.OnFocusOff.AddListener(() => CourseDetails.SetActive(false));
                 
                 if (steps.ContainsKey(i))
