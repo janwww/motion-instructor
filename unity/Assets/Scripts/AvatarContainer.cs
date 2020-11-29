@@ -5,6 +5,12 @@ using Microsoft.Azure.Kinect.Sensor.BodyTracking;
 
 namespace PoseTeacher
 {
+    // Label for various containers
+    public enum AvatarType
+    {
+        CUBE, STICK, ROBOT, SMPL
+    }
+
     // Base interface for different type of containers (cube, stick etc.)
     public interface IContainer
     {
@@ -715,18 +721,10 @@ namespace PoseTeacher
         }
     }
 
-    // Label for various containers
-    public enum AvatarType
-    {
-        CUBE, STICK, ROBOT, SMPL
-    }
 
     // Class that keeps references to sub-objects in the scene of a avatar container
     // Probably use this when refactoring as the base class for the script attached to avatar containers
     // TODO: 
-    //      implement functions for changing the currently used avatar (done), 
-    //      and keep state to not have to setActive on all avatars. (Use enum for current avatar?) (done)
-    //      transfer functions for moving the avatars into here (moved to Containers, done)
     //   !  rename class (include comments, use VS rename function!)
     public class AvatarContainer
     {
@@ -847,8 +845,5 @@ namespace PoseTeacher
                 avatarContainer.transform.localScale = new Vector3(-1.0f, 1.0f, 1.0f);
             }
         }
-
-
-
     }
 }

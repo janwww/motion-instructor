@@ -9,6 +9,9 @@ depthengine_1_0.dll
 depthengine_2_0.dll
 onnxruntime.dll
 
+# Example scene imports from UPM MRTK Examples
+/unity/Assets/Samples/
+
 # Visual Studio cache directory
 .vs/
 
