@@ -63,11 +63,11 @@ namespace PoseTeacher
             FramesSinceMayorBeat++;
             FramesSinceMinorBeat++;
 
-            if (FramesSinceMinorBeat == 30)
-                MinorBeatSubscriber(ScoreRating.MISS);
+            if (FramesSinceMinorBeat == 300)
+                MinorBeatSubscriber(ScoreRating.OK);
 
-            if (FramesSinceMayorBeat == 120)
-                MayorBeatSubscriber(ScoreRating.GOOD);
+            if (FramesSinceMayorBeat == 900)
+                MayorBeatSubscriber(ScoreRating.PERFECT);
 
         }
 

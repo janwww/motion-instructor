@@ -41659,7 +41659,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   MainObject: {fileID: 0}
   MenuObject: {fileID: 0}
-  buttonPrefab: {fileID: 0}
+  buttonPrefab: {fileID: 3782899515321846293}
   CourseDetails: {fileID: 3782899517074504317}
   CourseButtonCollection: {fileID: 2903408432492817100}
   CourseMenuHelperObject: {fileID: 4046310803804035503}
