@@ -18,6 +18,8 @@ namespace PoseTeacher
         void SetActive(bool active);
         // Move the contained GameObject object based on the input JointData
         void MovePerson(PoseData joint_data_list);
+
+        Vector3 GetReferencePosition();
     }
 
     // Class that contains information about the cube contained in an AvatarContainer object
@@ -50,6 +52,11 @@ namespace PoseTeacher
                 obj.transform.localRotation = r;
                 obj.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
             }
+        }
+
+        public Vector3 GetReferencePosition()
+        {
+            return cube.transform.position;
         }
 
         public void SetActive(bool active)
@@ -441,6 +448,11 @@ namespace PoseTeacher
             RightLowerLeg.transform.localScale = new Vector3(0.2f, 1.2f, 0.2f);
         }
 
+        public Vector3 GetReferencePosition()
+        {
+            return HipStick.transform.position;
+        }
+
         public void SetActive(bool active)
         {
             stick.SetActive(active);
@@ -546,6 +558,11 @@ namespace PoseTeacher
             right_thigh_joint.transform.Rotate(0, 0, -90);
             right_knee_joint.transform.localRotation = Quaternion.Inverse(right_thigh_joint.transform.localRotation) * stickContainer.RightKneeStick.transform.localRotation;
             right_knee_joint.transform.Rotate(180, 0, -170);
+        }
+
+        public Vector3 GetReferencePosition()
+        {
+            return stickContainer.HipStick.transform.position;
         }
 
         public void SetActive(bool active)
@@ -715,6 +732,11 @@ namespace PoseTeacher
             R_Knee.transform.Rotate(90, 180, 90);
         }
 
+        public Vector3 GetReferencePosition()
+        {
+            return stickContainer.HipStick.transform.position;
+        }
+
         public void SetActive(bool active)
         {
             smpl.SetActive(active);
@@ -821,6 +843,52 @@ namespace PoseTeacher
                     smplContainer.MovePerson(live_data);
                     break;
             }
+
+           MoveIndicators();
+
+        }
+
+        private void MoveIndicators()
+        {
+            Transform scoreIndicatorTr = avatarContainer.transform.Find("ScoreIndicator");
+            if (scoreIndicatorTr != null)
+            {
+                GameObject scoreIndicator = scoreIndicatorTr.gameObject;
+                if (scoreIndicator.activeSelf)
+                {
+                    Vector3 newPosition = containers[activeType].GetReferencePosition();
+                    newPosition = new Vector3(newPosition.x, 1.2f, newPosition.z);
+                    if ((scoreIndicator.transform.position - newPosition).magnitude > 1)
+                        scoreIndicator.transform.position = newPosition;
+                }
+            }
+
+            Transform pulsingObjectTr = avatarContainer.transform.Find("PulsingCube");
+            if (pulsingObjectTr != null)
+            {
+                GameObject pulseObject = pulsingObjectTr.gameObject;
+                if (pulseObject.activeSelf)
+                {
+                    Vector3 newPosition = containers[activeType].GetReferencePosition();
+                    newPosition = new Vector3(newPosition.x, 1.7f, newPosition.z);
+                    if ((pulseObject.transform.position - newPosition).magnitude > 1)
+                        pulseObject.transform.position = newPosition;
+                    //pulseObject.transform.position = new Vector3(newPosition.x, 1.7f, newPosition.z);
+                }
+            }
+
+            Transform progressIndicatorTr = avatarContainer.transform.Find("ProgressIndicator");
+            if (progressIndicatorTr != null)
+            {
+                GameObject progressIndicator = progressIndicatorTr.gameObject;
+                if (progressIndicator.activeSelf)
+                {
+                    Vector3 newPosition = containers[activeType].GetReferencePosition();
+                    newPosition = new Vector3(newPosition.x, 1.2f, newPosition.z);
+                    if ((progressIndicator.transform.position - newPosition).magnitude > 1)
+                        progressIndicator.transform.position = newPosition;
+                }
+            }
         }
 
         // Change the currently active container-type of the avatar. (Change between stick, robot etc.)
@@ -829,6 +897,8 @@ namespace PoseTeacher
             containers[activeType].SetActive(false);
             containers[type].SetActive(true);
             activeType = type;
+
+            MoveIndicators();
         }
 
         // Mirrors the avatar

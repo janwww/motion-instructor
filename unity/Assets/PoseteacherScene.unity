@@ -16125,7 +16125,27 @@ PrefabInstance:
     - target: {fileID: 1525717030280726671, guid: 6706340894601014f913e0cea24155c8,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 1.6
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 1921173760703349162, guid: 6706340894601014f913e0cea24155c8,
+        type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0.03
+      objectReference: {fileID: 0}
+    - target: {fileID: 8537871715981817014, guid: 6706340894601014f913e0cea24155c8,
+        type: 3}
+      propertyPath: m_fontSize
+      value: 168
+      objectReference: {fileID: 0}
+    - target: {fileID: 8537871715981817014, guid: 6706340894601014f913e0cea24155c8,
+        type: 3}
+      propertyPath: m_fontSizeBase
+      value: 168
+      objectReference: {fileID: 0}
+    - target: {fileID: 8702350141544535737, guid: 6706340894601014f913e0cea24155c8,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 1.3
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 6706340894601014f913e0cea24155c8, type: 3}
@@ -17208,6 +17228,21 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4183755664776392919, guid: fb7db092bc9295e41a21e9d530aac22e,
+        type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1.8
+      objectReference: {fileID: 0}
+    - target: {fileID: 4183755664776392919, guid: fb7db092bc9295e41a21e9d530aac22e,
+        type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1.8
+      objectReference: {fileID: 0}
+    - target: {fileID: 4183755664776392919, guid: fb7db092bc9295e41a21e9d530aac22e,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -0.04
+      objectReference: {fileID: 0}
     - target: {fileID: 6175223598122564573, guid: fb7db092bc9295e41a21e9d530aac22e,
         type: 3}
       propertyPath: MainObject
@@ -18233,6 +18268,26 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1231174140528480712, guid: b2687ed6193f98e4193a51d525fbbaf5,
+        type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0.03
+      objectReference: {fileID: 0}
+    - target: {fileID: 6453643570489118639, guid: b2687ed6193f98e4193a51d525fbbaf5,
+        type: 3}
+      propertyPath: m_fontSize
+      value: 168
+      objectReference: {fileID: 0}
+    - target: {fileID: 6453643570489118639, guid: b2687ed6193f98e4193a51d525fbbaf5,
+        type: 3}
+      propertyPath: m_fontSizeBase
+      value: 168
+      objectReference: {fileID: 0}
+    - target: {fileID: 6453643570489118639, guid: b2687ed6193f98e4193a51d525fbbaf5,
+        type: 3}
+      propertyPath: m_enableAutoSizing
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 9212582091385066804, guid: b2687ed6193f98e4193a51d525fbbaf5,
         type: 3}
       propertyPath: boxDisplayConfiguration
