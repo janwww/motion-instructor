@@ -17,6 +17,14 @@ namespace PoseTeacher
 
         public GameObject PulsingObject;
 
+        private AudioSource audioSource;
+        public AudioClip clave_beat1;
+        public AudioClip clave_beat2;
+        public AudioClip clave_beat3;
+        public AudioClip clave_beat4;
+        public AudioClip conga_bar;
+        private int beat_counter = 0;
+
         private Color BaseColor = new Color(1, 1, 1);
         private Color PerfectColor = new Color(0, 1, 0);
         private Color GoodColor = new Color(1, 1, 0);
@@ -31,6 +39,7 @@ namespace PoseTeacher
             FramesSinceMayorBeat = 0;
             FramesSinceMinorBeat = 0;
             material = PulsingObject.GetComponent<Renderer>().material;
+            audioSource = PulsingObject.GetComponent<AudioSource>();
         }
 
         // Update is called once per frame
@@ -63,24 +72,35 @@ namespace PoseTeacher
             FramesSinceMayorBeat++;
             FramesSinceMinorBeat++;
 
-            if (FramesSinceMinorBeat == 300)
-                MinorBeatSubscriber(ScoreRating.OK);
+            if (FramesSinceMinorBeat == 30)
+                BeatSubscriber(ScoreRating.OK);
 
-            if (FramesSinceMayorBeat == 900)
-                MayorBeatSubscriber(ScoreRating.PERFECT);
+            if (FramesSinceMayorBeat == 120)
+                BarSubscriber(ScoreRating.PERFECT);
 
         }
 
-        public void MayorBeatSubscriber(ScoreRating rating = ScoreRating.UNRATED)
+        public void BarSubscriber(ScoreRating rating = ScoreRating.UNRATED)
         {
             currentRating = rating;
             FramesSinceMayorBeat = 0;
+            //beat_counter = 0;
+            audioSource.PlayOneShot(conga_bar);
         }
 
-        public void MinorBeatSubscriber(ScoreRating rating = ScoreRating.UNRATED)
+        public void BeatSubscriber(ScoreRating rating = ScoreRating.UNRATED)
         {
             currentRating = rating;
             FramesSinceMinorBeat = 0;
+            beat_counter = (beat_counter + 1) % 4;
+            switch(beat_counter)
+            {
+                case 0: audioSource.PlayOneShot(clave_beat1); break;
+                case 1: audioSource.PlayOneShot(clave_beat2); break;
+                case 2: audioSource.PlayOneShot(clave_beat3); break;
+                case 3: audioSource.PlayOneShot(clave_beat4); break;
+                default: break;
+            }
         }
 
         public void EnableMinorBeat(bool enable)
