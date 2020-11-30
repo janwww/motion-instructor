@@ -1,4 +1,5 @@
 {
+	"CourseID":0,
 	"CourseTitle":"Salsa (Male)",
 	"CourseShortDescription":"Learn the passionate moves of Salsa!",
 	"CourseDescription":"Salsa is a Latin dance associated with the music genre of the same name which originated in the 1960s in New York City.",

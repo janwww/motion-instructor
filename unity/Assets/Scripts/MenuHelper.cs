@@ -33,6 +33,7 @@ namespace PoseTeacher
 
             courseMenuHelper = MenuObject.transform.Find("CourseMenuHelper").gameObject.GetComponent<CourseMenuHelper>();
             courseMenuHelper.LoadAllCourseInfos();
+            courseMenuHelper.GenerateCoursesMenu(menus[Menus.COURSES].transform.Find("CourseMenuButtonCollection").gameObject);
             // TODO: create the buttons from code
 
             TitleText = MenuObject.transform.Find("TitleBarHolder").Find("TitleBar").Find("Title").gameObject.GetComponent<TextMeshPro>();
@@ -235,9 +236,9 @@ namespace PoseTeacher
             }
         }
 
-        private void SetCourseDetailsText()
+        public void SetCourseDetailsText(int courseID)
         {
-
+            courseMenuHelper.SetCourseDetails(courseID);
         }
     }
 }

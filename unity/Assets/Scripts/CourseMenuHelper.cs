@@ -25,6 +25,7 @@ namespace PoseTeacher
     [Serializable]
     public class CourseJSON
     {
+        public int CourseID;
         public string CourseTitle;
         public string CourseShortDescription;
         public string CourseDescription;
@@ -47,6 +48,7 @@ namespace PoseTeacher
 
     public class CourseInfoHolder
     {
+        public int CourseID { get; set; }
         public string CourseTitle { get; set; }
         public string CourseShortDescription { get; set; }
         public string CourseDescription { get; set; }
@@ -89,11 +91,49 @@ namespace PoseTeacher
                 string json_data = File.ReadAllText(entry.Value);
                 CourseJSON course_steps = JsonUtility.FromJson<CourseJSON>(json_data);
                 CourseInfoHolder course = new CourseInfoHolder();
+                course.CourseID = course_steps.CourseID;
                 course.CourseTitle = course_steps.CourseTitle;
                 course.CourseShortDescription = course_steps.CourseShortDescription;
                 course.CourseDescription = course_steps.CourseDescription;
                 courses.Courses.Add(course);
             }
+        }
+
+        public void GenerateCoursesMenu(GameObject coursesMenuButtonCollection)
+        {
+            foreach (CourseInfoHolder info in courses.Courses)
+            {
+                GameObject newButton = Instantiate(buttonPrefab);
+                newButton.transform.localScale += new Vector3(2, 2, 0);
+                newButton.name = info.CourseTitle;
+                var buttonConfigHelper = newButton.GetComponent<ButtonConfigHelper>();
+
+                buttonConfigHelper.MainLabelText = info.CourseTitle;
+
+                var onFocusReciever = newButton.GetComponent<Interactable>().GetReceiver<InteractableOnFocusReceiver>();
+                if (onFocusReciever == null)
+                {
+                    onFocusReciever = newButton.GetComponent<Interactable>().AddReceiver<InteractableOnFocusReceiver>();
+                }
+                onFocusReciever.OnFocusOn.AddListener(() => CourseDetails.SetActive(true));
+                onFocusReciever.OnFocusOn.AddListener(() => SetCourseDetails(info.CourseID));
+                onFocusReciever.OnFocusOff.AddListener(() => CourseDetails.SetActive(false));
+
+                var onClickReciever = newButton.GetComponent<Interactable>().GetReceiver<InteractableOnPressReceiver>();
+                if (onClickReciever == null)
+                {
+                    onClickReciever = newButton.GetComponent<Interactable>().AddReceiver<InteractableOnPressReceiver>();
+                }
+                onClickReciever.OnPress.AddListener(() => MenuObject.GetComponent<MenuHelper>().SelectedMenuOption(info.CourseID));
+
+                newButton.SetActive(true);
+                newButton.transform.SetParent(coursesMenuButtonCollection.transform);
+            }
+
+            Microsoft.MixedReality.Toolkit.Utilities.GridObjectCollection objCollectionComponent =
+                coursesMenuButtonCollection.GetComponent<Microsoft.MixedReality.Toolkit.Utilities.GridObjectCollection>();
+
+            objCollectionComponent.UpdateCollection();
         }
 
         public CourseInfoHolder GetCourseInfo(int courseID)
@@ -163,13 +203,19 @@ namespace PoseTeacher
                     Debug.Log("Step/coreography not found.");
                     return;
                 }
-                
 
-                var onClickReciever = newButton.GetComponent<Interactable>().GetReceiver<InteractableOnClickReceiver>();
+                var onClickReciever = newButton.GetComponent<Interactable>().GetReceiver<InteractableOnPressReceiver>();
                 var onFocusReciever = newButton.GetComponent<Interactable>().GetReceiver<InteractableOnFocusReceiver>();
-                
+                if (onFocusReciever == null)
+                {
+                    onFocusReciever = newButton.GetComponent<Interactable>().AddReceiver<InteractableOnFocusReceiver>();
+                }
+                if (onClickReciever == null)
+                {
+                    onClickReciever = newButton.GetComponent<Interactable>().AddReceiver<InteractableOnPressReceiver>();
+                }
                 onFocusReciever.OnFocusOn.AddListener(() => CourseDetails.SetActive(true));
-                onFocusReciever.OnFocusOn.AddListener(() => CourseMenuHelperObject.GetComponent<CourseMenuHelper>().SetDetails(pos));
+                onFocusReciever.OnFocusOn.AddListener(() => CourseMenuHelperObject.GetComponent<CourseMenuHelper>().SetMoveDetails(pos));
                 onFocusReciever.OnFocusOn.AddListener(() => MainObject.GetComponent<PoseteacherMain>().SetTeacherFile(movementLocation));
                 //onFocusReciever.OnFocusOn.AddListener(() => MainObject.GetComponent<PoseteacherMain>().loadRecording(movementLocation));
                 //onFocusReciever.OnFocusOn.AddListener(() => MainObject.GetComponent<PoseteacherMain>().fake_file = movementLocation);
@@ -177,13 +223,14 @@ namespace PoseTeacher
                 
                 if (steps.ContainsKey(i))
                 {
-                    onClickReciever.OnClicked.AddListener(() => CourseMenuHelperObject.GetComponent<CourseMenuHelper>().StartStep());
+                    onClickReciever.OnPress.AddListener(() => CourseMenuHelperObject.GetComponent<CourseMenuHelper>().StartStep());
                 } 
                 else if (coreographies.ContainsKey(i))
                 {
-                    onClickReciever.OnClicked.AddListener(() => CourseMenuHelperObject.GetComponent<CourseMenuHelper>().StartCoreography());
+                    onClickReciever.OnPress.AddListener(() => CourseMenuHelperObject.GetComponent<CourseMenuHelper>().StartCoreography());
                 }
-                
+
+                newButton.SetActive(true);
                 // Vector3 pos = newButton.transform.position;
                 // Vector3 pos2 = CourseButtonCollection.transform.position;
                 newButton.transform.SetParent(CourseButtonCollection.transform);
@@ -206,15 +253,23 @@ namespace PoseTeacher
             }
         }
 
-        public void SetDetails(int position)
+        public void SetCourseDetails(int courseID)
+        {
+            GameObject CourseDescription = GameObject.Find("CourseDescription");
+            UnityEngine.UI.Text DescriptionText = CourseDescription.GetComponent<UnityEngine.UI.Text>();
+            CourseInfoHolder info = courses.Courses[courseID]; ;
+            DescriptionText.text = "<size=30>" + info.CourseTitle + "</size>\n<size=20>" + info.CourseDescription + "</size>";
+        }
+
+        public void SetMoveDetails(int position)
         {
             GameObject CourseDetails = GameObject.Find("CourseDetails");
-            GameObject CourseDescription = GameObject.Find("CourseDescription");
+            GameObject CourseDescription = GameObject.Find("CourseDescription"); // This is the text-holding object of CourseDetails
             UnityEngine.UI.Text DescriptionText = CourseDescription.GetComponent<UnityEngine.UI.Text>();
 
             if (steps.ContainsKey(position))
             {
-                DescriptionText.text = steps[position].Description;
+                DescriptionText.text = "<size=30>" + steps[position].Name + "</size>\n" + steps[position].Description;
             } else if (coreographies.ContainsKey(position))
             {
                 DescriptionText.text = coreographies[position].Description;
