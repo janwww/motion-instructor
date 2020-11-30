@@ -585,21 +585,53 @@ namespace PoseTeacher
             
         }
 
-        public GameObject TrainingProgressIndicator;
-        public GameObject CoreographyProgressIndicator;
-        public GameObject CoreographyScoreIndicator;
-        public GameObject PulsingCube;
 
         private int stepOrCoreoLength = 3;
         private int currentStepOrCoreotFrame = 1;
 
         private void UpdateIndicators()
         {
-            if (TrainingProgressIndicator.activeSelf)
+            foreach (AvatarContainer avatar in avatarListSelf)
             {
-                float progress = (float)currentStepOrCoreotFrame / stepOrCoreoLength;
-                TrainingProgressIndicator.GetComponent<ProgressIndicator>().SetProgress(progress);
+                Transform scoreIndicatorTr = avatar.avatarContainer.transform.Find("ScoreIndicator");
+                if (scoreIndicatorTr != null)
+                {
+                    GameObject scoreIndicator = scoreIndicatorTr.gameObject;
+                    if (scoreIndicator.activeSelf)
+                    {
+                        // TODO instead of progress use score...
+                        float progress = (float)currentStepOrCoreotFrame / stepOrCoreoLength;
+                        scoreIndicator.GetComponent<ProgressIndicator>().SetProgress(progress);
+                    }
+                }
+
+                Transform pulsingObjectTr = avatar.avatarContainer.transform.Find("PulsingCube");
+                if (pulsingObjectTr != null)
+                {
+                    GameObject pulseObject = pulsingObjectTr.gameObject;
+                    if (pulseObject.activeSelf)
+                    {
+                        // TODO make cube pulse depending on frames and stuff...
+                    }
+                }
+
             }
+            foreach (AvatarContainer avatar in avatarListTeacher)
+            {
+                Transform progressIndicatorTr = avatar.avatarContainer.transform.Find("ProgressIndicator");
+                if (progressIndicatorTr != null)
+                {
+                    GameObject progressIndicator = progressIndicatorTr.gameObject;
+                    if (progressIndicator.activeSelf)
+                    {
+                        // TODO use correct progress...
+                        float progress = (float)currentStepOrCoreotFrame / stepOrCoreoLength;
+                        progressIndicator.GetComponent<ProgressIndicator>().SetProgress(progress);
+                    }
+                }
+
+            }
+            
             // TODO update other indicators too
         }
 
