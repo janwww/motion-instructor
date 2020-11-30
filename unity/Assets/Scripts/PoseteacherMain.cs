@@ -391,6 +391,8 @@ namespace PoseTeacher
         public double similarityTotalScore = 0.0; // Total score
         public List<double> similarityScoreRaw; // similarity value for all body sticks
         AvatarSimilarity avatarSimilarity;
+        VisualisationSimilarity avatarVisualisationSimilarity;
+        // RandomGraph randomGraph;
 
 
         // Mirror all avatar containers
@@ -527,6 +529,8 @@ namespace PoseTeacher
 
             // initialize similarity calculation instance and assign selected avatars
             avatarSimilarity = new AvatarSimilarity(avatarListSelf[similaritySelfNr], avatarListTeacher[similarityTeacherNr], similarityBodyNr, similarityKalmanQ, similarityKalmanR);
+            avatarVisualisationSimilarity = new VisualisationSimilarity(avatarListSelf[similaritySelfNr]);
+           //  randomGraph = new RandomGraph();
         }
 
 
@@ -536,13 +540,18 @@ namespace PoseTeacher
             checkKeyInput();
 
             AnimateSelf(SelfPoseInputGetter.GetNextPose());
-
+       //avatarSelf.stickContainer.stick.activeSelf
+            // avatarListSelf[0].stickContainer.LeftUpperArm.GetComponent<Renderer>().material.color = Color.red;
+            AnimateSelf(TeacherPoseInputGetter.GetNextPose());
             // Get pose similarity
             avatarSimilarity.Update(); // update similarity calculation with each update loop step
             similarityScore = avatarSimilarity.similarityBodypart; // get single similarity score for selected body part
             similarityScoreRaw = avatarSimilarity.similarityStick; // get similarity score for each stick element
             similarityTotalScore = avatarSimilarity.totalScore; // get total Score
 
+            //avatarVisualisationSimilarity.Update(similarityScoreRaw);// avatarVisualisationSimilarity.Update(similarityScore);
+            avatarVisualisationSimilarity.UpdatePart("top", similarityScore);
+            // randomGraph.Update();
             // Playback for teacher avatar(s)
             if (recording_mode == 2) // playback
             {
