@@ -16530,20 +16530,10 @@ PrefabInstance:
       propertyPath: Events.Array.data[2].Settings.Array.data[1].Options.Array.data[2]
       value: Far Only
       objectReference: {fileID: 0}
-    - target: {fileID: 2802955909954836823, guid: fb7db092bc9295e41a21e9d530aac22e,
-        type: 3}
-      propertyPath: m_LocalScale.y
-      value: 1.1
-      objectReference: {fileID: 0}
     - target: {fileID: 2960495385122004057, guid: fb7db092bc9295e41a21e9d530aac22e,
         type: 3}
       propertyPath: m_RootOrder
       value: 8
-      objectReference: {fileID: 0}
-    - target: {fileID: 3781055398585155374, guid: fb7db092bc9295e41a21e9d530aac22e,
-        type: 3}
-      propertyPath: m_Name
-      value: CourseDescription
       objectReference: {fileID: 0}
     - target: {fileID: 3782899515321846286, guid: fb7db092bc9295e41a21e9d530aac22e,
         type: 3}
@@ -16718,21 +16708,6 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3782899515325153518, guid: fb7db092bc9295e41a21e9d530aac22e,
         type: 3}
-      propertyPath: Events.Array.size
-      value: 3
-      objectReference: {fileID: 0}
-    - target: {fileID: 3782899515325153518, guid: fb7db092bc9295e41a21e9d530aac22e,
-        type: 3}
-      propertyPath: Events.Array.data[2].Event.m_PersistentCalls.m_Calls.Array.size
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3782899515325153518, guid: fb7db092bc9295e41a21e9d530aac22e,
-        type: 3}
-      propertyPath: Events.Array.data[2].Settings.Array.size
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3782899515325153518, guid: fb7db092bc9295e41a21e9d530aac22e,
-        type: 3}
       propertyPath: Events.Array.data[2].Settings.Array.data[0].EventValue.m_PersistentCalls.m_Calls.Array.size
       value: 1
       objectReference: {fileID: 0}
@@ -16770,17 +16745,6 @@ PrefabInstance:
         type: 3}
       propertyPath: Events.Array.data[2].Event.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
       value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 3782899515325153518, guid: fb7db092bc9295e41a21e9d530aac22e,
-        type: 3}
-      propertyPath: Events.Array.data[2].ClassName
-      value: InteractableOnClickReceiver
-      objectReference: {fileID: 0}
-    - target: {fileID: 3782899515325153518, guid: fb7db092bc9295e41a21e9d530aac22e,
-        type: 3}
-      propertyPath: Events.Array.data[2].AssemblyQualifiedName
-      value: Microsoft.MixedReality.Toolkit.UI.InteractableOnClickReceiver, Microsoft.MixedReality.Toolkit.SDK,
-        Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
       objectReference: {fileID: 0}
     - target: {fileID: 3782899515325153518, guid: fb7db092bc9295e41a21e9d530aac22e,
         type: 3}
@@ -17228,11 +17192,6 @@ PrefabInstance:
       propertyPath: m_LocalPosition.y
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 3782899517074504317, guid: fb7db092bc9295e41a21e9d530aac22e,
-        type: 3}
-      propertyPath: m_IsActive
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 4446858564641289174, guid: fb7db092bc9295e41a21e9d530aac22e,
         type: 3}
       propertyPath: OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_Target
@@ -17262,28 +17221,6 @@ PrefabInstance:
         type: 3}
       propertyPath: OnClick.m_PersistentCalls.m_Calls.Array.data[6].m_Target
       value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 5022069081418380753, guid: fb7db092bc9295e41a21e9d530aac22e,
-        type: 3}
-      propertyPath: m_margin.y
-      value: -1.1360178
-      objectReference: {fileID: 0}
-    - target: {fileID: 5022069081418380753, guid: fb7db092bc9295e41a21e9d530aac22e,
-        type: 3}
-      propertyPath: m_margin.w
-      value: 0.43065864
-      objectReference: {fileID: 0}
-    - target: {fileID: 5022069081418380753, guid: fb7db092bc9295e41a21e9d530aac22e,
-        type: 3}
-      propertyPath: m_margin.z
-      value: -18.843723
-      objectReference: {fileID: 0}
-    - target: {fileID: 5022069081418380753, guid: fb7db092bc9295e41a21e9d530aac22e,
-        type: 3}
-      propertyPath: m_text
-      value: 'Motion Instructor
-
-        What are we going to do today?'
       objectReference: {fileID: 0}
     - target: {fileID: 6175223598122564573, guid: fb7db092bc9295e41a21e9d530aac22e,
         type: 3}

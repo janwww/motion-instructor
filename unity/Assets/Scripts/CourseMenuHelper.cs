@@ -10,16 +10,24 @@ using Microsoft.MixedReality.Toolkit.UI;
 namespace PoseTeacher
 {
     [Serializable]
+    public class BlockContainer
+    {
+        public string FileLocation;
+    }
+        [Serializable]
     public class StepContainer
     {
         public int Position;
         public string Name;
         public string Description;
-        public string FileLocation;
+        public BlockContainer[] Blocks;
     }
     [Serializable]
-    public class StepsJSON
+    public class CourseJSON
     {
+        public string CourseTitle;
+        public string CourseShortDescription;
+        public string CourseDescription;
         public StepContainer[] steps;
         public CoreographieContainer[] coreographies;
     }
@@ -37,6 +45,18 @@ namespace PoseTeacher
         public CoreographieContainer[] coreographies;
     }
 
+    public class CourseInfoHolder
+    {
+        public string CourseTitle { get; set; }
+        public string CourseShortDescription { get; set; }
+        public string CourseDescription { get; set; }
+    }
+
+    public class CoursesHolder
+    {
+        public List<CourseInfoHolder> Courses = new List<CourseInfoHolder>();
+        public int CurrentCourse = 0;
+    }
 
     [CLSCompliant(false)]
     public class CourseMenuHelper : MonoBehaviour
@@ -54,11 +74,37 @@ namespace PoseTeacher
         private Dictionary<string, string> courseToPath =
             new Dictionary<string, string>()
             {
-                { "salsa", "jsondata/courses/salsa.txt" }
+                { "salsa", "jsondata/courses/salsa_male.txt" }
             };
 
         private Dictionary<int, StepContainer> steps = new Dictionary<int, StepContainer>();
         private Dictionary<int, CoreographieContainer> coreographies = new Dictionary<int, CoreographieContainer>();
+
+        private CoursesHolder courses = new CoursesHolder();
+
+        public void LoadAllCourseInfos()
+        {
+            foreach (KeyValuePair<string, string> entry in courseToPath)
+            {
+                string json_data = File.ReadAllText(entry.Value);
+                CourseJSON course_steps = JsonUtility.FromJson<CourseJSON>(json_data);
+                CourseInfoHolder course = new CourseInfoHolder();
+                course.CourseTitle = course_steps.CourseTitle;
+                course.CourseShortDescription = course_steps.CourseShortDescription;
+                course.CourseDescription = course_steps.CourseDescription;
+                courses.Courses.Add(course);
+            }
+        }
+
+        public CourseInfoHolder GetCourseInfo(int courseID)
+        {
+            return courses.Courses[courseID];
+        }
+
+        public CourseInfoHolder GetCurrentCourseInfo()
+        {
+            return courses.Courses[courses.CurrentCourse];
+        }
 
         public void LoadCourse(string courseName)
         {
@@ -74,7 +120,7 @@ namespace PoseTeacher
 
             string json_data = File.ReadAllText(jsonPath);
             Debug.Log(json_data);
-            StepsJSON course_steps = JsonUtility.FromJson<StepsJSON>(json_data);
+            CourseJSON course_steps = JsonUtility.FromJson<CourseJSON>(json_data);
             Debug.Log(course_steps.ToString());
             foreach (StepContainer step in course_steps.steps)
             {
@@ -104,7 +150,7 @@ namespace PoseTeacher
                 {
                     buttonConfigHelper.MainLabelText = steps[i].Name;
                     pos = steps[i].Position;
-                    movementLocation = steps[i].FileLocation;
+                    movementLocation = steps[i].Blocks[0].FileLocation;
                 }
                 else if (coreographies.ContainsKey(i))
                 {
@@ -143,10 +189,7 @@ namespace PoseTeacher
                 newButton.transform.SetParent(CourseButtonCollection.transform);
             }
 
-
-
-
-                Microsoft.MixedReality.Toolkit.Utilities.GridObjectCollection objCollectionComponent = 
+            Microsoft.MixedReality.Toolkit.Utilities.GridObjectCollection objCollectionComponent = 
                 CourseButtonCollection.GetComponent<Microsoft.MixedReality.Toolkit.Utilities.GridObjectCollection>();
 
             objCollectionComponent.UpdateCollection();

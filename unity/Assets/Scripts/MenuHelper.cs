@@ -32,6 +32,9 @@ namespace PoseTeacher
             CurrentMenu = Menus.TITLE;
 
             courseMenuHelper = MenuObject.transform.Find("CourseMenuHelper").gameObject.GetComponent<CourseMenuHelper>();
+            courseMenuHelper.LoadAllCourseInfos();
+            // TODO: create the buttons from code
+
             TitleText = MenuObject.transform.Find("TitleBarHolder").Find("TitleBar").Find("Title").gameObject.GetComponent<TextMeshPro>();
             SetTitleBarText();
         }
@@ -212,16 +215,17 @@ namespace PoseTeacher
             switch (CurrentMenu)
             {
                 case Menus.TITLE:
-                    TitleText.text = "<size=120%>Morion Insstructor</size>\nWhat are we going to do today?";
+                    TitleText.text = "<size=120%>Motion Instructor</size>\nWhat are we going to do today?";
                     break;
                 case Menus.DANCE:
                     TitleText.text = "<size=120%>Dance</size>\nLearn a new dance style, or challange yourself in one that you already know!";
                     break;
                 case Menus.COURSES:
-                    TitleText.text = "<size=120%>Courses</size>\nSelect the dance type you want to learn!";
+                    TitleText.text = "<size=120%>Courses</size>\nSelect the dance style you want to learn!";
                     break;
                 case Menus.SPECCOURSE:
-                    TitleText.text = "<size=120%>Special Course</size>\nShould be set dynamically...";
+                    CourseInfoHolder info = courseMenuHelper.GetCurrentCourseInfo();
+                    TitleText.text = "<size=120%>" + info.CourseTitle + "</size>\n" + info.CourseShortDescription;
                     break;
                 case Menus.SETTINGS:
                     TitleText.text = "<size=120%>Settings</size>";
