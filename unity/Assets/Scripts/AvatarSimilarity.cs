@@ -17,13 +17,20 @@ namespace PoseTeacher
         public List<double> stickWeightCorrect; // correction weight to each stick in avatar
         public int stickNumber; // number of sticks existing in avatar
         public double stickWeightSum; // sum of all stick weights
+        public double totalScore; // total score
 
         // output
         public double similarityBodypart; // similarity for defined bodypart
         public List<double> similarityStick; // similarity for each stick in stickNames
 
+        // filter
+        public double kalmanQ = 0.000001;
+        public double kalmanR = 0.01;
+        public List<KalmanFilter> kalmanFilter;
+        bool kalmanOn = true;
+
         // constructor
-        public AvatarSimilarity(AvatarContainer selfIn, AvatarContainer teacherIn, String bodyNrIn)
+        public AvatarSimilarity(AvatarContainer selfIn, AvatarContainer teacherIn, String bodyNrIn, double kalmanQIn, double kalmanRIn)
         {
 
             // assign
@@ -31,17 +38,22 @@ namespace PoseTeacher
             self = selfIn;
             teacher = teacherIn;
             bodyNr = bodyNrIn;
+            kalmanQ = kalmanQIn;
+            kalmanR = kalmanRIn;
+            stickNumber = 0;
 
             // initialize
             ///////////////////////////////////////////////////////////////////////////////////
-            SetBody(bodyNr);
-
+            SetBody(bodyNr, kalmanQIn, kalmanRIn);
         }
 
-        public void SetBody(String bodyNrIn){
+        public void SetBody(String bodyNrIn, double kalmanQIn, double kalmanRIn)
+        {
             // assign
             ///////////////////////////////////////////////////////////////////////////////////
             bodyNr = bodyNrIn;
+            kalmanQ = kalmanQIn;
+            kalmanR = kalmanRIn;
 
             // parameters
             ///////////////////////////////////////////////////////////////////////////////////
@@ -302,6 +314,18 @@ namespace PoseTeacher
                 0.0,
                 0.0
             });
+
+            // generate kalman filters
+            kalmanFilter = new List<KalmanFilter>(new KalmanFilter[stickNumber]);
+            for (int i = 0; i < stickNumber; i++)
+            {
+                kalmanFilter[i] = new KalmanFilter(kalmanQ, kalmanR);
+                kalmanFilter[i].Reset(0.0);
+            }
+
+
+            // total score
+            totalScore = 0.0;
         }
 
         // get similarity of pose between 2 avatars
@@ -510,19 +534,29 @@ namespace PoseTeacher
 
 
 
-
-
-
                 // get cosine similarity from quaternion 
                 // background: https://www.researchgate.net/publication/316447858_Similarity_analysis_of_motion_based_on_motion_capture_technology
                 // background: https://gdalgorithms-list.narkive.com/9TaVDT9G/quaternion-similarity-measure
                 double cos_angle = selfRotation.w * teacherRotation.w + selfRotation.x * teacherRotation.x + selfRotation.y * teacherRotation.y + selfRotation.z * teacherRotation.z;
 				cos_angle = Math.Abs(cos_angle);
-                similarityStick[i] = cos_angle * stickWeight[i];
-                similarityTotal += similarityStick[i];
-
+                similarityStick[i] = cos_angle;
+                if (kalmanOn)
+                {
+                    similarityStick[i] = kalmanFilter[i].Update(similarityStick[i]);
+                    if(similarityStick[i] > 1.0)
+                    {
+                        similarityStick[i] = 1.0;
+                    }
+                    if (similarityStick[i] < 0.0)
+                    {
+                        similarityStick[i] = 0.0;
+                    }
+                }
+                similarityTotal += similarityStick[i] * stickWeight[i];
             }
             similarityBodypart = similarityTotal / stickWeightSum;
-		}
+            totalScore = totalScore + similarityBodypart;
+
+        }
 	}
 }

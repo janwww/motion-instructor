@@ -35,6 +35,8 @@ namespace PoseTeacher
         // TODO find good way to reference objects. @Unity might do this for us
         List<AvatarContainer> avatarListSelf;
         List<AvatarContainer> avatarListTeacher;
+        public GameObject avatarPrefab;
+        public GameObject avatarTPrefab;
 
         GameObject spatialAwarenessSystem;
 
@@ -83,13 +85,42 @@ namespace PoseTeacher
         public bool shouldCheckCorrectness = true;
         public float correctionThresh = 30.0f;
 
+
+        public List<AvatarContainer> GetSelfAvatarContainers()
+        {
+            return avatarListSelf;
+        }
+        public List<AvatarContainer> GetTeacherAvatarContainers()
+        {
+            return avatarListTeacher;
+        }
+
+        public void AddAvatar(bool self)
+        {
+            if (self)
+            {
+            //    GameObject avatarContainer = GameObject.Find("AvatarContainer");
+                GameObject newAvatar = Instantiate(avatarPrefab);
+                avatarListSelf.Add(new AvatarContainer(newAvatar));
+            } else
+            {
+            //    GameObject avatarContainer = GameObject.Find("AvatarContainerT");
+                GameObject newAvatar = Instantiate(avatarTPrefab);
+                avatarListTeacher.Add(new AvatarContainer(newAvatar));
+            }
+        }
         // Used for pose similarity calculation
         public String similarityBodyNr = "top"; // "total", "top", "middle", "bottom"
         public int similaritySelfNr = 0; // self list element to compare
         public int similarityTeacherNr = 0; // teacher list element to compare
         public double similarityScore; // similarity value between 0 and 1 for defined body part
+		public double similarityKalmanQ = 0.000001; // Kalman process noise covariance (model strength)
+        public double similarityKalmanR = 0.01; // Kalman sensor noise covariance (observation strength)
+        public double similarityTotalScore = 0.0; // Total score
         public List<double> similarityScoreRaw; // similarity value for all body sticks
         AvatarSimilarity avatarSimilarity;
+        VisualisationSimilarity avatarVisualisationSimilarity;
+        // RandomGraph randomGraph;
 
 
         // Mirror all avatar containers
@@ -212,7 +243,9 @@ namespace PoseTeacher
 
 
             // initialize similarity calculation instance and assign selected avatars
-            avatarSimilarity = new AvatarSimilarity(avatarListSelf[similaritySelfNr], avatarListTeacher[similarityTeacherNr], similarityBodyNr);
+            avatarSimilarity = new AvatarSimilarity(avatarListSelf[similaritySelfNr], avatarListTeacher[similarityTeacherNr], similarityBodyNr, similarityKalmanQ, similarityKalmanR);
+            avatarVisualisationSimilarity = new VisualisationSimilarity(avatarListSelf[similaritySelfNr]);
+           //  randomGraph = new RandomGraph();
         }
 
 
@@ -222,12 +255,18 @@ namespace PoseTeacher
             checkKeyInput();
 
             AnimateSelf(SelfPoseInputGetter.GetNextPose());
-
+       //avatarSelf.stickContainer.stick.activeSelf
+            // avatarListSelf[0].stickContainer.LeftUpperArm.GetComponent<Renderer>().material.color = Color.red;
+            AnimateSelf(TeacherPoseInputGetter.GetNextPose());
             // Get pose similarity
             avatarSimilarity.Update(); // update similarity calculation with each update loop step
             similarityScore = avatarSimilarity.similarityBodypart; // get single similarity score for selected body part
             similarityScoreRaw = avatarSimilarity.similarityStick; // get similarity score for each stick element
+            similarityTotalScore = avatarSimilarity.totalScore; // get total Score
 
+            //avatarVisualisationSimilarity.Update(similarityScoreRaw);// avatarVisualisationSimilarity.Update(similarityScore);
+            avatarVisualisationSimilarity.UpdatePart("top", similarityScore);
+            // randomGraph.Update();
             // Playback for teacher avatar(s)
             if (recording_mode == 2) // playback
             {
@@ -266,7 +305,58 @@ namespace PoseTeacher
 
             }
 
+            UpdateIndicators();
+            
+        }
 
+
+        private int stepOrCoreoLength = 3;
+        private int currentStepOrCoreotFrame = 1;
+
+        private void UpdateIndicators()
+        {
+            foreach (AvatarContainer avatar in avatarListSelf)
+            {
+                Transform scoreIndicatorTr = avatar.avatarContainer.transform.Find("ScoreIndicator");
+                if (scoreIndicatorTr != null)
+                {
+                    GameObject scoreIndicator = scoreIndicatorTr.gameObject;
+                    if (scoreIndicator.activeSelf)
+                    {
+                        // TODO instead of progress use score...
+                        float progress = (float)currentStepOrCoreotFrame / stepOrCoreoLength;
+                        scoreIndicator.GetComponent<ProgressIndicator>().SetProgress(progress);
+                    }
+                }
+
+                Transform pulsingObjectTr = avatar.avatarContainer.transform.Find("PulsingCube");
+                if (pulsingObjectTr != null)
+                {
+                    GameObject pulseObject = pulsingObjectTr.gameObject;
+                    if (pulseObject.activeSelf)
+                    {
+                        // TODO make cube pulse depending on frames and stuff...
+                    }
+                }
+
+            }
+            foreach (AvatarContainer avatar in avatarListTeacher)
+            {
+                Transform progressIndicatorTr = avatar.avatarContainer.transform.Find("ProgressIndicator");
+                if (progressIndicatorTr != null)
+                {
+                    GameObject progressIndicator = progressIndicatorTr.gameObject;
+                    if (progressIndicator.activeSelf)
+                    {
+                        // TODO use correct progress...
+                        float progress = (float)currentStepOrCoreotFrame / stepOrCoreoLength;
+                        progressIndicator.GetComponent<ProgressIndicator>().SetProgress(progress);
+                    }
+                }
+
+            }
+            
+            // TODO update other indicators too
         }
 
         // Actions to do before quitting application
@@ -352,6 +442,12 @@ namespace PoseTeacher
             {
                 avatar.MovePerson(recorded_data);
             }
+        }
+
+        public void SetTeacherFile(string path)
+        {
+            TeacherPoseInputGetter.ReadDataPath = path;
+            SelfPoseInputGetter.ReadDataPath = path;
         }
     }
 }
