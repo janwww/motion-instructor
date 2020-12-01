@@ -50,10 +50,21 @@ namespace PoseTeacher
         private string _ReadDataPath;
         public string ReadDataPath {
             get { return _ReadDataPath; }
-            set { _ReadDataPath = value; LoadData(); } 
+            set { _ReadDataPath = value; GetTotalPoseNumber(); LoadData(); } 
         }
+
+        private int _TotalFilePoseNumber;
+         public int TotalFilePoseNumber
+        {
+            get { return _TotalFilePoseNumber; }
+        }
+        private int _CurrentFilePoseNumber;
+        public int CurrentFilePoseNumber
+        {
+            get { return _CurrentFilePoseNumber; }
+        }
+
         public string WriteDataPath { get; set; }
-        bool loadedData = false;
 
         public PoseInputGetter(PoseInputSource InitPoseInputSource)
         {
@@ -152,9 +163,20 @@ namespace PoseTeacher
             Debug.Log("Device loading finished");
         }
 
+        private void GetTotalPoseNumber()
+        {
+            LoadData();
+            int count = 0;
+            while (SequenceEnum.MoveNext())
+            {
+                count++;
+            }
+            _TotalFilePoseNumber = count;
+            _CurrentFilePoseNumber = 0;
+        }
+
         private void LoadData()
         {
-            //loadedData = true;
             SequenceEnum = File.ReadLines(ReadDataPath).GetEnumerator();
         }
 
@@ -196,13 +218,17 @@ namespace PoseTeacher
                     break;
 
                 case PoseInputSource.FILE:
+
+                    _CurrentFilePoseNumber++;
                     // TODO: Only load once
                     // Quick and dirty way to loop (by reloading file)
                     if (SequenceEnum == null || !SequenceEnum.MoveNext())
                     {
                         LoadData();
                         SequenceEnum.MoveNext();
+                        _CurrentFilePoseNumber = 1;
                     }
+
 
                     string frame_json = SequenceEnum.Current;
                     PoseData fake_live_data = PoseDataUtils.JSONstring2PoseData(frame_json);
@@ -382,7 +408,7 @@ namespace PoseTeacher
             }
         }
         // Used for pose similarity calculation
-        public String similarityBodyNr = "top"; // "total", "top", "middle", "bottom"
+        public String similarityBodyNr = "total"; // "total", "top", "middle", "bottom"
         public int similaritySelfNr = 0; // self list element to compare
         public int similarityTeacherNr = 0; // teacher list element to compare
         public double similarityScore; // similarity value between 0 and 1 for defined body part
@@ -550,7 +576,7 @@ namespace PoseTeacher
             similarityTotalScore = avatarSimilarity.totalScore; // get total Score
 
             //avatarVisualisationSimilarity.Update(similarityScoreRaw);// avatarVisualisationSimilarity.Update(similarityScore);
-            avatarVisualisationSimilarity.UpdatePart("top", similarityScore);
+            avatarVisualisationSimilarity.UpdatePart(similarityBodyNr, similarityScore);
             // randomGraph.Update();
             // Playback for teacher avatar(s)
             if (recording_mode == 2) // playback
@@ -595,8 +621,15 @@ namespace PoseTeacher
         }
 
 
-        private int stepOrCoreoLength = 3;
-        private int currentStepOrCoreotFrame = 1;
+        private float scaleScore(float score)
+        {
+            float min = 0.5F;
+
+            float scaled_score = (float)(similarityScore - min) /(1-min);
+            scaled_score = scaled_score < 0 ? 0 : scaled_score;
+            scaled_score = scaled_score > 1 ? 1 : scaled_score;
+            return scaled_score;
+        }
 
         private void UpdateIndicators()
         {
@@ -608,8 +641,7 @@ namespace PoseTeacher
                     GameObject scoreIndicator = scoreIndicatorTr.gameObject;
                     if (scoreIndicator.activeSelf)
                     {
-                        // TODO instead of progress use score...
-                        float progress = (float)currentStepOrCoreotFrame / stepOrCoreoLength;
+                        float progress = scaleScore((float)similarityScore);
                         scoreIndicator.GetComponent<ProgressIndicator>().SetProgress(progress);
                     }
                 }
@@ -634,7 +666,7 @@ namespace PoseTeacher
                     if (progressIndicator.activeSelf)
                     {
                         // TODO use correct progress...
-                        float progress = (float)currentStepOrCoreotFrame / stepOrCoreoLength;
+                        float progress = (float)TeacherPoseInputGetter.CurrentFilePoseNumber / TeacherPoseInputGetter.TotalFilePoseNumber;
                         progressIndicator.GetComponent<ProgressIndicator>().SetProgress(progress);
                     }
                 }

@@ -13464,7 +13464,7 @@ MonoBehaviour:
   incorrect_material: {fileID: 2100000, guid: c4a1b7475a654dd0acaa0cfdfba2e20c, type: 2}
   shouldCheckCorrectness: 0
   correctionThresh: 30
-  similarityBodyNr: top
+  similarityBodyNr: total
   similaritySelfNr: 0
   similarityTeacherNr: 0
   similarityScore: 0
