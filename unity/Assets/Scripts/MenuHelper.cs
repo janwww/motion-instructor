@@ -9,6 +9,10 @@ namespace PoseTeacher
     {
         TITLE, DANCE, COURSES, SPECCOURSE, SETTINGS, AVATARSETTINGS
     }
+    public enum MenuState
+    {
+        INMAIN, PAUSED
+    }
 
     public class MenuHelper : MonoBehaviour
     {
@@ -16,8 +20,64 @@ namespace PoseTeacher
         public GameObject MenuObject;
         private Dictionary<Menus, GameObject> menus = new Dictionary<Menus, GameObject>();
         private Menus CurrentMenu;
+        private Menus PreviousMainMenu;
         private CourseMenuHelper courseMenuHelper;
         private TextMeshPro TitleText;
+        public MenuState state = MenuState.INMAIN;
+
+        public GameObject TrainingElements;
+        public GameObject CoreoElements;
+        private bool isTrainingPause = true;
+
+        public void setState(string state)
+        {
+            switch (state)
+            {
+                case "PAUSED_training":
+                    this.state = MenuState.PAUSED;
+                    // Set the menu to settings, but save state
+                    PreviousMainMenu = CurrentMenu;
+                    CurrentMenu = Menus.SETTINGS;
+                    UpdateMenu();
+                    // Show menu
+                    MenuObject.SetActive(true);
+                    // Change Buttons
+                    MenuObject.transform.Find("TitleBarHolder").Find("Buttons").Find("MainButtons").gameObject.SetActive(false);
+                    MenuObject.transform.Find("TitleBarHolder").Find("Buttons").Find("PausedButtons").gameObject.SetActive(true);
+                    TrainingElements.SetActive(false);
+                    isTrainingPause = true;
+                    break;
+                case "PAUSED_coreo":
+                    this.state = MenuState.PAUSED;
+                    // Set the menu to settings, but save state
+                    PreviousMainMenu = CurrentMenu;
+                    CurrentMenu = Menus.SETTINGS;
+                    UpdateMenu();
+                    // Show menu
+                    MenuObject.SetActive(true);
+                    // Change Buttons
+                    MenuObject.transform.Find("TitleBarHolder").Find("Buttons").Find("MainButtons").gameObject.SetActive(false);
+                    MenuObject.transform.Find("TitleBarHolder").Find("Buttons").Find("PausedButtons").gameObject.SetActive(true);
+                    CoreoElements.SetActive(false);
+                    isTrainingPause = false;
+                    break;
+                case "INMAIN":
+                    this.state = MenuState.INMAIN;
+                    // Revert Menu state
+                    CurrentMenu = PreviousMainMenu;
+                    UpdateMenu();
+                    // Hide Menu
+                    MenuObject.SetActive(false);
+                    // change buttins
+                    MenuObject.transform.Find("TitleBarHolder").Find("Buttons").Find("MainButtons").gameObject.SetActive(true);
+                    MenuObject.transform.Find("TitleBarHolder").Find("Buttons").Find("PausedButtons").gameObject.SetActive(false);
+                    if (isTrainingPause)
+                        TrainingElements.SetActive(true);
+                    else
+                        CoreoElements.SetActive(true);
+                    break;
+            }
+        }
 
         private void Start()
         {
@@ -48,7 +108,7 @@ namespace PoseTeacher
                 menus[CurrentMenu].SetActive(false);
                 // Set Title Menu to Active
                 CurrentMenu = Menus.TITLE;
-                menus[CurrentMenu].SetActive(true);
+                menus[CurrentMenu].SetActive(true); 
             }
 
             SetTitleBarText();
@@ -89,6 +149,28 @@ namespace PoseTeacher
                     break;
             }
 
+            SetTitleBarText();
+        }
+
+        public void BackToGame()
+        {
+            setState("INMAIN");
+        }
+
+        public void BackToSetting()
+        {
+            menus[CurrentMenu].SetActive(false);
+            CurrentMenu = Menus.SETTINGS;
+            menus[CurrentMenu].SetActive(true);
+        }
+
+        private void UpdateMenu()
+        {
+            foreach (KeyValuePair<Menus, GameObject> menu in menus)
+            {
+                menu.Value.SetActive(false);
+            }
+            menus[CurrentMenu].SetActive(true);
             SetTitleBarText();
         }
 

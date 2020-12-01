@@ -229,6 +229,7 @@ namespace PoseTeacher
                 {
                     onClickReciever.OnPress.AddListener(() => CourseMenuHelperObject.GetComponent<CourseMenuHelper>().StartCoreography());
                 }
+                onClickReciever.OnPress.AddListener(() => CourseDetails.SetActive(false));
 
                 newButton.SetActive(true);
                 // Vector3 pos = newButton.transform.position;
