@@ -24,6 +24,9 @@ namespace PoseTeacher
         public AudioClip clave_beat4;
         public AudioClip conga_bar;
         private int beat_counter = 0;
+        
+        private bool isPaused = false;
+        private bool isMuted = false;
 
         private Color BaseColor = new Color(1, 1, 1);
         private Color PerfectColor = new Color(0, 1, 0);
@@ -45,39 +48,51 @@ namespace PoseTeacher
         // Update is called once per frame
         void Update()
         {
-            if (FramesSinceMinorBeat < 5)
+            if (!isPaused)
             {
-                PulsingObject.transform.localScale += new Vector3(0.01f, 0.01f, 0.01f);
-                SetMaterialColor();
+                if (FramesSinceMinorBeat < 5)
+                {
+                    PulsingObject.transform.localScale += new Vector3(0.01f, 0.01f, 0.01f);
+                    SetMaterialColor();
+                }
+                else if (FramesSinceMinorBeat < 10)
+                {
+                    PulsingObject.transform.localScale -= new Vector3(0.01f, 0.01f, 0.01f);
+                    currentRating = ScoreRating.UNRATED;
+                    SetMaterialColor();
+                }
+
+                if (FramesSinceMayorBeat < 5)
+                {
+                    PulsingObject.transform.localScale += new Vector3(0.02f, 0.02f, 0.02f);
+                    SetMaterialColor();
+                }
+                else if (FramesSinceMayorBeat < 10)
+                {
+                    PulsingObject.transform.localScale -= new Vector3(0.02f, 0.02f, 0.02f);
+                    currentRating = ScoreRating.UNRATED;
+                    SetMaterialColor();
+                }
+
+                FramesSinceMayorBeat++;
+                FramesSinceMinorBeat++;
+
+                if (FramesSinceMinorBeat == 30)
+                    BeatSubscriber(ScoreRating.OK);
+
+                if (FramesSinceMayorBeat == 120)
+                    BarSubscriber(ScoreRating.PERFECT);
             }
-            else if (FramesSinceMinorBeat < 10)
-            {
-                PulsingObject.transform.localScale -= new Vector3(0.01f, 0.01f, 0.01f);
-                currentRating = ScoreRating.UNRATED;
-                SetMaterialColor();
-            }
+        }
 
-            if (FramesSinceMayorBeat < 5)
-            {
-                PulsingObject.transform.localScale += new Vector3(0.02f, 0.02f, 0.02f);
-                SetMaterialColor();
-            }
-            else if (FramesSinceMayorBeat < 10)
-            {
-                PulsingObject.transform.localScale -= new Vector3(0.02f, 0.02f, 0.02f);
-                currentRating = ScoreRating.UNRATED;
-                SetMaterialColor();
-            }
+        public void SetPause(bool isPaused)
+        {
+            this.isPaused = isPaused;
+        }
 
-            FramesSinceMayorBeat++;
-            FramesSinceMinorBeat++;
-
-            if (FramesSinceMinorBeat == 30)
-                BeatSubscriber(ScoreRating.OK);
-
-            if (FramesSinceMayorBeat == 120)
-                BarSubscriber(ScoreRating.PERFECT);
-
+        public void SetMute(bool isMuted)
+        {
+            this.isMuted = isMuted;
         }
 
         public void BarSubscriber(ScoreRating rating = ScoreRating.UNRATED)
