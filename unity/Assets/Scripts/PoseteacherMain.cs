@@ -312,6 +312,8 @@ namespace PoseTeacher
         // TODO find good way to reference objects. @Unity might do this for us
         List<AvatarContainer> avatarListSelf;
         List<AvatarContainer> avatarListTeacher;
+        public GameObject avatarPrefab;
+        public GameObject avatarTPrefab;
 
         GameObject spatialAwarenessSystem;
 
@@ -355,6 +357,30 @@ namespace PoseTeacher
         public bool shouldCheckCorrectness = true;
         public float correctionThresh = 30.0f;
 
+
+        public List<AvatarContainer> GetSelfAvatarContainers()
+        {
+            return avatarListSelf;
+        }
+        public List<AvatarContainer> GetTeacherAvatarContainers()
+        {
+            return avatarListTeacher;
+        }
+
+        public void AddAvatar(bool self)
+        {
+            if (self)
+            {
+            //    GameObject avatarContainer = GameObject.Find("AvatarContainer");
+                GameObject newAvatar = Instantiate(avatarPrefab);
+                avatarListSelf.Add(new AvatarContainer(newAvatar));
+            } else
+            {
+            //    GameObject avatarContainer = GameObject.Find("AvatarContainerT");
+                GameObject newAvatar = Instantiate(avatarTPrefab);
+                avatarListTeacher.Add(new AvatarContainer(newAvatar));
+            }
+        }
         // Used for pose similarity calculation
         public String similarityBodyNr = "top"; // "total", "top", "middle", "bottom"
         public int similaritySelfNr = 0; // self list element to compare
@@ -555,7 +581,58 @@ namespace PoseTeacher
 
             }
 
+            UpdateIndicators();
+            
+        }
 
+
+        private int stepOrCoreoLength = 3;
+        private int currentStepOrCoreotFrame = 1;
+
+        private void UpdateIndicators()
+        {
+            foreach (AvatarContainer avatar in avatarListSelf)
+            {
+                Transform scoreIndicatorTr = avatar.avatarContainer.transform.Find("ScoreIndicator");
+                if (scoreIndicatorTr != null)
+                {
+                    GameObject scoreIndicator = scoreIndicatorTr.gameObject;
+                    if (scoreIndicator.activeSelf)
+                    {
+                        // TODO instead of progress use score...
+                        float progress = (float)currentStepOrCoreotFrame / stepOrCoreoLength;
+                        scoreIndicator.GetComponent<ProgressIndicator>().SetProgress(progress);
+                    }
+                }
+
+                Transform pulsingObjectTr = avatar.avatarContainer.transform.Find("PulsingCube");
+                if (pulsingObjectTr != null)
+                {
+                    GameObject pulseObject = pulsingObjectTr.gameObject;
+                    if (pulseObject.activeSelf)
+                    {
+                        // TODO make cube pulse depending on frames and stuff...
+                    }
+                }
+
+            }
+            foreach (AvatarContainer avatar in avatarListTeacher)
+            {
+                Transform progressIndicatorTr = avatar.avatarContainer.transform.Find("ProgressIndicator");
+                if (progressIndicatorTr != null)
+                {
+                    GameObject progressIndicator = progressIndicatorTr.gameObject;
+                    if (progressIndicator.activeSelf)
+                    {
+                        // TODO use correct progress...
+                        float progress = (float)currentStepOrCoreotFrame / stepOrCoreoLength;
+                        progressIndicator.GetComponent<ProgressIndicator>().SetProgress(progress);
+                    }
+                }
+
+            }
+            
+            // TODO update other indicators too
         }
 
         // Actions to do before quitting application
@@ -641,6 +718,12 @@ namespace PoseTeacher
             {
                 avatar.MovePerson(recorded_data);
             }
+        }
+
+        public void SetTeacherFile(string path)
+        {
+            TeacherPoseInputGetter.ReadDataPath = path;
+            SelfPoseInputGetter.ReadDataPath = path;
         }
     }
 }

@@ -12,17 +12,19 @@ namespace PoseTeacher
     }
 
     // Base interface for different type of containers (cube, stick etc.)
-    interface IContainer
+    public interface IContainer
     {
         // Activates/Deactivates the contained GameObject object
         void SetActive(bool active);
         // Move the contained GameObject object based on the input JointData
         void MovePerson(PoseData joint_data_list);
+
+        Vector3 GetReferencePosition();
     }
 
     // Class that contains information about the cube contained in an AvatarContainer object
     // TODO move debugObject functionalities from AvatarContainer to CubeContainer
-    class CubeContainer : IContainer
+    public class CubeContainer : IContainer
     {
         // CONSIDER moving GameObject to interface? Change the interface to abstract base class with SetActive function there
         public GameObject cube;
@@ -52,6 +54,11 @@ namespace PoseTeacher
             }
         }
 
+        public Vector3 GetReferencePosition()
+        {
+            return cube.transform.position;
+        }
+
         public void SetActive(bool active)
         {
             cube.SetActive(active);
@@ -59,7 +66,7 @@ namespace PoseTeacher
     }
 
     // Class that contains information about the stick figure contained in an AvatarContainer object
-    class StickContainer : IContainer
+    public class StickContainer : IContainer
     {
         public GameObject stick;
 
@@ -441,6 +448,11 @@ namespace PoseTeacher
             RightLowerLeg.transform.localScale = new Vector3(0.2f, 1.2f, 0.2f);
         }
 
+        public Vector3 GetReferencePosition()
+        {
+            return HipStick.transform.position;
+        }
+
         public void SetActive(bool active)
         {
             stick.SetActive(active);
@@ -450,7 +462,7 @@ namespace PoseTeacher
     }
 
     // Class that contains information about the robot and joints contained in an AvatarContainer object
-    class RobotContainer : IContainer
+    public class RobotContainer : IContainer
     {
         // stick needed for Move calculations
         // CONSIDER: own stick or global stick for avatar?
@@ -548,6 +560,11 @@ namespace PoseTeacher
             right_knee_joint.transform.Rotate(180, 0, -170);
         }
 
+        public Vector3 GetReferencePosition()
+        {
+            return stickContainer.HipStick.transform.position;
+        }
+
         public void SetActive(bool active)
         {
             robot.SetActive(active);
@@ -556,7 +573,7 @@ namespace PoseTeacher
 
     // Class that contains information about the skinned multi-person linear body model contained in an AvatarContainer object
     // TODO: add changer function for male/female
-    class SmplContainer : IContainer
+    public class SmplContainer : IContainer
     {
         // stick needed for Move calculations
         // CONSIDER: see robot
@@ -715,6 +732,11 @@ namespace PoseTeacher
             R_Knee.transform.Rotate(90, 180, 90);
         }
 
+        public Vector3 GetReferencePosition()
+        {
+            return stickContainer.HipStick.transform.position;
+        }
+
         public void SetActive(bool active)
         {
             smpl.SetActive(active);
@@ -726,7 +748,7 @@ namespace PoseTeacher
     // Probably use this when refactoring as the base class for the script attached to avatar containers
     // TODO: 
     //   !  rename class (include comments, use VS rename function!)
-    class AvatarContainer
+    public class AvatarContainer
     {
 
         // TODO: if cube avatar class is created, migrate this to there. Otherwise move the getting of other refrences from init to here
@@ -821,6 +843,52 @@ namespace PoseTeacher
                     smplContainer.MovePerson(live_data);
                     break;
             }
+
+           MoveIndicators();
+
+        }
+
+        private void MoveIndicators()
+        {
+            Transform scoreIndicatorTr = avatarContainer.transform.Find("ScoreIndicator");
+            if (scoreIndicatorTr != null)
+            {
+                GameObject scoreIndicator = scoreIndicatorTr.gameObject;
+                if (scoreIndicator.activeSelf)
+                {
+                    Vector3 newPosition = containers[activeType].GetReferencePosition();
+                    newPosition = new Vector3(newPosition.x, 1.2f, newPosition.z);
+                    if ((scoreIndicator.transform.position - newPosition).magnitude > 1)
+                        scoreIndicator.transform.position = newPosition;
+                }
+            }
+
+            Transform pulsingObjectTr = avatarContainer.transform.Find("PulsingCube");
+            if (pulsingObjectTr != null)
+            {
+                GameObject pulseObject = pulsingObjectTr.gameObject;
+                if (pulseObject.activeSelf)
+                {
+                    Vector3 newPosition = containers[activeType].GetReferencePosition();
+                    newPosition = new Vector3(newPosition.x, 1.7f, newPosition.z);
+                    if ((pulseObject.transform.position - newPosition).magnitude > 1)
+                        pulseObject.transform.position = newPosition;
+                    //pulseObject.transform.position = new Vector3(newPosition.x, 1.7f, newPosition.z);
+                }
+            }
+
+            Transform progressIndicatorTr = avatarContainer.transform.Find("ProgressIndicator");
+            if (progressIndicatorTr != null)
+            {
+                GameObject progressIndicator = progressIndicatorTr.gameObject;
+                if (progressIndicator.activeSelf)
+                {
+                    Vector3 newPosition = containers[activeType].GetReferencePosition();
+                    newPosition = new Vector3(newPosition.x, 1.2f, newPosition.z);
+                    if ((progressIndicator.transform.position - newPosition).magnitude > 1)
+                        progressIndicator.transform.position = newPosition;
+                }
+            }
         }
 
         // Change the currently active container-type of the avatar. (Change between stick, robot etc.)
@@ -829,6 +897,8 @@ namespace PoseTeacher
             containers[activeType].SetActive(false);
             containers[type].SetActive(true);
             activeType = type;
+
+            MoveIndicators();
         }
 
         // Mirrors the avatar
