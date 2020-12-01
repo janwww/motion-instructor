@@ -631,6 +631,70 @@ namespace PoseTeacher
             return scaled_score;
         }
 
+        public void ActivateIndicators()
+        {
+            foreach (AvatarContainer avatar in avatarListSelf)
+            {
+                Transform scoreIndicatorTr = avatar.avatarContainer.transform.Find("ScoreIndicator");
+                if (scoreIndicatorTr != null)
+                {
+                    GameObject scoreIndicator = scoreIndicatorTr.gameObject;
+                    scoreIndicator.SetActive(true);
+
+                }
+
+                Transform pulsingObjectTr = avatar.avatarContainer.transform.Find("PulsingCube");
+                if (pulsingObjectTr != null)
+                {
+                    GameObject pulseObject = pulsingObjectTr.gameObject;
+                    pulseObject.SetActive(true);
+                }
+
+            }
+            foreach (AvatarContainer avatar in avatarListTeacher)
+            {
+                Transform progressIndicatorTr = avatar.avatarContainer.transform.Find("ProgressIndicator");
+                if (progressIndicatorTr != null)
+                {
+                    GameObject progressIndicator = progressIndicatorTr.gameObject;
+                    progressIndicator.SetActive(true);
+                }
+
+            }
+        }
+
+        public void DeActivateIndicators()
+        {
+            foreach (AvatarContainer avatar in avatarListSelf)
+            {
+                Transform scoreIndicatorTr = avatar.avatarContainer.transform.Find("ScoreIndicator");
+                if (scoreIndicatorTr != null)
+                {
+                    GameObject scoreIndicator = scoreIndicatorTr.gameObject;
+                    scoreIndicator.SetActive(false);
+
+                }
+
+                Transform pulsingObjectTr = avatar.avatarContainer.transform.Find("PulsingCube");
+                if (pulsingObjectTr != null)
+                {
+                    GameObject pulseObject = pulsingObjectTr.gameObject;
+                    pulseObject.SetActive(false);
+                }
+
+            }
+            foreach (AvatarContainer avatar in avatarListTeacher)
+            {
+                Transform progressIndicatorTr = avatar.avatarContainer.transform.Find("ProgressIndicator");
+                if (progressIndicatorTr != null)
+                {
+                    GameObject progressIndicator = progressIndicatorTr.gameObject;
+                    progressIndicator.SetActive(false);
+                }
+
+            }
+        }
+
         private void UpdateIndicators()
         {
             foreach (AvatarContainer avatar in avatarListSelf)

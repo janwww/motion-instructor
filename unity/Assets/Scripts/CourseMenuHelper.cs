@@ -286,14 +286,18 @@ namespace PoseTeacher
         {
             MenuObject.SetActive(false);
             TrainingHolder.SetActive(true);
-            MainObject.GetComponent<PoseteacherMain>().ShowTeacher();
+            PoseteacherMain main = MainObject.GetComponent<PoseteacherMain>();
+            main.ShowTeacher();
+            main.ActivateIndicators();
         }
 
         public void StartCoreography()
         {
             MenuObject.SetActive(false);
             CoreographyHolder.SetActive(true);
-            MainObject.GetComponent<PoseteacherMain>().ShowTeacher();
+            PoseteacherMain main = MainObject.GetComponent<PoseteacherMain>();
+            main.ShowTeacher();
+            main.ActivateIndicators();
         }
     }
 }
