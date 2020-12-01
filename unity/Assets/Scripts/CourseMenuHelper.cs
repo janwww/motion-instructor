@@ -285,12 +285,14 @@ namespace PoseTeacher
         {
             MenuObject.SetActive(false);
             TrainingHolder.SetActive(true);
+            MainObject.GetComponent<PoseteacherMain>().ShowTeacher();
         }
 
         public void StartCoreography()
         {
             MenuObject.SetActive(false);
             CoreographyHolder.SetActive(true);
+            MainObject.GetComponent<PoseteacherMain>().ShowTeacher();
         }
     }
 }

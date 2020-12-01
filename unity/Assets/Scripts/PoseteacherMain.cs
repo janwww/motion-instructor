@@ -542,7 +542,7 @@ namespace PoseTeacher
             AnimateSelf(SelfPoseInputGetter.GetNextPose());
        //avatarSelf.stickContainer.stick.activeSelf
             // avatarListSelf[0].stickContainer.LeftUpperArm.GetComponent<Renderer>().material.color = Color.red;
-            AnimateSelf(TeacherPoseInputGetter.GetNextPose());
+           // AnimateSelf(TeacherPoseInputGetter.GetNextPose());
             // Get pose similarity
             avatarSimilarity.Update(); // update similarity calculation with each update loop step
             similarityScore = avatarSimilarity.similarityBodypart; // get single similarity score for selected body part
@@ -732,7 +732,13 @@ namespace PoseTeacher
         public void SetTeacherFile(string path)
         {
             TeacherPoseInputGetter.ReadDataPath = path;
-            SelfPoseInputGetter.ReadDataPath = path;
+            //SelfPoseInputGetter.ReadDataPath = path;
+        }
+
+        public void ShowTeacher()
+        {
+            avatarListTeacher[0].avatarContainer.gameObject.SetActive(true);
+            set_recording_mode(2);
         }
     }
 }
