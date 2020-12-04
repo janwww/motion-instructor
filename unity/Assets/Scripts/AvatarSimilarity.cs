@@ -26,11 +26,11 @@ namespace PoseTeacher
         // filter
         public double kalmanQ = 0.000001;
         public double kalmanR = 0.01;
+        bool activateKalman = true;
         public List<KalmanFilter> kalmanFilter;
-        bool kalmanOn = true;
 
         // constructor
-        public AvatarSimilarity(AvatarContainer selfIn, AvatarContainer teacherIn, String bodyNrIn, double kalmanQIn, double kalmanRIn)
+        public AvatarSimilarity(AvatarContainer selfIn, AvatarContainer teacherIn, String bodyNrIn, bool activateKalmanIn, double kalmanQIn, double kalmanRIn)
         {
 
             // assign
@@ -41,6 +41,7 @@ namespace PoseTeacher
             kalmanQ = kalmanQIn;
             kalmanR = kalmanRIn;
             stickNumber = 0;
+            activateKalman = activateKalmanIn;
 
             // initialize
             ///////////////////////////////////////////////////////////////////////////////////
@@ -540,7 +541,7 @@ namespace PoseTeacher
                 double cos_angle = selfRotation.w * teacherRotation.w + selfRotation.x * teacherRotation.x + selfRotation.y * teacherRotation.y + selfRotation.z * teacherRotation.z;
 				cos_angle = Math.Abs(cos_angle);
                 similarityStick[i] = cos_angle;
-                if (kalmanOn)
+                if (activateKalman)
                 {
                     similarityStick[i] = kalmanFilter[i].Update(similarityStick[i]);
                     if(similarityStick[i] > 1.0)

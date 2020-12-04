@@ -359,8 +359,9 @@ namespace PoseTeacher
         public String similarityBodyNr = "top"; // "total", "top", "middle", "bottom"
         public int similaritySelfNr = 0; // self list element to compare
         public int similarityTeacherNr = 0; // teacher list element to compare
-        public double similarityScore; // similarity value between 0 and 1 for defined body part
-		public double similarityKalmanQ = 0.000001; // Kalman process noise covariance (model strength)
+        public double similarityScore; // similarity output value between 0 and 1 for defined body part
+        public bool similarityActivateKalman = true; // activate kalman 
+        public double similarityKalmanQ = 0.000001; // Kalman process noise covariance (model strength)
         public double similarityKalmanR = 0.01; // Kalman sensor noise covariance (observation strength)
         public double similarityTotalScore = 0.0; // Total score
         public List<double> similarityScoreRaw; // similarity value for all body sticks
@@ -500,7 +501,7 @@ namespace PoseTeacher
 
 
             // initialize similarity calculation instance and assign selected avatars
-            avatarSimilarity = new AvatarSimilarity(avatarListSelf[similaritySelfNr], avatarListTeacher[similarityTeacherNr], similarityBodyNr, similarityKalmanQ, similarityKalmanR);
+            avatarSimilarity = new AvatarSimilarity(avatarListSelf[similaritySelfNr], avatarListTeacher[similarityTeacherNr], similarityBodyNr, similarityActivateKalman, similarityKalmanQ, similarityKalmanR);
         }
 
 
