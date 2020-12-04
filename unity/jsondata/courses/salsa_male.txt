@@ -1,0 +1,95 @@
+{
+	"CourseID":0,
+	"CourseTitle":"Salsa (Male)",
+	"CourseShortDescription":"Learn the passionate moves of Salsa!",
+	"CourseDescription":"Salsa is a Latin dance associated with the music genre of the same name which originated in the 1960s in New York City.",
+	"steps": [
+		{
+			"Position":0,
+			"Name":"Pa'l medio",
+			"Description":"Feel the rhythm of Salsa!\nSimple side step: point and step.",
+			"Blocks": [
+				{
+					"FileLocation":"jsondata/2020_05_26-21_23_28.txt"
+				},
+				{
+					"FileLocation":"jsondata/2020_05_26-21_23_28.txt"
+				}
+			]
+		},
+		{
+			"Position":1,
+			"Name":"Ilevala pa'abajo",
+			"Description":"Move to the rhythm of Salsa!\nSimple steps on 1-2-3, with a little twist.",
+			"Blocks": [
+				{
+					"FileLocation":"jsondata/2020_05_26-22_55_32.txt"
+				},
+				{
+					"FileLocation":"jsondata/2020_05_26-22_55_32.txt"
+				}
+			]
+		},
+		{
+			"Position":2,
+			"Name":"Exhibela",
+			"Description":"Spin her around!\nUse your hands to spin your (imaginary) partner.",
+			"Blocks": [
+				{
+					"FileLocation":"jsondata/2020_05_26-22_55_32.txt"
+				},
+				{
+					"FileLocation":"jsondata/2020_05_26-22_55_32.txt"
+				}
+			]
+		},
+		{
+			"Position":3,
+			"Name":"Dile Que No",
+			"Description":"Lead the follower to your other side,\ncompleting a 180 degree turn.",
+			"Blocks": [
+				{
+					"FileLocation":"jsondata/2020_05_26-21_23_28.txt"
+				},
+				{
+					"FileLocation":"jsondata/2020_05_26-21_23_28.txt"
+				}
+			]
+		},
+		{
+			"Position":5,
+			"Name":"Guapea",
+			"Description":"placeholder...",
+			"Blocks": [
+				{
+					"FileLocation":"jsondata/2020_05_26-21_23_28.txt"
+				},
+				{
+					"FileLocation":"jsondata/2020_05_26-21_23_28.txt"
+				}
+			]
+		},
+		{
+			"Position":6,
+			"Name":"Enchufla",
+			"Description":"placeholder...",
+			"Blocks": [
+				{
+					"FileLocation":"jsondata/2020_05_26-21_23_28.txt"
+				},
+				{
+					"FileLocation":"jsondata/2020_05_26-21_23_28.txt"
+				}
+			]
+		}
+	],
+	"coreographies": [
+		{
+			"Position":4,
+			"Name":"Coreography 1",
+			"Description":"Concatenate the basic steps into a coreography.\n Many uses this as their first move to get into the rhythm.",
+			"HighScore":0,
+			"FileLocation":"jsondata/2020_05_26-21_23_28.txt"
+		}
+	]
+}
