@@ -411,12 +411,14 @@ namespace PoseTeacher
         public String similarityBodyNr = "total"; // "total", "top", "middle", "bottom"
         public int similaritySelfNr = 0; // self list element to compare
         public int similarityTeacherNr = 0; // teacher list element to compare
-        public double similarityScore; // similarity output value between 0 and 1 for defined body part
+        public double similarityScore = 0; // similarity output value between 0 and 1 for defined body part
+        public double similarityPenalty = 1.0; // exponential penalty coefficient to be applied when similarity of body part not optimal fit [0....inf] -> 0 every body part has same weight
         public bool similarityActivateKalman = true; // activate kalman 
         public double similarityKalmanQ = 0.000001; // Kalman process noise covariance (model strength)
-        public double similarityKalmanR = 0.01; // Kalman sensor noise covariance (observation strength)
-        public double similarityTotalScore = 0.0; // Total score
+        public double similarityKalmanR = 1.0; // Kalman sensor noise covariance (observation strength)
+        public double similarityTotalScore = 0; // Total score
         public List<double> similarityScoreRaw; // similarity value for all body sticks
+        public List<double> similarityWeightRaw; // weight value for all body sticks
         AvatarSimilarity avatarSimilarity;
         VisualisationSimilarity avatarVisualisationSimilarity;
         // RandomGraph randomGraph;
@@ -555,7 +557,7 @@ namespace PoseTeacher
 
 
             // initialize similarity calculation instance and assign selected avatars
-            avatarSimilarity = new AvatarSimilarity(avatarListSelf[similaritySelfNr], avatarListTeacher[similarityTeacherNr], similarityBodyNr, similarityActivateKalman, similarityKalmanQ, similarityKalmanR);
+            avatarSimilarity = new AvatarSimilarity(avatarListSelf[similaritySelfNr], avatarListTeacher[similarityTeacherNr], similarityBodyNr, similarityPenalty, similarityActivateKalman, similarityKalmanQ, similarityKalmanR);
             avatarVisualisationSimilarity = new VisualisationSimilarity(avatarListSelf[similaritySelfNr]);
            //  randomGraph = new RandomGraph();
         }
@@ -574,7 +576,8 @@ namespace PoseTeacher
             avatarSimilarity.Update(); // update similarity calculation with each update loop step
             similarityScore = avatarSimilarity.similarityBodypart; // get single similarity score for selected body part
             similarityScoreRaw = avatarSimilarity.similarityStick; // get similarity score for each stick element
-            similarityTotalScore = avatarSimilarity.totalScore; // get total Score
+            similarityWeightRaw = avatarSimilarity.stickWeight; // get similarity score for each stick element
+            similarityTotalScore = (int)avatarSimilarity.totalScore; // get total Score
 
             //avatarVisualisationSimilarity.Update(similarityScoreRaw);// avatarVisualisationSimilarity.Update(similarityScore);
             avatarVisualisationSimilarity.UpdatePart(similarityBodyNr, similarityScore);

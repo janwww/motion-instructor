@@ -13,10 +13,11 @@ namespace PoseTeacher
         public AvatarContainer teacher; // object containing teacher avatar
         public String bodyNr; // body part we want to show similarity for
         public List<string> stickNames; // all names of sticks existing in avatar
-        public List<double> stickWeight; // weight to each stick in avatar
-        public List<double> stickWeightCorrect; // correction weight to each stick in avatar
+        public List<double> stickWeightBody; // weight to each stick in avatar based on body variable
+        public List<double> stickWeightAdapt; // static correction weight to each stick in avatar
+        public List<double> stickWeight; // temporary weight value for all body sticks
         public int stickNumber; // number of sticks existing in avatar
-        public double stickWeightSum; // sum of all stick weights
+        public double stickWeightTotal; // sum of all stick weights
         public double totalScore; // total score
 
         // output
@@ -24,13 +25,14 @@ namespace PoseTeacher
         public List<double> similarityStick; // similarity for each stick in stickNames
 
         // filter
-        public double kalmanQ = 0.000001;
-        public double kalmanR = 0.01;
+        public double penalty = 0.0;
+        public double kalmanQ = 0.0001;
+        public double kalmanR = 1.0;
         bool activateKalman = true;
         public List<KalmanFilter> kalmanFilter;
 
         // constructor
-        public AvatarSimilarity(AvatarContainer selfIn, AvatarContainer teacherIn, String bodyNrIn, bool activateKalmanIn, double kalmanQIn, double kalmanRIn)
+        public AvatarSimilarity(AvatarContainer selfIn, AvatarContainer teacherIn, String bodyNrIn, double penaltyIn, bool activateKalmanIn, double kalmanQIn, double kalmanRIn)
         {
 
             // assign
@@ -38,6 +40,7 @@ namespace PoseTeacher
             self = selfIn;
             teacher = teacherIn;
             bodyNr = bodyNrIn;
+            penalty = penaltyIn;
             kalmanQ = kalmanQIn;
             kalmanR = kalmanRIn;
             stickNumber = 0;
@@ -45,14 +48,15 @@ namespace PoseTeacher
 
             // initialize
             ///////////////////////////////////////////////////////////////////////////////////
-            SetBody(bodyNr, kalmanQIn, kalmanRIn);
+            SetBody(bodyNr, penaltyIn, kalmanQIn, kalmanRIn);
         }
 
-        public void SetBody(String bodyNrIn, double kalmanQIn, double kalmanRIn)
+        public void SetBody(String bodyNrIn, double penaltyIn, double kalmanQIn, double kalmanRIn)
         {
             // assign
             ///////////////////////////////////////////////////////////////////////////////////
             bodyNr = bodyNrIn;
+            penalty = penaltyIn;
             kalmanQ = kalmanQIn;
             kalmanR = kalmanRIn;
 
@@ -93,9 +97,8 @@ namespace PoseTeacher
             });
             stickNumber = stickNames.Count;
 
-            if (bodyNr.Equals("total")) {
-                // weight each stick
-                stickWeight = new List<double>(new double[] {
+            // weight each stick
+            stickWeight = new List<double>(new double[] {
                 1.0,
                 1.0,
                 1.0,
@@ -127,11 +130,46 @@ namespace PoseTeacher
                 1.0,
                 1.0
             });
+
+            if (bodyNr.Equals("total")) {
+                // weight each stick
+                stickWeightBody = new List<double>(new double[] {
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                });
             };
             if (bodyNr.Equals("top"))
             {
                 // weight each stick
-                stickWeight = new List<double>(new double[] {
+                stickWeightBody = new List<double>(new double[] {
                 0.0,
                 0.0,
                 0.0,
@@ -167,7 +205,7 @@ namespace PoseTeacher
             if (bodyNr.Equals("middle"))
             {
                 // weight each stick
-                stickWeight = new List<double>(new double[] {
+                stickWeightBody = new List<double>(new double[] {
                 0.0,
                 0.0,
                 1.0,
@@ -203,7 +241,7 @@ namespace PoseTeacher
             if (bodyNr.Equals("bottom"))
             {
                 // weight each stick
-                stickWeight = new List<double>(new double[] {
+                stickWeightBody = new List<double>(new double[] {
                 1.0,
                 1.0,
                 0.0,
@@ -241,11 +279,11 @@ namespace PoseTeacher
             ///////////////////////////////////////////////////////////////////////////////////
 
             // correct each default stick weight
-            stickWeightCorrect = new List<double>(new double[] {
+            stickWeightAdapt = new List<double>(new double[] {
                 1.0,
                 1.0,
-                0.0,
-                0.0,
+                1.0,
+                1.0,
                 1.0,
                 1.0,
                 1.0,
@@ -275,11 +313,10 @@ namespace PoseTeacher
             });
 
             // calculate final stick weight
-            stickWeightSum = 0.0;
+            stickWeightTotal = 0.0;
             for (int i = 0; i < stickNumber; i++)
             {
-                stickWeight[i] = stickWeight[i] * stickWeightCorrect[i];
-                stickWeightSum += stickWeight[i];
+                stickWeightTotal += stickWeightBody[i] * stickWeightAdapt[i];
             }
 
             // set default similarity each stick
@@ -335,7 +372,9 @@ namespace PoseTeacher
 		{
 			// get similarity (between 0 and 1) of orientation between all sticks
 			double similarityTotal = 0.0;
-			for (int i = 0; i < stickNumber; i++)
+            double stickWeightPenalty = 1.0;
+            stickWeightTotal = 0.0;
+            for (int i = 0; i < stickNumber; i++)
 			{
                 // get position and orientation of relevant game objects
                 Vector3 selfPosition;
@@ -540,6 +579,8 @@ namespace PoseTeacher
                 // background: https://gdalgorithms-list.narkive.com/9TaVDT9G/quaternion-similarity-measure
                 double cos_angle = selfRotation.w * teacherRotation.w + selfRotation.x * teacherRotation.x + selfRotation.y * teacherRotation.y + selfRotation.z * teacherRotation.z;
 				cos_angle = Math.Abs(cos_angle);
+
+                // similarity after filter
                 similarityStick[i] = cos_angle;
                 if (activateKalman)
                 {
@@ -553,9 +594,19 @@ namespace PoseTeacher
                         similarityStick[i] = 0.0;
                     }
                 }
-                similarityTotal += similarityStick[i] * stickWeight[i];
+                similarityTotal += similarityStick[i];
+
+                // penalty
+                stickWeightPenalty = 1.0/(Math.Pow(similarityStick[i], penalty));
+
+                // weight
+                stickWeight[i] = stickWeightBody[i] * stickWeightAdapt[i] * stickWeightPenalty;
+                stickWeightTotal += stickWeight[i];
+
             }
-            similarityBodypart = similarityTotal / stickWeightSum;
+            // normalization
+            similarityBodypart = similarityTotal / stickWeightTotal;
+            // timewise total score
             totalScore = totalScore + similarityBodypart;
 
         }

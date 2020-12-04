@@ -9,8 +9,8 @@ namespace PoseTeacher
         // Constants:
         //-----------------------------------------------------------------------------------------
 
-        public const double DEFAULT_Q = 0.000001;
-        public const double DEFAULT_R = 0.01;
+        public const double DEFAULT_Q = 0.0001;
+        public const double DEFAULT_R = 1.0;
 
         public const double DEFAULT_P = 1;
 
