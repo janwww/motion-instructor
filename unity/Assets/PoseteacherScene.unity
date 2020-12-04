@@ -11763,7 +11763,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1285289408}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: -0.303, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 0.1}
   m_Children: []
   m_Father: {fileID: 1352144398}
@@ -14444,6 +14444,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   gobject: {fileID: 1744107165}
+  xaxis: {fileID: 0}
+  yaxis: {fileID: 0}
 --- !u!120 &1744107167
 LineRenderer:
   m_ObjectHideFlags: 0
