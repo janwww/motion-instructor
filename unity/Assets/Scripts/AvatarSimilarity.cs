@@ -358,7 +358,7 @@ namespace PoseTeacher
             for (int i = 0; i < stickNumber; i++)
             {
                 kalmanFilter[i] = new KalmanFilter(kalmanQ, kalmanR);
-                kalmanFilter[i].Reset(0.0);
+                kalmanFilter[i].Reset(1.0);
             }
 
 
