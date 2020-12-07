@@ -11,314 +11,9 @@ using System.Security.Permissions;
 
 namespace PoseTeacher
 {
-
-    // Label for various containers
-    public enum PoseInputSource
+    public enum MainState
     {
-        KINECT, WEBSOCKET, FILE
-    }
-
-    [CLSCompliant(false)]
-    public class PoseInputGetter
-    {
-
-        PoseInputSource CurrentPoseInputSource;
-        bool recording = false;
-        PoseData CurrentPose { get; set; }
-
-        // Azure Kinect variables
-        Device device;
-        BodyTracker tracker;
-
-        // Used for displaying RGB Kinect video
-        public Renderer videoRenderer;
-        RawImage m_RawImage;
-        GameObject streamCanvas;
-        GameObject videoCube;
-
-        //Select a Texture in the Inspector to change it (unused)
-        public Texture m_Texture;
-        Texture2D tex;
-
-        //Websocket variables
-        WebSocket websocket;
-        public string WS_ip = "ws://localhost:2567";
-        private PoseData poseLiveWS = null; // newest pose data from WS TODO: merge with CurrentPose
-
-        //File variables
-        IEnumerator<string> SequenceEnum;
-        private string _ReadDataPath;
-        public string ReadDataPath {
-            get { return _ReadDataPath; }
-            set { _ReadDataPath = value; GetTotalPoseNumber(); LoadData(); } 
-        }
-
-        private int _TotalFilePoseNumber;
-         public int TotalFilePoseNumber
-        {
-            get { return _TotalFilePoseNumber; }
-        }
-        private int _CurrentFilePoseNumber;
-        public int CurrentFilePoseNumber
-        {
-            get { return _CurrentFilePoseNumber; }
-        }
-
-        public string WriteDataPath { get; set; }
-
-        public PoseInputGetter(PoseInputSource InitPoseInputSource)
-        {
-            CurrentPoseInputSource = InitPoseInputSource;
-
-            switch (CurrentPoseInputSource)
-            {
-                case PoseInputSource.KINECT:
-                    StartAzureKinect();
-                    break;
-                
-                case PoseInputSource.WEBSOCKET:
-                    StartWebsocket();
-                    break;
-
-                case PoseInputSource.FILE:
-                    break;
-            }
-        }
-
-        private async void StartWebsocket()
-        {
-            // Contains code to instantiate a websocket to obtain pose data
-            // Web socket is currently used only for Kinect Alternative
-
-            websocket = new WebSocket(WS_ip);
-
-            websocket.OnOpen += () =>
-            {
-                Debug.Log("WS connection open!");
-            };
-
-            websocket.OnError += (e) =>
-            {
-                Debug.Log("Error! " + e);
-            };
-
-            websocket.OnClose += (e) =>
-            {
-                Debug.Log("WS connection closed!");
-            };
-
-            websocket.OnMessage += (bytes) =>
-            {
-                // If joint information is recieved, set poseLiveWS
-                var message = System.Text.Encoding.UTF8.GetString(bytes);
-                Debug.Log("WS message received: " + message);
-                var remote_joints = PoseDataUtils.DeserializeRJL(message);
-                Debug.Log(remote_joints);
-                poseLiveWS = PoseDataUtils.Remote2PoseData(remote_joints);
-            };
-
-            // Keep sending messages at every 0.3s
-            // TODO: if using websocket, make this work
-            //InvokeRepeating("SendWebSocketMessage", 0.0f, 0.3f);
-
-            await websocket.Connect();
-        }
-        // For testing websocket
-        async void SendWebSocketMessage()
-        {
-            if (websocket.State == WebSocketState.Open)
-            {
-                // Sending text
-                await websocket.SendText("Test message");
-            }
-        }
-
-        private void StartAzureKinect()
-        {
-            // Print to log
-            Debug.Log("Try loading device");
-            this.device = Device.Open(0);
-            var config = new DeviceConfiguration
-            {
-                ColorResolution = ColorResolution.r720p,
-                ColorFormat = ImageFormat.ColorBGRA32,
-                DepthMode = DepthMode.NFOV_Unbinned
-            };
-            device.StartCameras(config);
-
-            if (device != null)
-            {
-                Debug.Log("Found non-null device");
-                Debug.Log(device);
-            }
-
-            var calibration = device.GetCalibration(config.DepthMode, config.ColorResolution);
-
-            var trackerConfiguration = new TrackerConfiguration
-            {
-                SensorOrientation = SensorOrientation.OrientationDefault,
-                CpuOnlyMode = false
-            };
-            this.tracker = BodyTracker.Create(calibration, trackerConfiguration);
-            Debug.Log("Device loading finished");
-        }
-
-        private void GetTotalPoseNumber()
-        {
-            LoadData();
-            int count = 0;
-            while (SequenceEnum.MoveNext())
-            {
-                count++;
-            }
-            _TotalFilePoseNumber = count;
-            _CurrentFilePoseNumber = 0;
-        }
-
-        private void LoadData()
-        {
-            SequenceEnum = File.ReadLines(ReadDataPath).GetEnumerator();
-        }
-
-        // Appends the passed pose (PoseDataJSON format) to the file as JSON
-        void AppendRecordedFrame(PoseDataJSON jdl)
-        {
-            string json = JsonUtility.ToJson(jdl) + Environment.NewLine;
-            File.AppendAllText(WriteDataPath, json);
-        }
-        
-        // reset recording file
-        void ResetRecording()
-        {
-            File.WriteAllText(WriteDataPath, "");
-            Debug.Log("Reset recording file");
-        }
-
-
-        public PoseData GetNextPose()
-        {
-            switch (CurrentPoseInputSource)
-            {
-                case PoseInputSource.WEBSOCKET:
-                    #if !UNITY_WEBGL || UNITY_EDITOR
-                    websocket.DispatchMessageQueue();
-                    #endif
-                    // poseLiveWS is non-null if alternative is sending pose data over websocket
-                    if (poseLiveWS != null)
-                    {
-                        // Assign last pose from websocket
-                        // TODO: maybe animate in websocket code directly upon recieveing?
-                        CurrentPose = poseLiveWS;
-                    }
-                    else
-                    {
-                        Debug.Log("No pose recieved from WebSocket!");
-                        
-                    }
-                    break;
-
-                case PoseInputSource.FILE:
-
-                    _CurrentFilePoseNumber++;
-                    // TODO: Only load once
-                    // Quick and dirty way to loop (by reloading file)
-                    if (SequenceEnum == null || !SequenceEnum.MoveNext())
-                    {
-                        LoadData();
-                        SequenceEnum.MoveNext();
-                        _CurrentFilePoseNumber = 1;
-                    }
-
-
-                    string frame_json = SequenceEnum.Current;
-                    PoseData fake_live_data = PoseDataUtils.JSONstring2PoseData(frame_json);
-                    CurrentPose = fake_live_data;
-                    break;
-
-                case PoseInputSource.KINECT:
-                    if (device != null)
-                    {
-                        // TODO: move to function?
-                        // potentially simplify by not using "using" scopes
-                        using (Capture capture = device.GetCapture())
-                        {
-                            // Make tracker estimate body
-                            tracker.EnqueueCapture(capture);
-
-                            // Code for getting RGB image from camera
-                            var color = capture.Color;
-                            if (color != null && color.WidthPixels > 0)
-                            {
-                                UnityEngine.Object.Destroy(tex);// required to not keep old images in memory
-                                tex = new Texture2D(color.WidthPixels, color.HeightPixels, TextureFormat.BGRA32, false);
-                                tex.LoadRawTextureData(color.GetBufferCopy());
-                                tex.Apply();
-
-                                //Fetch the RawImage component from the GameObject
-                                if (streamCanvas != null)
-                                {
-                                    m_RawImage = streamCanvas.GetComponent<RawImage>();
-                                    if (m_RawImage != null)
-                                    {
-                                        m_RawImage.texture = tex;
-                                        videoRenderer.material.mainTexture = tex;
-                                    }
-                                }
-
-                            }
-                        }
-
-                        // Get pose estimate from tracker
-                        using (BodyFrame frame = tracker.PopResult())
-                        {
-                            Debug.LogFormat("{0} bodies found.", frame.BodyCount);
-
-                            //  At least one body found by Body Tracking
-                            if (frame.BodyCount > 0)
-                            {
-                                // Use first estimated person, if mutiple are in the image
-                                // !!! There are (probably) no guarantees on consisitent ordering between estimates
-                                var bodies = frame.Bodies;
-                                var body = bodies[0];
-
-                                // Apply pose to user avatar(s)
-                                PoseData live_data = PoseDataUtils.Body2PoseData(body);
-
-                                if (recording) // recording
-                                {
-                                    PoseDataJSON jdl = PoseDataUtils.Body2PoseDataJSON(body);
-                                    AppendRecordedFrame(jdl);
-                                }
-                                CurrentPose = live_data;
-                            }
-                        }
-                    }
-                    else
-                    {
-                        Debug.Log("device is null!");
-                    }
-                    break;
-                    
-            }
-            return CurrentPose;
-        }
-
-        public async void Dispose()
-        {
-            if (websocket != null)
-            {
-                await websocket.Close();
-            }
-            if (tracker != null)
-            {
-                tracker.Dispose();
-            }
-            if (device != null)
-            {
-                device.Dispose();
-            }
-        }
-
+        PAUSE, PLAY_SELF, PLAY_ALL
     }
 
     // Main script
@@ -341,7 +36,7 @@ namespace PoseTeacher
         public GameObject avatarPrefab;
         public GameObject avatarTPrefab;
 
-        GameObject spatialAwarenessSystem;
+        //GameObject spatialAwarenessSystem;
 
         // Decides what action is being done with joints
         // TODO: 
@@ -359,13 +54,12 @@ namespace PoseTeacher
 
 
 
-        // File that is being read from
-        string current_file = "jsondata/2020_05_26-22_55_32.txt";
+        // Default file to read from for techer. Should not actually be played
+        private string current_file = "";
 
-        //For fake data 
-        //string fake_file = "jsondata/2020_05_26-21_23_28.txt";
-        //string fake_file = "jsondata/2020_05_26-22_55_32.txt";
-        string fake_file = "jsondata/2020_05_27-00_01_59.txt";
+        // For fake data when emulating unput from file
+        // "jsondata/2020_05_26-21_23_28.txt"  "jsondata/2020_05_26-22_55_32.txt"  "jsondata/2020_05_27-00_01_59.txt"
+        private readonly string fake_file = "jsondata/2020_05_27-00_01_59.txt";
 
         // can be changed in the UI
         // TODO: probaly change to using functions to toggle
@@ -472,25 +166,13 @@ namespace PoseTeacher
         {
             isMaleSMPL = value;
         }
-        //public void set_OpenPose(bool value)
-        //{
-        //    usingKinectAlternative = value;
-        //}
         public void set_recording_mode(int rec)
         {
             recording_mode = rec;
         }
-        public void set_correctionThresh(float thresh)
-        {
-            correctionThresh = thresh;
-        }
         public void set_playback_speed(int a)
         {
             playback_speed = a;
-        }
-        public void set_current_file(string curr)
-        {
-            current_file = curr;
         }
 
         // For setting in menu
@@ -520,8 +202,6 @@ namespace PoseTeacher
             string timestamp = DateTime.Now.ToString("yyyy_MM_dd-HH_mm_ss");
             current_file = "jsondata/" + timestamp + ".txt";
         }
-
-
 
         // Do once on scene startup
         private void Start()
@@ -611,13 +291,6 @@ namespace PoseTeacher
                         playback_counter = 0;
                     }
                 }
-
-                // TODO: Put this in AvatarContainer?
-                if (shouldCheckCorrectness)
-                {
-                    showCorrection(avatarListSelf[0], avatarListTeacher[0]);
-                }
-
             }
 
             UpdateIndicators();
@@ -779,35 +452,6 @@ namespace PoseTeacher
                 Debug.Log("R - set recording_mode to 4 (reset_recording)");
                 recording_mode = 4;
             }
-        }
-
-
-        // Change material of stickContainer avatar if not close enough to teacher pose
-        // CONSIDER: move (part of it) to AvatarContainer or Containers
-        void showCorrection(AvatarContainer avatarSelf, AvatarContainer avatarTeacher)
-        {
-            float LeftUpperArm_difference = Quaternion.Angle(avatarSelf.stickContainer.LeftUpperArm.transform.localRotation, avatarTeacher.stickContainer.LeftUpperArm.transform.localRotation);
-            float LeftLowerArm_difference = Quaternion.Angle(avatarSelf.stickContainer.LeftLowerArm.transform.localRotation, avatarTeacher.stickContainer.LeftLowerArm.transform.localRotation);
-            float RightUpperArm_difference = Quaternion.Angle(avatarSelf.stickContainer.RightUpperArm.transform.localRotation, avatarTeacher.stickContainer.RightUpperArm.transform.localRotation);
-            float RightLowerArm_difference = Quaternion.Angle(avatarSelf.stickContainer.RightLowerArm.transform.localRotation, avatarTeacher.stickContainer.RightLowerArm.transform.localRotation);
-            float LeftUpperLeg_difference = Quaternion.Angle(avatarSelf.stickContainer.LeftUpperLeg.transform.localRotation, avatarTeacher.stickContainer.LeftUpperLeg.transform.localRotation);
-            float LeftLowerLeg_difference = Quaternion.Angle(avatarSelf.stickContainer.LeftLowerLeg.transform.localRotation, avatarTeacher.stickContainer.LeftLowerLeg.transform.localRotation);
-            float RightUpperLeg_difference = Quaternion.Angle(avatarSelf.stickContainer.RightUpperLeg.transform.localRotation, avatarTeacher.stickContainer.RightUpperLeg.transform.localRotation);
-            float RightLowerLeg_difference = Quaternion.Angle(avatarSelf.stickContainer.RightLowerLeg.transform.localRotation, avatarTeacher.stickContainer.RightLowerLeg.transform.localRotation);
-            float thresh = correctionThresh;
-
-            if (avatarSelf.stickContainer.stick.activeSelf)
-            {
-                avatarSelf.stickContainer.LeftUpperArm.GetComponent<Renderer>().material = (LeftUpperArm_difference > thresh) ? incorrect_material : correct_material;
-                avatarSelf.stickContainer.LeftLowerArm.GetComponent<Renderer>().material = (LeftLowerArm_difference > thresh) ? incorrect_material : correct_material;
-                avatarSelf.stickContainer.RightUpperArm.GetComponent<Renderer>().material = (RightUpperArm_difference > thresh) ? incorrect_material : correct_material;
-                avatarSelf.stickContainer.RightLowerArm.GetComponent<Renderer>().material = (RightLowerArm_difference > thresh) ? incorrect_material : correct_material;
-                avatarSelf.stickContainer.LeftUpperLeg.GetComponent<Renderer>().material = (LeftUpperLeg_difference > thresh) ? incorrect_material : correct_material;
-                avatarSelf.stickContainer.LeftLowerLeg.GetComponent<Renderer>().material = (LeftLowerLeg_difference > thresh) ? incorrect_material : correct_material;
-                avatarSelf.stickContainer.RightUpperLeg.GetComponent<Renderer>().material = (RightUpperLeg_difference > thresh) ? incorrect_material : correct_material;
-                avatarSelf.stickContainer.RightLowerLeg.GetComponent<Renderer>().material = (RightLowerLeg_difference > thresh) ? incorrect_material : correct_material;
-            }
-
         }
 
 
