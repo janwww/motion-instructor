@@ -10770,7 +10770,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 90}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -0.616, y: 0.017}
+  m_AnchoredPosition: {x: -0.616, y: 0.1}
   m_SizeDelta: {x: 20, y: 5}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1161761257
@@ -12746,8 +12746,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1352144397}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: -0.1, z: 0.9}
-  m_LocalScale: {x: 1, y: 0.6, z: 0.5}
+  m_LocalPosition: {x: 0, y: 0, z: 0.9}
+  m_LocalScale: {x: 1, y: 0.8, z: 0.5}
   m_Children:
   - {fileID: 1285289409}
   m_Father: {fileID: 1813381914}
@@ -15475,9 +15475,32 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dc495e2b050a91944a49bbb0ea9cc9d9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  videoRenderer: {fileID: 0}
+  avatarPrefab: {fileID: 0}
+  avatarTPrefab: {fileID: 0}
+  recording_mode: 0
+  playback_speed: 1
+  isMaleSMPL: 1
+  usingKinectAlternative: 1
+  SelfPoseInputSource: 2
+  mirroring: 1
+  normal_material: {fileID: 0}
+  correct_material: {fileID: 0}
+  incorrect_material: {fileID: 0}
+  shouldCheckCorrectness: 1
+  correctionThresh: 30
+  similarityBodyNr: total
+  similaritySelfNr: 0
+  similarityTeacherNr: 0
+  similarityScore: 0
+  similarityKalmanQ: 0.000001
+  similarityKalmanR: 0.01
+  similarityTotalScore: 0
+  similarityScoreRaw: []
   gobject: {fileID: 1744107165}
   newobject: {fileID: 1813381909}
   coord: {fileID: 1300287501}
+  vectorElementsN: 200
 --- !u!222 &1813381912
 CanvasRenderer:
   m_ObjectHideFlags: 2
