@@ -373,7 +373,6 @@ namespace PoseTeacher
         public bool usingKinectAlternative = true;
         public PoseInputSource SelfPoseInputSource = PoseInputSource.FILE;
 
-
         public bool mirroring = true; // can probably be changed to private (if no UI elements use it)
 
         // Used for showing if pose is correct
@@ -411,13 +410,16 @@ namespace PoseTeacher
         public String similarityBodyNr = "total"; // "total", "top", "middle", "bottom"
         public int similaritySelfNr = 0; // self list element to compare
         public int similarityTeacherNr = 0; // teacher list element to compare
-        public double similarityScore; // similarity value between 0 and 1 for defined body part
-		public double similarityKalmanQ = 0.000001; // Kalman process noise covariance (model strength)
+        public double similarityScore = 0.0; // similarity value between 0 and 1 for defined body part
+        public double similarityKalmanQ = 0.000001; // Kalman process noise covariance (model strength)
         public double similarityKalmanR = 0.01; // Kalman sensor noise covariance (observation strength)
         public double similarityTotalScore = 0.0; // Total score
         public List<double> similarityScoreRaw; // similarity value for all body sticks
         AvatarSimilarity avatarSimilarity;
         VisualisationSimilarity avatarVisualisationSimilarity;
+        public static double similarityScoreExtern = 0.0; // similarity value between 0 and 1 for defined body part (extern global variable for plot)
+        public static double similarityTotalScoreExtern = 0.0; // Total score (extern global variable for plot)
+
         // RandomGraph randomGraph;
 
 
@@ -574,6 +576,8 @@ namespace PoseTeacher
             similarityScore = avatarSimilarity.similarityBodypart; // get single similarity score for selected body part
             similarityScoreRaw = avatarSimilarity.similarityStick; // get similarity score for each stick element
             similarityTotalScore = avatarSimilarity.totalScore; // get total Score
+            similarityScoreExtern = similarityScore; // global
+            similarityTotalScoreExtern = similarityTotalScore; // global
 
             //avatarVisualisationSimilarity.Update(similarityScoreRaw);// avatarVisualisationSimilarity.Update(similarityScore);
             avatarVisualisationSimilarity.UpdatePart(similarityBodyNr, similarityScore);
