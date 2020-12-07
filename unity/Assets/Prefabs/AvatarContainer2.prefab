@@ -1893,7 +1893,7 @@ GameObject:
   - component: {fileID: 3756193402720495900}
   - component: {fileID: 3756193402720495901}
   m_Layer: 0
-  m_Name: SpineNaval
+  m_Name: SpineNavel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4016,6 +4016,18 @@ MonoBehaviour:
   localCenter: {x: 0, y: 0, z: -0.008}
   bounds: {x: 0.032, y: 0.032}
   touchableCollider: {fileID: 3756193403215306708}
+--- !u!114 &3756193403961146014
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3756193403237474734}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e95ba9d0e8917d542afe15dd4d153f61, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &3756193403254722088
 GameObject:
   m_ObjectHideFlags: 0
@@ -6642,18 +6654,6 @@ MonoBehaviour:
   onHoverExited:
     m_PersistentCalls:
       m_Calls: []
---- !u!114 &3756193403961146014
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3756193403237474734}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e95ba9d0e8917d542afe15dd4d153f61, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &3756193403980269182
 GameObject:
   m_ObjectHideFlags: 0

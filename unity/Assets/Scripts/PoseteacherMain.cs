@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Microsoft.Azure.Kinect.Sensor;
-using Microsoft.Azure.Kinect.Sensor.BodyTracking;
+using Microsoft.Azure.Kinect.BodyTracking;
 using UnityEngine.UI;
 using System.IO;
 using System.Collections;
@@ -65,7 +65,7 @@ namespace PoseTeacher
         // TODO: probaly change to using functions to toggle
         public bool isMaleSMPL = true;
         public bool usingKinectAlternative = true;
-        public PoseInputSource SelfPoseInputSource = PoseInputSource.FILE;
+        public PoseInputSource SelfPoseInputSource = PoseInputSource.KINECT;
 
 
         public bool mirroring = true; // can probably be changed to private (if no UI elements use it)
@@ -233,7 +233,7 @@ namespace PoseTeacher
             avatarListTeacher[1].avatarContainer.gameObject.SetActive(false);
 
             SelfPoseInputGetter = new PoseInputGetter(SelfPoseInputSource){ ReadDataPath = fake_file };
-            TeacherPoseInputGetter = new PoseInputGetter(PoseInputSource.FILE){ ReadDataPath = current_file};
+            TeacherPoseInputGetter = new PoseInputGetter(PoseInputSource.FILE){ ReadDataPath = fake_file };
 
 
             // initialize similarity calculation instance and assign selected avatars

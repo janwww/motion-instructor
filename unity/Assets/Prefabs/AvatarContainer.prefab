@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 684655730892211510}
   - component: {fileID: 684655730892211511}
   m_Layer: 0
-  m_Name: SpineNaval
+  m_Name: SpineNavel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6842,6 +6842,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   PulsingObject: {fileID: 4669644976386540675}
+  clave_beat1: {fileID: 0}
+  clave_beat2: {fileID: 0}
+  clave_beat3: {fileID: 0}
+  clave_beat4: {fileID: 0}
+  conga_bar: {fileID: 0}
 --- !u!1 &5784231870440668260
 GameObject:
   m_ObjectHideFlags: 0

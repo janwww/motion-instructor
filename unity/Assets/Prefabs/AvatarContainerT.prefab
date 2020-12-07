@@ -6349,7 +6349,7 @@ GameObject:
   - component: {fileID: 9212582093134970667}
   - component: {fileID: 9212582093134970660}
   m_Layer: 0
-  m_Name: SpineNaval
+  m_Name: SpineNavel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

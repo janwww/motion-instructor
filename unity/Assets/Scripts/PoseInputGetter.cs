@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Microsoft.Azure.Kinect.Sensor;
-using Microsoft.Azure.Kinect.Sensor.BodyTracking;
+using Microsoft.Azure.Kinect.BodyTracking;
 using UnityEngine.UI;
 using System.IO;
 using NativeWebSocket;
@@ -16,7 +16,7 @@ namespace PoseTeacher
     }
 
     [CLSCompliant(false)]
-    public class PoseInputGetter
+    public class PoseInputGetter 
     {
 
         PoseInputSource CurrentPoseInputSource;
@@ -25,7 +25,7 @@ namespace PoseTeacher
 
         // Azure Kinect variables
         Device device;
-        BodyTracker tracker;
+        Tracker tracker;
 
         // Used for displaying RGB Kinect video
         public Renderer videoRenderer;
@@ -131,17 +131,22 @@ namespace PoseTeacher
         }
 
         private void StartAzureKinect()
-        {
+        {  
+
             // Print to log
             Debug.Log("Try loading device");
             this.device = Device.Open(0);
+
             var config = new DeviceConfiguration
             {
-                ColorResolution = ColorResolution.r720p,
+                CameraFPS = FPS.FPS30,
+                ColorResolution = ColorResolution.R720p,
                 ColorFormat = ImageFormat.ColorBGRA32,
-                DepthMode = DepthMode.NFOV_Unbinned
+                DepthMode = DepthMode.NFOV_Unbinned,
+                WiredSyncMode = WiredSyncMode.Standalone,
             };
             device.StartCameras(config);
+            Debug.Log("Open K4A device successful. sn:" + device.SerialNum);
 
             if (device != null)
             {
@@ -149,15 +154,17 @@ namespace PoseTeacher
                 Debug.Log(device);
             }
 
-            var calibration = device.GetCalibration(config.DepthMode, config.ColorResolution);
+            //var calibration = device.GetCalibration(config.DepthMode, config.ColorResolution);
+            var calibration = device.GetCalibration();
 
             var trackerConfiguration = new TrackerConfiguration
             {
-                SensorOrientation = SensorOrientation.OrientationDefault,
-                CpuOnlyMode = false
+                ProcessingMode = TrackerProcessingMode.Gpu,
+                SensorOrientation = SensorOrientation.Default
             };
-            this.tracker = BodyTracker.Create(calibration, trackerConfiguration);
-            Debug.Log("Device loading finished");
+
+            this.tracker = Tracker.Create(calibration, trackerConfiguration);
+            Debug.Log("Body tracker created.");
         }
 
         private void GetTotalPoseNumber()
@@ -243,6 +250,7 @@ namespace PoseTeacher
                             tracker.EnqueueCapture(capture);
 
                             // Code for getting RGB image from camera
+                            /*
                             var color = capture.Color;
                             if (color != null && color.WidthPixels > 0)
                             {
@@ -263,20 +271,22 @@ namespace PoseTeacher
                                 }
 
                             }
+                            */
                         }
 
                         // Get pose estimate from tracker
-                        using (BodyFrame frame = tracker.PopResult())
+                        using (Frame frame = tracker.PopResult())
                         {
-                            Debug.LogFormat("{0} bodies found.", frame.BodyCount);
+
+                            Debug.LogFormat("{0} bodies found.", frame.NumberOfBodies);
 
                             //  At least one body found by Body Tracking
-                            if (frame.BodyCount > 0)
+                            if (frame.NumberOfBodies > 0)
                             {
                                 // Use first estimated person, if mutiple are in the image
                                 // !!! There are (probably) no guarantees on consisitent ordering between estimates
-                                var bodies = frame.Bodies;
-                                var body = bodies[0];
+                                //var bodies = frame.Bodies;
+                                var body = frame.GetBody(0);
 
                                 // Apply pose to user avatar(s)
                                 PoseData live_data = PoseDataUtils.Body2PoseData(body);

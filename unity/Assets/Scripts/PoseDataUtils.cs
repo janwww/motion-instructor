@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-using Microsoft.Azure.Kinect.Sensor.BodyTracking;
+using Microsoft.Azure.Kinect.BodyTracking;
 
 namespace PoseTeacher
 {
@@ -59,13 +59,13 @@ namespace PoseTeacher
         // Converts Azure Kinect SDK BT Body to PoseDataJSON (serializable for JSON) pose
         public static PoseDataJSON Body2PoseDataJSON(Body body)
         {
-            JointDataJSON[] joint_data_array = new JointDataJSON[(int)JointType.Count];
-            for (JointType jt = 0; jt < JointType.Count; jt++)
+            JointDataJSON[] joint_data_array = new JointDataJSON[(int)JointId.Count];
+            for (JointId jt = 0; jt < JointId.Count; jt++)
             {
                 // write recorded poses to file
-                var joint = body.Skeleton.Joints[(int)jt];
+                Microsoft.Azure.Kinect.BodyTracking.Joint joint = body.Skeleton.GetJoint(jt);
                 var pos = joint.Position;
-                var orientation = joint.Orientation;
+                var orientation = joint.Quaternion;
                 // save raw data
                 var v = new Vector3(pos.X, pos.Y, pos.Z);
                 var r = new Quaternion(orientation.X, orientation.Y, orientation.Z, orientation.W);
@@ -79,12 +79,12 @@ namespace PoseTeacher
         // Converts JSON string to PoseData pose
         public static PoseData JSONstring2PoseData(string frame_json)
         {
-            JointData[] joint_data_recorded_array = new JointData[(int)JointType.Count];
+            JointData[] joint_data_recorded_array = new JointData[(int)JointId.Count];
             PoseData recorded_data = new PoseData { data = { } };
 
             //Debug.Log(frame_json);
             PoseDataJSON saved_joint_data = JsonUtility.FromJson<PoseDataJSON>(frame_json);
-            for (JointType jt = 0; jt < JointType.Count; jt++)
+            for (JointId jt = 0; jt < JointId.Count; jt++)
             {
                 // play recording
                 JointDataJSON jd = saved_joint_data.data[(int)jt];
@@ -104,15 +104,15 @@ namespace PoseTeacher
         // Converts Azure Kinect SDK BT Body to PoseData pose
         public static PoseData Body2PoseData(Body body)
         {
-            JointData[] joint_data_live_array = new JointData[(int)JointType.Count];
+            JointData[] joint_data_live_array = new JointData[(int)JointId.Count];
             PoseData live_data = new PoseData { data = { } };
 
-            for (JointType jt = 0; jt < JointType.Count; jt++)
+            for (JointId jt = 0; jt < JointId.Count; jt++)
             {
-                var stickJoint = body.Skeleton.Joints[(int)jt];
+                Microsoft.Azure.Kinect.BodyTracking.Joint stickJoint = body.Skeleton.GetJoint(jt);
                 var stickPos = stickJoint.Position;
-                var stickOrientation = stickJoint.Orientation;
-                var joint_data_live = new JointData
+                var stickOrientation = stickJoint.Quaternion;
+                JointData joint_data_live = new JointData
                 {
                     Position = new Vector3(stickPos.X, stickPos.Y, stickPos.Z),
                     Orientation = new Quaternion(stickOrientation.X, stickOrientation.Y, stickOrientation.Z, stickOrientation.W)
@@ -185,14 +185,14 @@ namespace PoseTeacher
             dict.Add(27, 1);
             dict.Add(29, 18);
             dict.Add(31, 17);
-            JointData[] joint_data_received_array = new JointData[(int)JointType.Count];
+            JointData[] joint_data_received_array = new JointData[(int)JointId.Count];
 
             Debug.Log(JsonUtility.ToJson(rjl));
             List<List<double>> joint_data = rjl.values;
             Debug.Log(joint_data);
 
             float scaling = 10.0f;
-            for (JointType jt = 0; jt < JointType.Count; jt++)
+            for (JointId jt = 0; jt < JointId.Count; jt++)
             {
                 if (dict.ContainsKey((int)jt))
                 {
