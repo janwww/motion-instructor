@@ -112,6 +112,7 @@ namespace PoseTeacher
                 menus[CurrentMenu].SetActive(false);
                 // Set Title Menu to Active
                 CurrentMenu = Menus.TITLE;
+                DeactivateTeachers();
                 menus[CurrentMenu].SetActive(true); 
             }
 
@@ -143,6 +144,7 @@ namespace PoseTeacher
                     break;
                 case Menus.SETTINGS:
                     CurrentMenu = Menus.TITLE;
+                    DeactivateTeachers();
                     menus[CurrentMenu].SetActive(true);
                     break;
                 case Menus.AVATARSETTINGS:
@@ -239,6 +241,7 @@ namespace PoseTeacher
                 case 2:
                     menus[CurrentMenu].SetActive(false);
                     CurrentMenu = Menus.SETTINGS;
+                    ActivateTeachers();
                     menus[CurrentMenu].SetActive(true);
                     break;
                 default:
@@ -295,6 +298,7 @@ namespace PoseTeacher
                 case 0:
                     menus[CurrentMenu].SetActive(false);
                     CurrentMenu = Menus.AVATARSETTINGS;
+                    HighlightSelectedAvatarType();
                     menus[CurrentMenu].SetActive(true);
                     break;
                 // Settings -> RGBFeedSettings Menu
@@ -342,15 +346,15 @@ namespace PoseTeacher
         {
             switch (selectedMenuOption)
             {
-                // Easy Difficutly selected
+                // Kinect input selected
                 case 0:
                     MainObject.GetComponent<PoseteacherMain>().SelfPoseInputSource = PoseInputSource.KINECT;
                     break;
-                // Medium Difficulty Selected
+                // Websocket input Selected
                 case 1:
                     MainObject.GetComponent<PoseteacherMain>().SelfPoseInputSource = PoseInputSource.WEBSOCKET;
                     break;
-                // Hard Difficulty Selected
+                // File input Selected
                 case 2:
                     MainObject.GetComponent<PoseteacherMain>().SelfPoseInputSource = PoseInputSource.FILE;
                     break;
@@ -413,6 +417,38 @@ namespace PoseTeacher
             }
         }
 
+        public void HighlightSelectedAvatarType()
+        {
+            menus[CurrentMenu].transform.Find("VerticalGrid").Find("AvatarTypes").Find("AvatarTypesButtonCollection").Find("CubeAvatarButton").
+                Find("IconAndText").Find("TextMeshPro").gameObject.GetComponent<TextMeshPro>().color = new Color(255, 255, 255);
+            menus[CurrentMenu].transform.Find("VerticalGrid").Find("AvatarTypes").Find("AvatarTypesButtonCollection").Find("StickAvatarButton").
+                Find("IconAndText").Find("TextMeshPro").gameObject.GetComponent<TextMeshPro>().color = new Color(255, 255, 255);
+            menus[CurrentMenu].transform.Find("VerticalGrid").Find("AvatarTypes").Find("AvatarTypesButtonCollection").Find("RobotAvatarButton").
+                Find("IconAndText").Find("TextMeshPro").gameObject.GetComponent<TextMeshPro>().color = new Color(255, 255, 255);
+            menus[CurrentMenu].transform.Find("VerticalGrid").Find("AvatarTypes").Find("AvatarTypesButtonCollection").Find("SMPLAvatarButton").
+                Find("IconAndText").Find("TextMeshPro").gameObject.GetComponent<TextMeshPro>().color = new Color(255, 255, 255);
+
+            switch (MainObject.GetComponent<PoseteacherMain>().GetSelfAvatarContainers()[0].activeType)
+            {
+                case AvatarType.CUBE:
+                    menus[CurrentMenu].transform.Find("VerticalGrid").Find("AvatarTypes").Find("AvatarTypesButtonCollection").Find("CubeAvatarButton").
+                        Find("IconAndText").Find("TextMeshPro").gameObject.GetComponent<TextMeshPro>().color = new Color(255, 255, 0);
+                    break;
+                case AvatarType.STICK:
+                    menus[CurrentMenu].transform.Find("VerticalGrid").Find("AvatarTypes").Find("AvatarTypesButtonCollection").Find("StickAvatarButton").
+                        Find("IconAndText").Find("TextMeshPro").gameObject.GetComponent<TextMeshPro>().color = new Color(255, 255, 0);
+                    break;
+                case AvatarType.ROBOT:
+                    menus[CurrentMenu].transform.Find("VerticalGrid").Find("AvatarTypes").Find("AvatarTypesButtonCollection").Find("RobotAvatarButton").
+                        Find("IconAndText").Find("TextMeshPro").gameObject.GetComponent<TextMeshPro>().color = new Color(255, 255, 0);
+                    break;
+                case AvatarType.SMPL:
+                    menus[CurrentMenu].transform.Find("VerticalGrid").Find("AvatarTypes").Find("AvatarTypesButtonCollection").Find("SMPLAvatarButton").
+                        Find("IconAndText").Find("TextMeshPro").gameObject.GetComponent<TextMeshPro>().color = new Color(255, 255, 0);
+                    break;
+            }
+        }
+
         private void SetTitleBarText()
         {
             
@@ -442,6 +478,22 @@ namespace PoseTeacher
         public void SetCourseDetailsText(int courseID)
         {
             courseMenuHelper.SetCourseDetails(courseID);
+        }
+
+        private void ActivateTeachers()
+        {
+            foreach (AvatarContainer avatar in MainObject.GetComponent<PoseteacherMain>().GetTeacherAvatarContainers())
+            {
+                avatar.avatarContainer.SetActive(true);
+            }
+        }
+
+        private void DeactivateTeachers()
+        {
+            foreach (AvatarContainer avatar in MainObject.GetComponent<PoseteacherMain>().GetTeacherAvatarContainers())
+            {
+                avatar.avatarContainer.SetActive(false);
+            }
         }
     }
 }

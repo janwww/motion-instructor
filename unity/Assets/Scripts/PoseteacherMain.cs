@@ -425,11 +425,27 @@ namespace PoseTeacher
             //    GameObject avatarContainer = GameObject.Find("AvatarContainer");
                 GameObject newAvatar = Instantiate(avatarPrefab);
                 avatarListSelf.Add(new AvatarContainer(newAvatar));
+                newAvatar.SetActive(true);
             } else
             {
             //    GameObject avatarContainer = GameObject.Find("AvatarContainerT");
                 GameObject newAvatar = Instantiate(avatarTPrefab);
                 avatarListTeacher.Add(new AvatarContainer(newAvatar));
+                newAvatar.SetActive(true);
+            }
+        }
+        public void DeleteAvatar(bool self)
+        {
+            if (self && avatarListSelf.Count > 1)
+            {
+                AvatarContainer avatar = avatarListSelf[avatarListSelf.Count - 1];
+                avatar.avatarContainer.SetActive(false);
+                avatarListSelf.Remove(avatar);
+            } else if (!self && avatarListTeacher.Count > 1)
+            {
+                AvatarContainer avatar = avatarListTeacher[avatarListTeacher.Count - 1];
+                avatar.avatarContainer.SetActive(false);
+                avatarListTeacher.Remove(avatar);
             }
         }
         // Used for pose similarity calculation
@@ -568,14 +584,16 @@ namespace PoseTeacher
             avatarListSelf = new List<AvatarContainer>();
             avatarListTeacher = new List<AvatarContainer>();
             avatarListSelf.Add(new AvatarContainer(avatarContainer));
-            avatarListSelf.Add(new AvatarContainer(avatarContainer2));
+          //  avatarListSelf.Add(new AvatarContainer(avatarContainer2));
             avatarListTeacher.Add(new AvatarContainer(avatarContainerT));
-            avatarListTeacher.Add(new AvatarContainer(avatarContainerT2));
+          //  avatarListTeacher.Add(new AvatarContainer(avatarContainerT2));
 
             // Set unused containers to inactive
             avatarListTeacher[0].avatarContainer.gameObject.SetActive(false);
-            avatarListSelf[1].avatarContainer.gameObject.SetActive(false);
-            avatarListTeacher[1].avatarContainer.gameObject.SetActive(false);
+            avatarContainer2.SetActive(false);
+            avatarContainerT2.SetActive(false);
+            // avatarListSelf[1].avatarContainer.gameObject.SetActive(false);
+            // avatarListTeacher[1].avatarContainer.gameObject.SetActive(false);
 
             SelfPoseInputGetter = new PoseInputGetter(SelfPoseInputSource){ ReadDataPath = fake_file };
             TeacherPoseInputGetter = new PoseInputGetter(PoseInputSource.FILE){ ReadDataPath = current_file};
@@ -862,7 +880,11 @@ namespace PoseTeacher
 
         public void ShowTeacher()
         {
-            avatarListTeacher[0].avatarContainer.gameObject.SetActive(true);
+            foreach (AvatarContainer avatar in avatarListTeacher)
+            {
+                avatar.avatarContainer.gameObject.SetActive(true);
+            }
+            //avatarListTeacher[0].avatarContainer.gameObject.SetActive(true);
             set_recording_mode(2);
         }
     }
