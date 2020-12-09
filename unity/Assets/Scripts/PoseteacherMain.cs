@@ -18,6 +18,11 @@ namespace PoseTeacher
         KINECT, WEBSOCKET, FILE
     }
 
+    public enum Difficulty
+    {
+        EASY, MEDIUM, HARD
+    }
+
     [CLSCompliant(false)]
     public class PoseInputGetter
     {
@@ -383,6 +388,26 @@ namespace PoseTeacher
         public bool shouldCheckCorrectness = true;
         public float correctionThresh = 30.0f;
 
+        public Difficulty difficulty = Difficulty.EASY;
+        public void SetDifficulty(Difficulty newDifficulty)
+        {
+            difficulty = newDifficulty;
+            // TODO change penalty and other stuff...
+            switch (difficulty)
+            {
+                case Difficulty.EASY:
+                    avatarSimilarity.penalty = 0.5;
+                    break;
+                case Difficulty.MEDIUM:
+                    avatarSimilarity.penalty = 1.0;
+                    break;
+                case Difficulty.HARD:
+                    avatarSimilarity.penalty = 1.5f;
+                    break;
+                default:
+                    break;
+            }
+        }
 
         public List<AvatarContainer> GetSelfAvatarContainers()
         {

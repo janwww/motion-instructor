@@ -7,7 +7,8 @@ namespace PoseTeacher
 {
     public enum Menus
     {
-        TITLE, DANCE, COURSES, SPECCOURSE, SETTINGS, AVATARSETTINGS
+        TITLE, DANCE, COURSES, SPECCOURSE, SETTINGS, AVATARSETTINGS,
+        DIFFICULTYSETTINGS, FEEDSETTINGS, RECORDMENU, COREOMENU
     }
     public enum MenuState
     {
@@ -18,6 +19,7 @@ namespace PoseTeacher
     {
 
         public GameObject MenuObject;
+        public GameObject MainObject;
         private Dictionary<Menus, GameObject> menus = new Dictionary<Menus, GameObject>();
         private Menus CurrentMenu;
         private Menus PreviousMainMenu;
@@ -88,6 +90,7 @@ namespace PoseTeacher
             menus.Add(Menus.SPECCOURSE, MenuHolderTr.Find("SpecCourseMenu").gameObject);
             menus.Add(Menus.SETTINGS, MenuHolderTr.Find("SettingsMenu").gameObject);
             menus.Add(Menus.AVATARSETTINGS, MenuObject.transform.Find("AvatarSettings").gameObject);
+            menus.Add(Menus.DIFFICULTYSETTINGS, MenuHolderTr.Find("DifficultySettingsMenu").gameObject);
 
             CurrentMenu = Menus.TITLE;
 
@@ -145,6 +148,10 @@ namespace PoseTeacher
                     CurrentMenu = Menus.SETTINGS;
                     menus[CurrentMenu].SetActive(true);
                     break;
+                case Menus.DIFFICULTYSETTINGS:
+                    CurrentMenu = Menus.SETTINGS;
+                    menus[CurrentMenu].SetActive(true);
+                    break;
                 default:
                     break;
             }
@@ -193,6 +200,9 @@ namespace PoseTeacher
                     break;
                 case Menus.SETTINGS:
                     SelectedInSettingsMenu(selectedMenuOption);
+                    break;
+                case Menus.DIFFICULTYSETTINGS:
+                    SelectedInDifficultySettingsMenu(selectedMenuOption);
                     break;
                 default:
                     break;
@@ -285,9 +295,60 @@ namespace PoseTeacher
                     break;
                 // Settings -> DifficultySettings Menu
                 case 2:
-                    
+                    menus[CurrentMenu].SetActive(false);
+                    CurrentMenu = Menus.DIFFICULTYSETTINGS;
+                    HighlightSelectedDifficulty();
+                    menus[CurrentMenu].SetActive(true);
                     break;
                 default:
+                    break;
+            }
+        }
+
+        private void SelectedInDifficultySettingsMenu(int selectedMenuOption)
+        {
+            switch (selectedMenuOption)
+            {
+                // Easy Difficutly selected
+                case 0:
+                    MainObject.GetComponent<PoseteacherMain>().SetDifficulty(Difficulty.EASY);
+                    break;
+                // Medium Difficulty Selected
+                case 1:
+                    MainObject.GetComponent<PoseteacherMain>().SetDifficulty(Difficulty.MEDIUM);
+                    break;
+                // Hard Difficulty Selected
+                case 2:
+                    MainObject.GetComponent<PoseteacherMain>().SetDifficulty(Difficulty.HARD);
+                    break;
+                default:
+                    break;
+            }
+            HighlightSelectedDifficulty();
+        }
+
+        private void HighlightSelectedDifficulty()
+        {
+            menus[CurrentMenu].transform.Find("DifficultySettingsMenuButtonCollection").Find("EasyDifficultySettingsButton").
+                Find("IconAndText").Find("TextMeshPro").gameObject.GetComponent<TextMeshPro>().color = new Color(255, 255, 255);
+            menus[CurrentMenu].transform.Find("DifficultySettingsMenuButtonCollection").Find("MediumDifficultySettingsButton").
+                Find("IconAndText").Find("TextMeshPro").gameObject.GetComponent<TextMeshPro>().color = new Color(255, 255, 255);
+            menus[CurrentMenu].transform.Find("DifficultySettingsMenuButtonCollection").Find("HardDifficultySettingsButton").
+                Find("IconAndText").Find("TextMeshPro").gameObject.GetComponent<TextMeshPro>().color = new Color(255, 255, 255);
+
+            switch (MainObject.GetComponent<PoseteacherMain>().difficulty)
+            {
+                case Difficulty.EASY:
+                    menus[CurrentMenu].transform.Find("DifficultySettingsMenuButtonCollection").Find("EasyDifficultySettingsButton").
+                        Find("IconAndText").Find("TextMeshPro").gameObject.GetComponent<TextMeshPro>().color = new Color(255,255,0);
+                    break;
+                case Difficulty.MEDIUM:
+                    menus[CurrentMenu].transform.Find("DifficultySettingsMenuButtonCollection").Find("MediumDifficultySettingsButton").
+                        Find("IconAndText").Find("TextMeshPro").gameObject.GetComponent<TextMeshPro>().color = new Color(255, 255, 0); 
+                    break;
+                case Difficulty.HARD:
+                    menus[CurrentMenu].transform.Find("DifficultySettingsMenuButtonCollection").Find("HardDifficultySettingsButton").
+                        Find("IconAndText").Find("TextMeshPro").gameObject.GetComponent<TextMeshPro>().color = new Color(255, 255, 0); 
                     break;
             }
         }
