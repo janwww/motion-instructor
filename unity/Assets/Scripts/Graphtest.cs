@@ -10,18 +10,113 @@ namespace PoseTeacher
     {
         public GameObject gobject;
         public GameObject newobject;
+        public GameObject coordobject;
 
         public Text coord;
         public int vectorElementsN = 200;
         LineRenderer lineRenderer, lineRenderer_coordx, lineRenderer_coordy;
         Vector3[] values, valuesDynamic, values_x, values_y, start_axis_x, start_axis_y, end_axis_x, end_axis_y, coordx, coordy;
-        float end_x, end_y, step_x, step_y;
+        float begin_x, begin_y, end_x, end_y, step_x, step_y;
 
         // Start is called before the first frame update
         void Start()
         {
+
+            //    Transform canvas = newobject.transform.Find("TextContent");
+            //    text_0.transform.parent = canvas;
+            //GameObject xaxis = Instantiate(gobject);
+            //Transform canvas = newobject.transform.Find("Backplate");
+            //xaxis.transform.parent = canvas;
+            //LineRenderer lineRenderer_x = xaxis.GetComponent<LineRenderer>();
+            //lineRenderer_x.widthMultiplier = 0.2f;
+            //lineRenderer_x.startColor = Color.black;
+            //lineRenderer_x.endColor = Color.black;
+            //lineRenderer_x.positionCount = 2;
+            //lineRenderer_x.SetPosition(0, new Vector3((float)0.0f, (float)0.0f, 0.7f));
+            //lineRenderer_x.SetPosition(1, new Vector3((float)1.0f, (float)0.0f, 0.7f));
+
+            //////line renderer for yaxis
+            //////Instantiate(gobject, new Vector3(0, 0, 0), Quaternion.identity);
+            //GameObject yaxis = Instantiate(gobject);
+            ////GameObject yaxis = Instantiate(gobject);
+            ////Transform canvas = newobject.transform.Find("Backplate");
+            //yaxis.transform.parent = canvas;
+            //LineRenderer lineRenderer_y = yaxis.GetComponent<LineRenderer>();
+            //lineRenderer_y.widthMultiplier = 0.2f;
+            //lineRenderer_y.startColor = Color.black;
+            //lineRenderer_y.endColor = Color.black;
+            //lineRenderer_y.positionCount = 2;
+            //lineRenderer_y.SetPosition(0, new Vector3((float)0.0f, (float)0.0f, 0.7f));
+            //lineRenderer_y.SetPosition(1, new Vector3((float)0.0f, (float)1.0f, 0.0f));
             //line renderer for a plot line
             lineRenderer = gobject.GetComponent<LineRenderer>();
+
+            GameObject xaxis = Instantiate(coordobject);
+            LineRenderer lineRenderer_x = xaxis.GetComponent<LineRenderer>();
+            GameObject yaxis = Instantiate(coordobject);
+            LineRenderer lineRenderer_y = yaxis.GetComponent<LineRenderer>();
+            lineRenderer_x.widthMultiplier = 0.2f;
+            lineRenderer_y.widthMultiplier = 0.2f;
+            //lineRenderer_x.transform.localPosition = new Vector3(0.0f, 0.0f, 0.0f);
+            //lineRenderer_y.transform.localPosition = new Vector3(0.0f, 0.0f, 0.0f);
+            values_x = new Vector3[vectorElementsN];
+            values_y = new Vector3[vectorElementsN];
+            for (int i = 0; i < vectorElementsN; i++)
+            {
+              
+                values_x[i] = new Vector3((float)i / vectorElementsN, 0.0f, 8.0f);
+                values_y[i] = new Vector3(0.0f, (float)i / vectorElementsN, 8.0f);
+                
+                lineRenderer_x.SetPositions(values_x);
+                lineRenderer_y.SetPositions(values_y);
+            }
+
+            begin_x = 0.0f;
+            begin_y = 0.0f;
+            end_x = 1.2f;
+            end_y = 0.45f;
+            step_x = (end_x - begin_x)/ 10; //gap between vertical lines
+            step_y = (end_y - begin_y) / 10; //gap between horisontal lines
+
+            for (int i = 0; i < 11; i++)
+            {
+                //vertical lines of a grid
+                GameObject vert = Instantiate(gobject);
+
+                vert.GetComponent<Renderer>().material.color = Color.white;
+                LineRenderer lineRenderer_vert = vert.GetComponent<LineRenderer>();
+                lineRenderer_vert.widthMultiplier = 0.1f;
+                lineRenderer_vert.startColor = Color.white;
+                lineRenderer_vert.endColor = Color.white;
+                lineRenderer_vert.positionCount = 2;
+                lineRenderer_vert.SetPosition(0, new Vector3(begin_x + i * step_x, begin_y, 8.7f));
+                lineRenderer_vert.SetPosition(1, new Vector3(begin_x + i * step_x, end_y, 8.7f));
+
+                //horisontal lines of a grid
+                GameObject hor = Instantiate(gobject);
+                if (i == 0 || i == 10)
+                {
+                    hor.GetComponent<Renderer>().material.color = Color.green;
+                }
+                else
+                {
+                    hor.GetComponent<Renderer>().material.color = Color.white;
+                }
+                if (i == 5){
+                    hor.GetComponent<Renderer>().material.color = Color.yellow;
+                    //hor.GetComponent<Renderer>().material.mainTexture 
+                }
+                LineRenderer lineRenderer_hor = hor.GetComponent<LineRenderer>();
+                lineRenderer_hor.widthMultiplier = 0.1f;
+                lineRenderer_hor.startColor = Color.white;
+                lineRenderer_hor.endColor = Color.white;
+                lineRenderer_hor.positionCount = 2;
+                lineRenderer_hor.SetPosition(0, new Vector3(begin_x, begin_y + i * step_y, 8.7f));
+                lineRenderer_hor.SetPosition(1, new Vector3(end_x, begin_y + i * step_y, 8.7f));
+
+            }
+
+
             valuesDynamic = new Vector3[vectorElementsN];
             for (int i = 0; i < vectorElementsN; i++){
                 valuesDynamic[i] = new Vector3((float)i / vectorElementsN, (float)similarityScoreExtern, 0.0f);
@@ -207,8 +302,11 @@ namespace PoseTeacher
             Color c2 = Color.red;
             lineRenderer.startColor = Color.red;
             lineRenderer.endColor = Color.red;
-            lineRenderer.widthMultiplier = 0.5f;
+            lineRenderer.widthMultiplier = 0.4f;
             //draw a plot line
+
+
+
             for (int i = 0; i < vectorElementsN; i++)
             {
                 if (i == vectorElementsN - 1)
