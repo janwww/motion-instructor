@@ -91,6 +91,7 @@ namespace PoseTeacher
             menus.Add(Menus.SETTINGS, MenuHolderTr.Find("SettingsMenu").gameObject);
             menus.Add(Menus.AVATARSETTINGS, MenuObject.transform.Find("AvatarSettings").gameObject);
             menus.Add(Menus.DIFFICULTYSETTINGS, MenuHolderTr.Find("DifficultySettingsMenu").gameObject);
+            menus.Add(Menus.FEEDSETTINGS, MenuHolderTr.Find("PosefeedSettingsMenu").gameObject);
 
             CurrentMenu = Menus.TITLE;
 
@@ -152,6 +153,10 @@ namespace PoseTeacher
                     CurrentMenu = Menus.SETTINGS;
                     menus[CurrentMenu].SetActive(true);
                     break;
+                case Menus.FEEDSETTINGS:
+                    CurrentMenu = Menus.SETTINGS;
+                    menus[CurrentMenu].SetActive(true);
+                    break;
                 default:
                     break;
             }
@@ -203,6 +208,9 @@ namespace PoseTeacher
                     break;
                 case Menus.DIFFICULTYSETTINGS:
                     SelectedInDifficultySettingsMenu(selectedMenuOption);
+                    break;
+                case Menus.FEEDSETTINGS:
+                    SelectedInFeedSettingsMenu(selectedMenuOption);
                     break;
                 default:
                     break;
@@ -291,7 +299,10 @@ namespace PoseTeacher
                     break;
                 // Settings -> RGBFeedSettings Menu
                 case 1:
-                    
+                    menus[CurrentMenu].SetActive(false);
+                    CurrentMenu = Menus.FEEDSETTINGS;
+                    HighlightSelectedFeed();
+                    menus[CurrentMenu].SetActive(true);
                     break;
                 // Settings -> DifficultySettings Menu
                 case 2:
@@ -327,6 +338,29 @@ namespace PoseTeacher
             HighlightSelectedDifficulty();
         }
 
+        private void SelectedInFeedSettingsMenu(int selectedMenuOption)
+        {
+            switch (selectedMenuOption)
+            {
+                // Easy Difficutly selected
+                case 0:
+                    MainObject.GetComponent<PoseteacherMain>().SelfPoseInputSource = PoseInputSource.KINECT;
+                    break;
+                // Medium Difficulty Selected
+                case 1:
+                    MainObject.GetComponent<PoseteacherMain>().SelfPoseInputSource = PoseInputSource.WEBSOCKET;
+                    break;
+                // Hard Difficulty Selected
+                case 2:
+                    MainObject.GetComponent<PoseteacherMain>().SelfPoseInputSource = PoseInputSource.FILE;
+                    break;
+                default:
+                    break;
+            }
+            HighlightSelectedFeed();
+        }
+
+
         private void HighlightSelectedDifficulty()
         {
             menus[CurrentMenu].transform.Find("DifficultySettingsMenuButtonCollection").Find("EasyDifficultySettingsButton").
@@ -349,6 +383,32 @@ namespace PoseTeacher
                 case Difficulty.HARD:
                     menus[CurrentMenu].transform.Find("DifficultySettingsMenuButtonCollection").Find("HardDifficultySettingsButton").
                         Find("IconAndText").Find("TextMeshPro").gameObject.GetComponent<TextMeshPro>().color = new Color(255, 255, 0); 
+                    break;
+            }
+        }
+
+        private void HighlightSelectedFeed()
+        {
+            menus[CurrentMenu].transform.Find("PosefeedSettingsMenuButtonCollection").Find("KinectFeedButton").
+                Find("IconAndText").Find("TextMeshPro").gameObject.GetComponent<TextMeshPro>().color = new Color(255, 255, 255);
+            menus[CurrentMenu].transform.Find("PosefeedSettingsMenuButtonCollection").Find("RGBCameraFeedButton").
+                Find("IconAndText").Find("TextMeshPro").gameObject.GetComponent<TextMeshPro>().color = new Color(255, 255, 255);
+            menus[CurrentMenu].transform.Find("PosefeedSettingsMenuButtonCollection").Find("JSONFeedButton").
+                Find("IconAndText").Find("TextMeshPro").gameObject.GetComponent<TextMeshPro>().color = new Color(255, 255, 255);
+
+            switch (MainObject.GetComponent<PoseteacherMain>().SelfPoseInputSource)
+            {
+                case PoseInputSource.KINECT:
+                    menus[CurrentMenu].transform.Find("PosefeedSettingsMenuButtonCollection").Find("KinectFeedButton").
+                        Find("IconAndText").Find("TextMeshPro").gameObject.GetComponent<TextMeshPro>().color = new Color(255, 255, 0);
+                    break;
+                case PoseInputSource.WEBSOCKET:
+                    menus[CurrentMenu].transform.Find("PosefeedSettingsMenuButtonCollection").Find("RGBCameraFeedButton").
+                        Find("IconAndText").Find("TextMeshPro").gameObject.GetComponent<TextMeshPro>().color = new Color(255, 255, 0);
+                    break;
+                case PoseInputSource.FILE:
+                    menus[CurrentMenu].transform.Find("PosefeedSettingsMenuButtonCollection").Find("JSONFeedButton").
+                        Find("IconAndText").Find("TextMeshPro").gameObject.GetComponent<TextMeshPro>().color = new Color(255, 255, 0);
                     break;
             }
         }
