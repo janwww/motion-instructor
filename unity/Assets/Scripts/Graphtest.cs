@@ -10,7 +10,7 @@ namespace PoseTeacher
     {
         public GameObject gobject;
         public GameObject newobject;
-        public GameObject coordobject;
+        //public GameObject coordobject;
 
         public Text coord;
         public int vectorElementsN = 200;
