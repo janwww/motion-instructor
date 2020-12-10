@@ -15674,7 +15674,7 @@ MonoBehaviour:
   similarityScoreRaw: []
   gobject: {fileID: 1744107165}
   newobject: {fileID: 1813381909}
-  coordobject: {fileID: 0}
+  coordobject: {fileID: 1300287499}
   coord: {fileID: 1300287501}
   vectorElementsN: 200
 --- !u!222 &1813381912
