@@ -18,12 +18,17 @@ namespace PoseTeacher
         KINECT, WEBSOCKET, FILE
     }
 
+    public enum Difficulty
+    {
+        EASY, MEDIUM, HARD
+    }
+
     [CLSCompliant(false)]
     public class PoseInputGetter
     {
 
         PoseInputSource CurrentPoseInputSource;
-        bool recording = false;
+        public bool recording { get; set; } = false;
         PoseData CurrentPose { get; set; }
 
         // Azure Kinect variables
@@ -188,7 +193,7 @@ namespace PoseTeacher
         }
         
         // reset recording file
-        void ResetRecording()
+        public void ResetRecording()
         {
             File.WriteAllText(WriteDataPath, "");
             Debug.Log("Reset recording file");
@@ -233,6 +238,12 @@ namespace PoseTeacher
                     string frame_json = SequenceEnum.Current;
                     PoseData fake_live_data = PoseDataUtils.JSONstring2PoseData(frame_json);
                     CurrentPose = fake_live_data;
+
+                    if (recording) // recording
+                    {
+                        File.AppendAllText(WriteDataPath, frame_json + Environment.NewLine);
+                    }
+
                     break;
 
                 case PoseInputSource.KINECT:
@@ -328,6 +339,7 @@ namespace PoseTeacher
 
         PoseInputGetter SelfPoseInputGetter;
         PoseInputGetter TeacherPoseInputGetter;
+        PoseInputGetter RecordedPoseInputGetter;
 
         // Used for displaying RGB Kinect video
         public Renderer videoRenderer;
@@ -338,6 +350,7 @@ namespace PoseTeacher
         // TODO find good way to reference objects. @Unity might do this for us
         List<AvatarContainer> avatarListSelf;
         List<AvatarContainer> avatarListTeacher;
+        public AvatarContainer recordAvatar;
         public GameObject avatarPrefab;
         public GameObject avatarTPrefab;
 
@@ -356,7 +369,8 @@ namespace PoseTeacher
         // Change to enum? (!!! making this changes makes button playback speed change in scene unusable)
         public int playback_speed = 1; // 1: x1 , 2: x0.5, 4: x0.25
         private int playback_counter = 0;
-
+        private int record_counter = 0;
+        private bool show_recording = false;
 
 
         // File that is being read from
@@ -373,7 +387,6 @@ namespace PoseTeacher
         public bool usingKinectAlternative = true;
         public PoseInputSource SelfPoseInputSource = PoseInputSource.FILE;
 
-
         public bool mirroring = true; // can probably be changed to private (if no UI elements use it)
 
         // Used for showing if pose is correct
@@ -383,6 +396,26 @@ namespace PoseTeacher
         public bool shouldCheckCorrectness = true;
         public float correctionThresh = 30.0f;
 
+        public Difficulty difficulty = Difficulty.EASY;
+        public void SetDifficulty(Difficulty newDifficulty)
+        {
+            difficulty = newDifficulty;
+            // TODO change penalty and other stuff...
+            switch (difficulty)
+            {
+                case Difficulty.EASY:
+                    avatarSimilarity.penalty = 0.5;
+                    break;
+                case Difficulty.MEDIUM:
+                    avatarSimilarity.penalty = 1.0;
+                    break;
+                case Difficulty.HARD:
+                    avatarSimilarity.penalty = 1.5f;
+                    break;
+                default:
+                    break;
+            }
+        }
 
         public List<AvatarContainer> GetSelfAvatarContainers()
         {
@@ -400,11 +433,27 @@ namespace PoseTeacher
             //    GameObject avatarContainer = GameObject.Find("AvatarContainer");
                 GameObject newAvatar = Instantiate(avatarPrefab);
                 avatarListSelf.Add(new AvatarContainer(newAvatar));
+                newAvatar.SetActive(true);
             } else
             {
             //    GameObject avatarContainer = GameObject.Find("AvatarContainerT");
                 GameObject newAvatar = Instantiate(avatarTPrefab);
                 avatarListTeacher.Add(new AvatarContainer(newAvatar));
+                newAvatar.SetActive(true);
+            }
+        }
+        public void DeleteAvatar(bool self)
+        {
+            if (self && avatarListSelf.Count > 1)
+            {
+                AvatarContainer avatar = avatarListSelf[avatarListSelf.Count - 1];
+                avatar.avatarContainer.SetActive(false);
+                avatarListSelf.Remove(avatar);
+            } else if (!self && avatarListTeacher.Count > 1)
+            {
+                AvatarContainer avatar = avatarListTeacher[avatarListTeacher.Count - 1];
+                avatar.avatarContainer.SetActive(false);
+                avatarListTeacher.Remove(avatar);
             }
         }
         // Used for pose similarity calculation
@@ -421,6 +470,10 @@ namespace PoseTeacher
         public List<double> similarityWeightRaw; // weight value for all body sticks
         AvatarSimilarity avatarSimilarity;
         VisualisationSimilarity avatarVisualisationSimilarity;
+        Graphtest graphtest;
+        public static double similarityScoreExtern = 0.0; // similarity value between 0 and 1 for defined body part (extern global variable for plot)
+        public static double similarityTotalScoreExtern = 0.0; // Total score (extern global variable for plot)
+
         // RandomGraph randomGraph;
 
 
@@ -543,14 +596,21 @@ namespace PoseTeacher
             avatarListSelf = new List<AvatarContainer>();
             avatarListTeacher = new List<AvatarContainer>();
             avatarListSelf.Add(new AvatarContainer(avatarContainer));
-            avatarListSelf.Add(new AvatarContainer(avatarContainer2));
+          //  avatarListSelf.Add(new AvatarContainer(avatarContainer2));
             avatarListTeacher.Add(new AvatarContainer(avatarContainerT));
-            avatarListTeacher.Add(new AvatarContainer(avatarContainerT2));
+            //  avatarListTeacher.Add(new AvatarContainer(avatarContainerT2));
+
+
+            GameObject newAvatar = Instantiate(avatarTPrefab);
+            recordAvatar = new AvatarContainer(newAvatar);
+            newAvatar.SetActive(false);
 
             // Set unused containers to inactive
             avatarListTeacher[0].avatarContainer.gameObject.SetActive(false);
-            avatarListSelf[1].avatarContainer.gameObject.SetActive(false);
-            avatarListTeacher[1].avatarContainer.gameObject.SetActive(false);
+            avatarContainer2.SetActive(false);
+            avatarContainerT2.SetActive(false);
+            // avatarListSelf[1].avatarContainer.gameObject.SetActive(false);
+            // avatarListTeacher[1].avatarContainer.gameObject.SetActive(false);
 
             SelfPoseInputGetter = new PoseInputGetter(SelfPoseInputSource){ ReadDataPath = fake_file };
             TeacherPoseInputGetter = new PoseInputGetter(PoseInputSource.FILE){ ReadDataPath = current_file};
@@ -559,6 +619,8 @@ namespace PoseTeacher
             // initialize similarity calculation instance and assign selected avatars
             avatarSimilarity = new AvatarSimilarity(avatarListSelf[similaritySelfNr], avatarListTeacher[similarityTeacherNr], similarityBodyNr, similarityPenalty, similarityActivateKalman, similarityKalmanQ, similarityKalmanR);
             avatarVisualisationSimilarity = new VisualisationSimilarity(avatarListSelf[similaritySelfNr]);
+            graphtest = new Graphtest((float)similarityScoreExtern);
+            //graphtest.Start_plot((float)similarityScoreExtern);
            //  randomGraph = new RandomGraph();
         }
 
@@ -577,10 +639,14 @@ namespace PoseTeacher
             similarityScore = avatarSimilarity.similarityBodypart; // get single similarity score for selected body part
             similarityScoreRaw = avatarSimilarity.similarityStick; // get similarity score for each stick element
             similarityWeightRaw = avatarSimilarity.stickWeight; // get similarity score for each stick element
-            similarityTotalScore = (int)avatarSimilarity.totalScore; // get total Score
+            similarityTotalScore = avatarSimilarity.totalScore; // get total Score
+            similarityScoreExtern = similarityScore; // global
+            similarityTotalScoreExtern = similarityTotalScore; // global
 
             //avatarVisualisationSimilarity.Update(similarityScoreRaw);// avatarVisualisationSimilarity.Update(similarityScore);
             avatarVisualisationSimilarity.UpdatePart(similarityBodyNr, similarityScore);
+            graphtest.Update_plot(similarityScoreExtern);
+
             // randomGraph.Update();
             // Playback for teacher avatar(s)
             if (recording_mode == 2) // playback
@@ -618,6 +684,32 @@ namespace PoseTeacher
                     showCorrection(avatarListSelf[0], avatarListTeacher[0]);
                 }
 
+            }
+
+            if (show_recording)
+            {
+                if (playback_speed == 1) // x1
+                {
+                    recordAvatar.MovePerson(RecordedPoseInputGetter.GetNextPose());
+                }
+                else if (playback_speed == 2) // x0.5
+                {
+                    record_counter++;
+                    if (record_counter >= 2)
+                    {
+                        recordAvatar.MovePerson(RecordedPoseInputGetter.GetNextPose());
+                        record_counter = 0;
+                    }
+                }
+                else //(playback_speed == 3) // x0.25
+                {
+                    record_counter++;
+                    if (record_counter >= 4)
+                    {
+                        recordAvatar.MovePerson(RecordedPoseInputGetter.GetNextPose());
+                        record_counter = 0;
+                    }
+                }
             }
 
             UpdateIndicators();
@@ -837,8 +929,69 @@ namespace PoseTeacher
 
         public void ShowTeacher()
         {
-            avatarListTeacher[0].avatarContainer.gameObject.SetActive(true);
+            foreach (AvatarContainer avatar in avatarListTeacher)
+            {
+                avatar.avatarContainer.gameObject.SetActive(true);
+            }
+            //avatarListTeacher[0].avatarContainer.gameObject.SetActive(true);
             set_recording_mode(2);
         }
+
+        bool isrecording = false;
+        public void StartRecordingMode(bool temporary)
+        {
+            if (temporary)
+            {
+                SelfPoseInputGetter.WriteDataPath = "jsondata/temporary.txt";
+                SelfPoseInputGetter.ResetRecording();
+            }
+            else
+                SelfPoseInputGetter.WriteDataPath = "jsondata/" + DateTime.Now.ToString("yyyy_MM_dd-HH_mm_ss") + ".txt";
+            SelfPoseInputGetter.recording = true;
+            isrecording = true;
+        }
+
+        public void StopRecordingMode(bool abort = false)
+        {
+            if (isrecording)
+            {
+                if (abort)
+                {
+                    SelfPoseInputGetter.recording = false;
+                    isrecording = false;
+                }
+                else
+                {
+                    SelfPoseInputGetter.recording = false;
+                    recordAvatar.avatarContainer.SetActive(true);
+                    RecordedPoseInputGetter = new PoseInputGetter(PoseInputSource.FILE) { ReadDataPath = SelfPoseInputGetter.WriteDataPath };
+                    show_recording = true;
+                    isrecording = false;
+                }
+            }
+        }
+
+        public void PauseRecordingMode()
+        {
+            if (isrecording)
+                SelfPoseInputGetter.recording = false;
+        }
+        public void ResumeRecordingMode()
+        {
+            if (isrecording)
+                SelfPoseInputGetter.recording = true;
+        }
+
+        public void StopShowingRecording()
+        {
+            recordAvatar.avatarContainer.SetActive(false);
+            show_recording = false;
+        }
+
+        public void PauseShowingRecording()
+        {
+            show_recording = !show_recording;
+        }
+
     }
 }

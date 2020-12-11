@@ -24,7 +24,7 @@ namespace PoseTeacher
         // Start is called before the first frame update
         void Start()
         {
-
+            poseteacher = MainObject.GetComponent<PoseteacherMain>();
             // TODO persistency
         }
 
@@ -124,10 +124,15 @@ namespace PoseTeacher
             objCollectionComponent.UpdateCollection();
         }
 
-        void AddAvatar(bool self)
+        public void AddAvatar(bool self)
         {
             poseteacher.AddAvatar(self);
-            AddAvatarButton(self);
+            //AddAvatarButton(self);
+        }
+
+        public void RemoveAvatar(bool self)
+        {
+            poseteacher.DeleteAvatar(self);
         }
 
         void AddAvatarButton(bool self)
@@ -194,18 +199,41 @@ namespace PoseTeacher
 
             poseteacher = MainObject.GetComponent<PoseteacherMain>();
 
-            if (selectedAvatarSelf)
+
+            List<AvatarContainer> selfs = poseteacher.GetSelfAvatarContainers();
+            foreach (AvatarContainer avatar in selfs)
             {
-                List<AvatarContainer> selfs = poseteacher.GetSelfAvatarContainers();
-                selfs[selectedAvatarNum].ChangeActiveType(type);
+                avatar.ChangeActiveType(type);
             }
-            else
+           // selfs[selectedAvatarNum].ChangeActiveType(type);
+
+            List<AvatarContainer> teachers = poseteacher.GetTeacherAvatarContainers();
+            foreach (AvatarContainer avatar in teachers)
             {
-                List<AvatarContainer> teachers = poseteacher.GetTeacherAvatarContainers();
-                teachers[selectedAvatarNum].ChangeActiveType(type);
+                avatar.ChangeActiveType(type);
             }
+           // teachers[selectedAvatarNum].ChangeActiveType(type);           
             
-            
+        }
+
+        public void MirrorAvatars()
+        {
+            poseteacher = MainObject.GetComponent<PoseteacherMain>();
+           // poseteacher.do_mirror();
+
+            List<AvatarContainer> selfs = poseteacher.GetSelfAvatarContainers();
+            foreach (AvatarContainer avatar in selfs)
+            {
+                avatar.Mirror();
+            }
+           // selfs[selectedAvatarNum].Mirror();
+
+            List<AvatarContainer> teachers = poseteacher.GetTeacherAvatarContainers();
+            foreach (AvatarContainer avatar in teachers)
+            {
+                avatar.Mirror();
+            }
+           // teachers[selectedAvatarNum].Mirror();
         }
     }
 }

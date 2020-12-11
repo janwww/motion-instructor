@@ -7,17 +7,23 @@ namespace PoseTeacher
 {
     public enum Menus
     {
-        TITLE, DANCE, COURSES, SPECCOURSE, SETTINGS, AVATARSETTINGS
+        TITLE, DANCE, COURSES, SPECCOURSE, SETTINGS, AVATARSETTINGS,
+        DIFFICULTYSETTINGS, FEEDSETTINGS, RECORDMENU, COREOMENU
     }
     public enum MenuState
     {
         INMAIN, PAUSED
+    }
+    public enum PauseType
+    {
+        TRAINING, COREO, RECORD
     }
 
     public class MenuHelper : MonoBehaviour
     {
 
         public GameObject MenuObject;
+        public GameObject MainObject;
         private Dictionary<Menus, GameObject> menus = new Dictionary<Menus, GameObject>();
         private Menus CurrentMenu;
         private Menus PreviousMainMenu;
@@ -27,7 +33,9 @@ namespace PoseTeacher
 
         public GameObject TrainingElements;
         public GameObject CoreoElements;
-        private bool isTrainingPause = true;
+        public GameObject RecordElements;
+       // private bool isTrainingPause = true;
+        private PauseType pauseType = PauseType.TRAINING;
 
         public void setState(string state)
         {
@@ -45,7 +53,7 @@ namespace PoseTeacher
                     MenuObject.transform.Find("TitleBarHolder").Find("Buttons").Find("MainButtons").gameObject.SetActive(false);
                     MenuObject.transform.Find("TitleBarHolder").Find("Buttons").Find("PausedButtons").gameObject.SetActive(true);
                     TrainingElements.SetActive(false);
-                    isTrainingPause = true;
+                    pauseType = PauseType.TRAINING;
                     break;
                 case "PAUSED_coreo":
                     this.state = MenuState.PAUSED;
@@ -59,7 +67,20 @@ namespace PoseTeacher
                     MenuObject.transform.Find("TitleBarHolder").Find("Buttons").Find("MainButtons").gameObject.SetActive(false);
                     MenuObject.transform.Find("TitleBarHolder").Find("Buttons").Find("PausedButtons").gameObject.SetActive(true);
                     CoreoElements.SetActive(false);
-                    isTrainingPause = false;
+                    pauseType = PauseType.COREO;
+                    break;
+                case "PAUSED_record":
+                    this.state = MenuState.PAUSED;
+                    PreviousMainMenu = CurrentMenu;
+                    CurrentMenu = Menus.SETTINGS;
+                    UpdateMenu();
+                    // Show menu
+                    MenuObject.SetActive(true);
+                    // Change Buttons
+                    MenuObject.transform.Find("TitleBarHolder").Find("Buttons").Find("MainButtons").gameObject.SetActive(false);
+                    MenuObject.transform.Find("TitleBarHolder").Find("Buttons").Find("PausedButtons").gameObject.SetActive(true);
+                    RecordElements.SetActive(false);
+                    pauseType = PauseType.RECORD;
                     break;
                 case "INMAIN":
                     this.state = MenuState.INMAIN;
@@ -71,10 +92,22 @@ namespace PoseTeacher
                     // change buttins
                     MenuObject.transform.Find("TitleBarHolder").Find("Buttons").Find("MainButtons").gameObject.SetActive(true);
                     MenuObject.transform.Find("TitleBarHolder").Find("Buttons").Find("PausedButtons").gameObject.SetActive(false);
-                    if (isTrainingPause)
-                        TrainingElements.SetActive(true);
-                    else
-                        CoreoElements.SetActive(true);
+                    
+                    switch (pauseType)
+                    {
+                        case PauseType.TRAINING:
+                            TrainingElements.SetActive(true);
+                            break;
+                        case PauseType.COREO:
+                            CoreoElements.SetActive(true);
+                            break;
+                        case PauseType.RECORD:
+                            RecordElements.SetActive(true);
+                            break;
+                        default:
+                            break;
+                    }
+
                     break;
             }
         }
@@ -88,6 +121,9 @@ namespace PoseTeacher
             menus.Add(Menus.SPECCOURSE, MenuHolderTr.Find("SpecCourseMenu").gameObject);
             menus.Add(Menus.SETTINGS, MenuHolderTr.Find("SettingsMenu").gameObject);
             menus.Add(Menus.AVATARSETTINGS, MenuObject.transform.Find("AvatarSettings").gameObject);
+            menus.Add(Menus.DIFFICULTYSETTINGS, MenuHolderTr.Find("DifficultySettingsMenu").gameObject);
+            menus.Add(Menus.FEEDSETTINGS, MenuHolderTr.Find("PosefeedSettingsMenu").gameObject);
+            menus.Add(Menus.RECORDMENU, MenuHolderTr.Find("RecordMenu").gameObject);
 
             CurrentMenu = Menus.TITLE;
 
@@ -108,6 +144,7 @@ namespace PoseTeacher
                 menus[CurrentMenu].SetActive(false);
                 // Set Title Menu to Active
                 CurrentMenu = Menus.TITLE;
+                DeactivateTeachers();
                 menus[CurrentMenu].SetActive(true); 
             }
 
@@ -139,10 +176,23 @@ namespace PoseTeacher
                     break;
                 case Menus.SETTINGS:
                     CurrentMenu = Menus.TITLE;
+                    DeactivateTeachers();
                     menus[CurrentMenu].SetActive(true);
                     break;
                 case Menus.AVATARSETTINGS:
                     CurrentMenu = Menus.SETTINGS;
+                    menus[CurrentMenu].SetActive(true);
+                    break;
+                case Menus.DIFFICULTYSETTINGS:
+                    CurrentMenu = Menus.SETTINGS;
+                    menus[CurrentMenu].SetActive(true);
+                    break;
+                case Menus.FEEDSETTINGS:
+                    CurrentMenu = Menus.SETTINGS;
+                    menus[CurrentMenu].SetActive(true);
+                    break;
+                case Menus.RECORDMENU:
+                    CurrentMenu = Menus.TITLE;
                     menus[CurrentMenu].SetActive(true);
                     break;
                 default:
@@ -194,6 +244,15 @@ namespace PoseTeacher
                 case Menus.SETTINGS:
                     SelectedInSettingsMenu(selectedMenuOption);
                     break;
+                case Menus.DIFFICULTYSETTINGS:
+                    SelectedInDifficultySettingsMenu(selectedMenuOption);
+                    break;
+                case Menus.FEEDSETTINGS:
+                    SelectedInFeedSettingsMenu(selectedMenuOption);
+                    break;
+                case Menus.RECORDMENU:
+                    SelectedInRecordMovementMenu(selectedMenuOption);
+                    break;
                 default:
                     break;
             }
@@ -221,6 +280,13 @@ namespace PoseTeacher
                 case 2:
                     menus[CurrentMenu].SetActive(false);
                     CurrentMenu = Menus.SETTINGS;
+                    ActivateTeachers();
+                    menus[CurrentMenu].SetActive(true);
+                    break;
+                // Title -> Record movement Menu
+                case 3:
+                    menus[CurrentMenu].SetActive(false);
+                    CurrentMenu = Menus.RECORDMENU;
                     menus[CurrentMenu].SetActive(true);
                     break;
                 default:
@@ -277,17 +343,171 @@ namespace PoseTeacher
                 case 0:
                     menus[CurrentMenu].SetActive(false);
                     CurrentMenu = Menus.AVATARSETTINGS;
+                    HighlightSelectedAvatarType();
                     menus[CurrentMenu].SetActive(true);
                     break;
                 // Settings -> RGBFeedSettings Menu
                 case 1:
-                    
+                    menus[CurrentMenu].SetActive(false);
+                    CurrentMenu = Menus.FEEDSETTINGS;
+                    HighlightSelectedFeed();
+                    menus[CurrentMenu].SetActive(true);
                     break;
                 // Settings -> DifficultySettings Menu
                 case 2:
-                    
+                    menus[CurrentMenu].SetActive(false);
+                    CurrentMenu = Menus.DIFFICULTYSETTINGS;
+                    HighlightSelectedDifficulty();
+                    menus[CurrentMenu].SetActive(true);
                     break;
                 default:
+                    break;
+            }
+        }
+
+        private void SelectedInDifficultySettingsMenu(int selectedMenuOption)
+        {
+            switch (selectedMenuOption)
+            {
+                // Easy Difficutly selected
+                case 0:
+                    MainObject.GetComponent<PoseteacherMain>().SetDifficulty(Difficulty.EASY);
+                    break;
+                // Medium Difficulty Selected
+                case 1:
+                    MainObject.GetComponent<PoseteacherMain>().SetDifficulty(Difficulty.MEDIUM);
+                    break;
+                // Hard Difficulty Selected
+                case 2:
+                    MainObject.GetComponent<PoseteacherMain>().SetDifficulty(Difficulty.HARD);
+                    break;
+                default:
+                    break;
+            }
+            HighlightSelectedDifficulty();
+        }
+
+        private void SelectedInFeedSettingsMenu(int selectedMenuOption)
+        {
+            switch (selectedMenuOption)
+            {
+                // Kinect input selected
+                case 0:
+                    MainObject.GetComponent<PoseteacherMain>().SelfPoseInputSource = PoseInputSource.KINECT;
+                    break;
+                // Websocket input Selected
+                case 1:
+                    MainObject.GetComponent<PoseteacherMain>().SelfPoseInputSource = PoseInputSource.WEBSOCKET;
+                    break;
+                // File input Selected
+                case 2:
+                    MainObject.GetComponent<PoseteacherMain>().SelfPoseInputSource = PoseInputSource.FILE;
+                    break;
+                default:
+                    break;
+            }
+            HighlightSelectedFeed();
+        }
+
+        private void SelectedInRecordMovementMenu(int selectedMenuOption)
+        {
+            switch (selectedMenuOption)
+            {
+                // Start recording
+                case 0:
+                    // TODO
+                    StartRecording();
+                    break;
+                // Placeholder for recorded movements
+                case 1:
+                    // TODO
+                    break;
+                default:
+                    break;
+            }
+        }
+
+
+        private void HighlightSelectedDifficulty()
+        {
+            menus[CurrentMenu].transform.Find("DifficultySettingsMenuButtonCollection").Find("EasyDifficultySettingsButton").
+                Find("IconAndText").Find("TextMeshPro").gameObject.GetComponent<TextMeshPro>().color = new Color(255, 255, 255);
+            menus[CurrentMenu].transform.Find("DifficultySettingsMenuButtonCollection").Find("MediumDifficultySettingsButton").
+                Find("IconAndText").Find("TextMeshPro").gameObject.GetComponent<TextMeshPro>().color = new Color(255, 255, 255);
+            menus[CurrentMenu].transform.Find("DifficultySettingsMenuButtonCollection").Find("HardDifficultySettingsButton").
+                Find("IconAndText").Find("TextMeshPro").gameObject.GetComponent<TextMeshPro>().color = new Color(255, 255, 255);
+
+            switch (MainObject.GetComponent<PoseteacherMain>().difficulty)
+            {
+                case Difficulty.EASY:
+                    menus[CurrentMenu].transform.Find("DifficultySettingsMenuButtonCollection").Find("EasyDifficultySettingsButton").
+                        Find("IconAndText").Find("TextMeshPro").gameObject.GetComponent<TextMeshPro>().color = new Color(255,255,0);
+                    break;
+                case Difficulty.MEDIUM:
+                    menus[CurrentMenu].transform.Find("DifficultySettingsMenuButtonCollection").Find("MediumDifficultySettingsButton").
+                        Find("IconAndText").Find("TextMeshPro").gameObject.GetComponent<TextMeshPro>().color = new Color(255, 255, 0); 
+                    break;
+                case Difficulty.HARD:
+                    menus[CurrentMenu].transform.Find("DifficultySettingsMenuButtonCollection").Find("HardDifficultySettingsButton").
+                        Find("IconAndText").Find("TextMeshPro").gameObject.GetComponent<TextMeshPro>().color = new Color(255, 255, 0); 
+                    break;
+            }
+        }
+
+        private void HighlightSelectedFeed()
+        {
+            menus[CurrentMenu].transform.Find("PosefeedSettingsMenuButtonCollection").Find("KinectFeedButton").
+                Find("IconAndText").Find("TextMeshPro").gameObject.GetComponent<TextMeshPro>().color = new Color(255, 255, 255);
+            menus[CurrentMenu].transform.Find("PosefeedSettingsMenuButtonCollection").Find("RGBCameraFeedButton").
+                Find("IconAndText").Find("TextMeshPro").gameObject.GetComponent<TextMeshPro>().color = new Color(255, 255, 255);
+            menus[CurrentMenu].transform.Find("PosefeedSettingsMenuButtonCollection").Find("JSONFeedButton").
+                Find("IconAndText").Find("TextMeshPro").gameObject.GetComponent<TextMeshPro>().color = new Color(255, 255, 255);
+
+            switch (MainObject.GetComponent<PoseteacherMain>().SelfPoseInputSource)
+            {
+                case PoseInputSource.KINECT:
+                    menus[CurrentMenu].transform.Find("PosefeedSettingsMenuButtonCollection").Find("KinectFeedButton").
+                        Find("IconAndText").Find("TextMeshPro").gameObject.GetComponent<TextMeshPro>().color = new Color(255, 255, 0);
+                    break;
+                case PoseInputSource.WEBSOCKET:
+                    menus[CurrentMenu].transform.Find("PosefeedSettingsMenuButtonCollection").Find("RGBCameraFeedButton").
+                        Find("IconAndText").Find("TextMeshPro").gameObject.GetComponent<TextMeshPro>().color = new Color(255, 255, 0);
+                    break;
+                case PoseInputSource.FILE:
+                    menus[CurrentMenu].transform.Find("PosefeedSettingsMenuButtonCollection").Find("JSONFeedButton").
+                        Find("IconAndText").Find("TextMeshPro").gameObject.GetComponent<TextMeshPro>().color = new Color(255, 255, 0);
+                    break;
+            }
+        }
+
+        public void HighlightSelectedAvatarType()
+        {
+            menus[CurrentMenu].transform.Find("VerticalGrid").Find("AvatarTypes").Find("AvatarTypesButtonCollection").Find("CubeAvatarButton").
+                Find("IconAndText").Find("TextMeshPro").gameObject.GetComponent<TextMeshPro>().color = new Color(255, 255, 255);
+            menus[CurrentMenu].transform.Find("VerticalGrid").Find("AvatarTypes").Find("AvatarTypesButtonCollection").Find("StickAvatarButton").
+                Find("IconAndText").Find("TextMeshPro").gameObject.GetComponent<TextMeshPro>().color = new Color(255, 255, 255);
+            menus[CurrentMenu].transform.Find("VerticalGrid").Find("AvatarTypes").Find("AvatarTypesButtonCollection").Find("RobotAvatarButton").
+                Find("IconAndText").Find("TextMeshPro").gameObject.GetComponent<TextMeshPro>().color = new Color(255, 255, 255);
+            menus[CurrentMenu].transform.Find("VerticalGrid").Find("AvatarTypes").Find("AvatarTypesButtonCollection").Find("SMPLAvatarButton").
+                Find("IconAndText").Find("TextMeshPro").gameObject.GetComponent<TextMeshPro>().color = new Color(255, 255, 255);
+
+            switch (MainObject.GetComponent<PoseteacherMain>().GetSelfAvatarContainers()[0].activeType)
+            {
+                case AvatarType.CUBE:
+                    menus[CurrentMenu].transform.Find("VerticalGrid").Find("AvatarTypes").Find("AvatarTypesButtonCollection").Find("CubeAvatarButton").
+                        Find("IconAndText").Find("TextMeshPro").gameObject.GetComponent<TextMeshPro>().color = new Color(255, 255, 0);
+                    break;
+                case AvatarType.STICK:
+                    menus[CurrentMenu].transform.Find("VerticalGrid").Find("AvatarTypes").Find("AvatarTypesButtonCollection").Find("StickAvatarButton").
+                        Find("IconAndText").Find("TextMeshPro").gameObject.GetComponent<TextMeshPro>().color = new Color(255, 255, 0);
+                    break;
+                case AvatarType.ROBOT:
+                    menus[CurrentMenu].transform.Find("VerticalGrid").Find("AvatarTypes").Find("AvatarTypesButtonCollection").Find("RobotAvatarButton").
+                        Find("IconAndText").Find("TextMeshPro").gameObject.GetComponent<TextMeshPro>().color = new Color(255, 255, 0);
+                    break;
+                case AvatarType.SMPL:
+                    menus[CurrentMenu].transform.Find("VerticalGrid").Find("AvatarTypes").Find("AvatarTypesButtonCollection").Find("SMPLAvatarButton").
+                        Find("IconAndText").Find("TextMeshPro").gameObject.GetComponent<TextMeshPro>().color = new Color(255, 255, 0);
                     break;
             }
         }
@@ -321,6 +541,30 @@ namespace PoseTeacher
         public void SetCourseDetailsText(int courseID)
         {
             courseMenuHelper.SetCourseDetails(courseID);
+        }
+
+        private void ActivateTeachers()
+        {
+            foreach (AvatarContainer avatar in MainObject.GetComponent<PoseteacherMain>().GetTeacherAvatarContainers())
+            {
+                avatar.avatarContainer.SetActive(true);
+            }
+        }
+
+        private void DeactivateTeachers()
+        {
+            foreach (AvatarContainer avatar in MainObject.GetComponent<PoseteacherMain>().GetTeacherAvatarContainers())
+            {
+                avatar.avatarContainer.SetActive(false);
+            }
+        }
+
+        private void StartRecording()
+        {
+            MenuObject.SetActive(false);
+            PoseteacherMain main = MainObject.GetComponent<PoseteacherMain>();
+            main.StartRecordingMode(false);
+            RecordElements.SetActive(true);
         }
     }
 }
