@@ -387,7 +387,6 @@ namespace PoseTeacher
         public bool usingKinectAlternative = true;
         public PoseInputSource SelfPoseInputSource = PoseInputSource.FILE;
 
-
         public bool mirroring = true; // can probably be changed to private (if no UI elements use it)
 
         // Used for showing if pose is correct
@@ -471,6 +470,10 @@ namespace PoseTeacher
         public List<double> similarityWeightRaw; // weight value for all body sticks
         AvatarSimilarity avatarSimilarity;
         VisualisationSimilarity avatarVisualisationSimilarity;
+        Graphtest graphtest;
+        public static double similarityScoreExtern = 0.0; // similarity value between 0 and 1 for defined body part (extern global variable for plot)
+        public static double similarityTotalScoreExtern = 0.0; // Total score (extern global variable for plot)
+
         // RandomGraph randomGraph;
 
 
@@ -616,6 +619,8 @@ namespace PoseTeacher
             // initialize similarity calculation instance and assign selected avatars
             avatarSimilarity = new AvatarSimilarity(avatarListSelf[similaritySelfNr], avatarListTeacher[similarityTeacherNr], similarityBodyNr, similarityPenalty, similarityActivateKalman, similarityKalmanQ, similarityKalmanR);
             avatarVisualisationSimilarity = new VisualisationSimilarity(avatarListSelf[similaritySelfNr]);
+            graphtest = new Graphtest((float)similarityScoreExtern);
+            //graphtest.Start_plot((float)similarityScoreExtern);
            //  randomGraph = new RandomGraph();
         }
 
@@ -634,10 +639,14 @@ namespace PoseTeacher
             similarityScore = avatarSimilarity.similarityBodypart; // get single similarity score for selected body part
             similarityScoreRaw = avatarSimilarity.similarityStick; // get similarity score for each stick element
             similarityWeightRaw = avatarSimilarity.stickWeight; // get similarity score for each stick element
-            similarityTotalScore = (int)avatarSimilarity.totalScore; // get total Score
+            similarityTotalScore = avatarSimilarity.totalScore; // get total Score
+            similarityScoreExtern = similarityScore; // global
+            similarityTotalScoreExtern = similarityTotalScore; // global
 
             //avatarVisualisationSimilarity.Update(similarityScoreRaw);// avatarVisualisationSimilarity.Update(similarityScore);
             avatarVisualisationSimilarity.UpdatePart(similarityBodyNr, similarityScore);
+            graphtest.Update_plot(similarityScoreExtern);
+
             // randomGraph.Update();
             // Playback for teacher avatar(s)
             if (recording_mode == 2) // playback
