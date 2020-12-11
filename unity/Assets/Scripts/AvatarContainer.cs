@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
-using Microsoft.Azure.Kinect.Sensor.BodyTracking;
+using Microsoft.Azure.Kinect.BodyTracking;
 
 namespace PoseTeacher
 {
@@ -40,7 +40,7 @@ namespace PoseTeacher
         public void MovePerson(PoseData joint_data_list)
         {
             //Place cubes at position and orietation of joints
-            for (JointType jt = 0; jt < JointType.Count; jt++)
+            for (JointId jt = 0; jt < JointId.Count; jt++)
             {
                 var joint = joint_data_list.data[(int)jt];
                 var pos = joint.Position;
@@ -759,12 +759,15 @@ namespace PoseTeacher
             // Gets refernces to the cube children of the cube container
             // TODO: do this after finding cubeContainer and setting to field is done in init, to not run Find again
             GameObject cubeC = avatarContainer.transform.Find("CubeContainer").gameObject;
-            debugObjects = new GameObject[(int)JointType.Count];
-            for (var i = 0; i < (int)JointType.Count; i++)
+            debugObjects = new GameObject[(int)JointId.Count];
+            for (var i = 0; i < (int)JointId.Count; i++)
             {
                 // Find cube children, and insert refrences in same order as joints from the BT SDK
                 // Note: cube objects have same name as the joints in the SDK
-                var cube = cubeC.transform.Find(Enum.GetName(typeof(JointType), i)).gameObject;
+                if (cubeC.transform.Find(Enum.GetName(typeof(JointId), i)) == null)
+                    Debug.Log(Enum.GetName(typeof(JointId), i));
+                var cube = cubeC.transform.Find(Enum.GetName(typeof(JointId), i)).gameObject;
+                
                 cube.transform.localScale = Vector3.one * 0.4f;
                 cube.transform.SetParent(cubeC.transform);
                 debugObjects[i] = cube;

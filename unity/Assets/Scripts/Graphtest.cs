@@ -8,7 +8,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Microsoft.Azure.Kinect.Sensor;
-using Microsoft.Azure.Kinect.Sensor.BodyTracking;
+using Microsoft.Azure.Kinect.BodyTracking;
 using UnityEngine.UI;
 using System.IO;
 using System.Collections;

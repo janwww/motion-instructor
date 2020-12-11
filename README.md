@@ -5,36 +5,27 @@ Learning complex movements can be a time-consuming process, but it is necessary 
 In-person sessions can be impractical due to epidemics or travel distance, while videos make it hard to see the 3D postures of the teacher and of the students. As an alternative, we propose the teaching of poses in Augmented Reality (AR) with a virtual teacher and 3D avatars.
 
 ## Open source usage
+TODO update this:
+
 This work is based on [this repository](https://github.com/curiosity-inc/azure-kinect-dk-unity) (MIT License), which is an example C# wrapper showing how to use Azure Kinect DK in Unity. In particular, we used code from [this fork](https://github.com/Aviscii/azure-kinect-dk-unity). We upgraded the Azure Kinect Body Tracking SDK and Azure Kinect SDK.
 As alternative to pose estimation with Kinect we used [Lightweight human pose estimation](https://github.com/Daniil-Osokin/lightweight-human-pose-estimation-3d-demo.pytorch) (Apache-2.0 License). 
 
 ## Environment
-As of July 5, 2020, this repo has been tested under the following environment.
-- Windows 10 Education N (Version 10.0.18363) with Media Feature Pack (important)
-- [Azure Kinect Sensor SDK](https://docs.microsoft.com/en-us/azure/Kinect-dk/sensor-sdk-download) v1.4.0
-  - test by running `k4aviewer.exe` in `C:\Program Files\Azure Kinect SDK v1.4.0\tools`
-- [Azure Kinect Body Tracking SDK](https://docs.microsoft.com/en-us/azure/Kinect-dk/body-sdk-download) v0.9.0
-  - test by running `k4abt_simple_3d_viewer.exe` in `C:\Program Files\Azure Kinect Body Tracking SDK\tools`
-- Unity 2019.4.13f1 // newest Unity 2019 LTS version at the moment
-- CUDA v10.0
-  - try `nvcc  --version` (ONNX runtime officially only supports up to CUDA 10.0) 
-- cudnn v7.5.1.10 
-  - check `C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.0\include\cudnn.h`
-- [all other tools required to develop on the Hololens](https://docs.microsoft.com/en-us/windows/mixed-reality/install-the-tools)
+As of December 10, 2020, this repository has been tested under the following environment:
+- Windows 10 Education (10.0.19042 Build 19042)
+- [all tools required to develop on the Hololens](https://docs.microsoft.com/en-us/windows/mixed-reality/install-the-tools)
+- Unity 2019.4.13f1 // Unity 2019 LTS version
+- GTX 1070
 
 ## Get Started
-1. Clone the poseteacher2 repo.
-2. (optional but recommended) For setting up real-time pose estimation. Otherwise a motion from a file will be used instead. 
-   1. With Azure Kinect: Copy the following files from Azure Kinect Sensor SDK or Azure Kinect Body Tracking SDK to the folder unity in the poseteacher2 repo:
-    
-      - k4a.dll (Body Tracking SDK or Kinect SDK)
-      - k4abt.dll (Body Tracking SDK)
-      - onnxruntime.dll (Body Tracking SDK)
-      - depthengine_2_0.dll (Body Tracking SDK or Kinect SDK)
-      - dnn_model_2_0.onnx (Body Tracking SDK)
-      - make sure that cudnn is properly installed and in the path. Otherwise it might be necessary to add the cudnn files to the unity folder as well. 
-
-   2. Without Azure Kinect or a GPU: Clone [this repository](https://github.com/Daniil-Osokin/lightweight-human-pose-estimation-3d-demo.pytorch) and copy `demo_ws.py` into its main folder. Then install the required packages according to the repo and run `demo_ws.py`. Beware that Pytorch still has issues with Python 3.8, so we recommend using Python 3.7.
+1. Clone this repository.
+2. Setup the Azure Kinect Libraries: (same as [Sample Unity Body Tracking Application](https://github.com/microsoft/Azure-Kinect-Samples/tree/master/body-tracking-samples/sample_unity_bodytracking))
+    1. Get the latest nuget packages of libraries:
+        - Open the Visual Studio Solution (.sln) associated with this project. You can make one by opening a csharp file the Unity Editor.
+        - In Visual Studio open: Tools->NuGet Package Manager-> Package Manager Console
+        - Exectue in the console: `Install-Package Microsoft.Azure.Kinect.BodyTracking -Version 1.0.1`
+    2. Move libraries to correct folders:
+        - Execute the file `unity/MoveLibraryFile.bat`. You should now have library files in `unity/` and in the newly created `unity/Assets/Plugins`.
 3. Open the `unity` folder as a Unity project, with `Universal Windows Platform` as the build platform. It might take a while to fetch all packages.
 4. Open `Assets/PoseteacherScene`.
 5. When prompted to import TextMesh Pro, select `Import TMP Essential Resources`. You will need to reopen the scene to fix visual glitches.
@@ -60,18 +51,3 @@ As of July 5, 2020, this repo has been tested under the following environment.
    - press Z for playback
    - press L to load playback
    - press R to reset/delete saved playback
-
-## Refactor TODOs
-
-Refactored project organization:
-
-The `PoseteacherMain.cs` script shoud be divided onto relevant objects in the scene:
-   Attach a separate script on each avatar object in scene.
- - Pose Interface script (attached to empty object? or called from main) functionalities:
-   - [ ] Get stream of poses from Azure Kinect BT SDK (or websocket)
-   - [ ] Get stream of poses from a `.json` file
-   - [ ] Write stream of poses to file.
-   - [ ] Start/Pause/Restart/Speed for movements from files
- - Main script (attached to empty object) functionalities:
-   - [ ] (optional) change so that avatar containers are added to scene when needed.
-   
