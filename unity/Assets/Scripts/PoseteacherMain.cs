@@ -238,6 +238,12 @@ namespace PoseTeacher
                     string frame_json = SequenceEnum.Current;
                     PoseData fake_live_data = PoseDataUtils.JSONstring2PoseData(frame_json);
                     CurrentPose = fake_live_data;
+
+                    if (recording) // recording
+                    {
+                        File.AppendAllText(WriteDataPath, frame_json + Environment.NewLine);
+                    }
+
                     break;
 
                 case PoseInputSource.KINECT:
@@ -959,7 +965,12 @@ namespace PoseTeacher
         public void PauseRecordingMode()
         {
             if (isrecording)
-                SelfPoseInputGetter.recording = !SelfPoseInputGetter.recording;
+                SelfPoseInputGetter.recording = false;
+        }
+        public void ResumeRecordingMode()
+        {
+            if (isrecording)
+                SelfPoseInputGetter.recording = true;
         }
 
         public void StopShowingRecording()

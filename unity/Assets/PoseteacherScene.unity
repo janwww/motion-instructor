@@ -16205,6 +16205,12 @@ Material:
     - _ProximityLightOuterColorOverride: {r: 0, g: 0, b: 1, a: 1}
     - _RimColor: {r: 1, g: 1, b: 1, a: 0.497}
     - _RoundCornersRadius: {r: 0.5, g: 0.5, b: 0.5, a: 0.5}
+--- !u!1 &2094008290 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8535993307723565852, guid: efd77db9e374bcf4ba53ae1676a1647a,
+    type: 3}
+  m_PrefabInstance: {fileID: 1609218879524815173}
+  m_PrefabAsset: {fileID: 0}
 --- !u!21 &2144906589
 Material:
   serializedVersion: 6
@@ -16531,7 +16537,7 @@ PrefabInstance:
     - target: {fileID: 2704426156250201761, guid: efd77db9e374bcf4ba53ae1676a1647a,
         type: 3}
       propertyPath: onLastHandLost.m_PersistentCalls.m_Calls.Array.data[1].m_MethodName
-      value: PauseRecordingMode
+      value: ResumeRecordingMode
       objectReference: {fileID: 0}
     - target: {fileID: 2704426156250201761, guid: efd77db9e374bcf4ba53ae1676a1647a,
         type: 3}
@@ -16563,6 +16569,11 @@ PrefabInstance:
       propertyPath: OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
       value: StopRecordingMode
       objectReference: {fileID: 0}
+    - target: {fileID: 3283409386357915033, guid: efd77db9e374bcf4ba53ae1676a1647a,
+        type: 3}
+      propertyPath: OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
+      value: 6
+      objectReference: {fileID: 0}
     - target: {fileID: 7776702402741860969, guid: efd77db9e374bcf4ba53ae1676a1647a,
         type: 3}
       propertyPath: OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
@@ -16582,6 +16593,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: RecordElements
+      objectReference: {fileID: 0}
+    - target: {fileID: 8535993307723565852, guid: efd77db9e374bcf4ba53ae1676a1647a,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: efd77db9e374bcf4ba53ae1676a1647a, type: 3}
@@ -17730,6 +17746,11 @@ PrefabInstance:
       propertyPath: MainObject
       value: 
       objectReference: {fileID: 1630789622}
+    - target: {fileID: 6950095971029028176, guid: fb7db092bc9295e41a21e9d530aac22e,
+        type: 3}
+      propertyPath: RecordElements
+      value: 
+      objectReference: {fileID: 2094008290}
     - target: {fileID: 7213041097213749465, guid: fb7db092bc9295e41a21e9d530aac22e,
         type: 3}
       propertyPath: m_IsActive
