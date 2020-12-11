@@ -28,7 +28,7 @@ namespace PoseTeacher
     {
 
         PoseInputSource CurrentPoseInputSource;
-        bool recording = false;
+        public bool recording { get; set; } = false;
         PoseData CurrentPose { get; set; }
 
         // Azure Kinect variables
@@ -193,7 +193,7 @@ namespace PoseTeacher
         }
         
         // reset recording file
-        void ResetRecording()
+        public void ResetRecording()
         {
             File.WriteAllText(WriteDataPath, "");
             Debug.Log("Reset recording file");
@@ -333,6 +333,7 @@ namespace PoseTeacher
 
         PoseInputGetter SelfPoseInputGetter;
         PoseInputGetter TeacherPoseInputGetter;
+        PoseInputGetter RecordedPoseInputGetter;
 
         // Used for displaying RGB Kinect video
         public Renderer videoRenderer;
@@ -343,6 +344,7 @@ namespace PoseTeacher
         // TODO find good way to reference objects. @Unity might do this for us
         List<AvatarContainer> avatarListSelf;
         List<AvatarContainer> avatarListTeacher;
+        public AvatarContainer recordAvatar;
         public GameObject avatarPrefab;
         public GameObject avatarTPrefab;
 
@@ -361,7 +363,8 @@ namespace PoseTeacher
         // Change to enum? (!!! making this changes makes button playback speed change in scene unusable)
         public int playback_speed = 1; // 1: x1 , 2: x0.5, 4: x0.25
         private int playback_counter = 0;
-
+        private int record_counter = 0;
+        private bool show_recording = false;
 
 
         // File that is being read from
@@ -586,7 +589,12 @@ namespace PoseTeacher
             avatarListSelf.Add(new AvatarContainer(avatarContainer));
           //  avatarListSelf.Add(new AvatarContainer(avatarContainer2));
             avatarListTeacher.Add(new AvatarContainer(avatarContainerT));
-          //  avatarListTeacher.Add(new AvatarContainer(avatarContainerT2));
+            //  avatarListTeacher.Add(new AvatarContainer(avatarContainerT2));
+
+
+            GameObject newAvatar = Instantiate(avatarTPrefab);
+            recordAvatar = new AvatarContainer(newAvatar);
+            newAvatar.SetActive(false);
 
             // Set unused containers to inactive
             avatarListTeacher[0].avatarContainer.gameObject.SetActive(false);
@@ -661,6 +669,32 @@ namespace PoseTeacher
                     showCorrection(avatarListSelf[0], avatarListTeacher[0]);
                 }
 
+            }
+
+            if (show_recording)
+            {
+                if (playback_speed == 1) // x1
+                {
+                    recordAvatar.MovePerson(RecordedPoseInputGetter.GetNextPose());
+                }
+                else if (playback_speed == 2) // x0.5
+                {
+                    record_counter++;
+                    if (record_counter >= 2)
+                    {
+                        recordAvatar.MovePerson(RecordedPoseInputGetter.GetNextPose());
+                        record_counter = 0;
+                    }
+                }
+                else //(playback_speed == 3) // x0.25
+                {
+                    record_counter++;
+                    if (record_counter >= 4)
+                    {
+                        recordAvatar.MovePerson(RecordedPoseInputGetter.GetNextPose());
+                        record_counter = 0;
+                    }
+                }
             }
 
             UpdateIndicators();
@@ -887,5 +921,57 @@ namespace PoseTeacher
             //avatarListTeacher[0].avatarContainer.gameObject.SetActive(true);
             set_recording_mode(2);
         }
+
+        bool isrecording = false;
+        public void StartRecordingMode(bool temporary)
+        {
+            if (temporary)
+            {
+                SelfPoseInputGetter.WriteDataPath = "jsondata/temporary.txt";
+                SelfPoseInputGetter.ResetRecording();
+            }
+            else
+                SelfPoseInputGetter.WriteDataPath = "jsondata/" + DateTime.Now.ToString("yyyy_MM_dd-HH_mm_ss") + ".txt";
+            SelfPoseInputGetter.recording = true;
+            isrecording = true;
+        }
+
+        public void StopRecordingMode(bool abort = false)
+        {
+            if (isrecording)
+            {
+                if (abort)
+                {
+                    SelfPoseInputGetter.recording = false;
+                    isrecording = false;
+                }
+                else
+                {
+                    SelfPoseInputGetter.recording = false;
+                    recordAvatar.avatarContainer.SetActive(true);
+                    RecordedPoseInputGetter = new PoseInputGetter(PoseInputSource.FILE) { ReadDataPath = SelfPoseInputGetter.WriteDataPath };
+                    show_recording = true;
+                    isrecording = false;
+                }
+            }
+        }
+
+        public void PauseRecordingMode()
+        {
+            if (isrecording)
+                SelfPoseInputGetter.recording = !SelfPoseInputGetter.recording;
+        }
+
+        public void StopShowingRecording()
+        {
+            recordAvatar.avatarContainer.SetActive(false);
+            show_recording = false;
+        }
+
+        public void PauseShowingRecording()
+        {
+            show_recording = !show_recording;
+        }
+
     }
 }

@@ -14,6 +14,10 @@ namespace PoseTeacher
     {
         INMAIN, PAUSED
     }
+    public enum PauseType
+    {
+        TRAINING, COREO, RECORD
+    }
 
     public class MenuHelper : MonoBehaviour
     {
@@ -29,7 +33,9 @@ namespace PoseTeacher
 
         public GameObject TrainingElements;
         public GameObject CoreoElements;
-        private bool isTrainingPause = true;
+        public GameObject RecordElements;
+       // private bool isTrainingPause = true;
+        private PauseType pauseType = PauseType.TRAINING;
 
         public void setState(string state)
         {
@@ -47,7 +53,7 @@ namespace PoseTeacher
                     MenuObject.transform.Find("TitleBarHolder").Find("Buttons").Find("MainButtons").gameObject.SetActive(false);
                     MenuObject.transform.Find("TitleBarHolder").Find("Buttons").Find("PausedButtons").gameObject.SetActive(true);
                     TrainingElements.SetActive(false);
-                    isTrainingPause = true;
+                    pauseType = PauseType.TRAINING;
                     break;
                 case "PAUSED_coreo":
                     this.state = MenuState.PAUSED;
@@ -61,7 +67,20 @@ namespace PoseTeacher
                     MenuObject.transform.Find("TitleBarHolder").Find("Buttons").Find("MainButtons").gameObject.SetActive(false);
                     MenuObject.transform.Find("TitleBarHolder").Find("Buttons").Find("PausedButtons").gameObject.SetActive(true);
                     CoreoElements.SetActive(false);
-                    isTrainingPause = false;
+                    pauseType = PauseType.COREO;
+                    break;
+                case "PAUSED_record":
+                    this.state = MenuState.PAUSED;
+                    PreviousMainMenu = CurrentMenu;
+                    CurrentMenu = Menus.SETTINGS;
+                    UpdateMenu();
+                    // Show menu
+                    MenuObject.SetActive(true);
+                    // Change Buttons
+                    MenuObject.transform.Find("TitleBarHolder").Find("Buttons").Find("MainButtons").gameObject.SetActive(false);
+                    MenuObject.transform.Find("TitleBarHolder").Find("Buttons").Find("PausedButtons").gameObject.SetActive(true);
+                    RecordElements.SetActive(false);
+                    pauseType = PauseType.RECORD;
                     break;
                 case "INMAIN":
                     this.state = MenuState.INMAIN;
@@ -73,10 +92,22 @@ namespace PoseTeacher
                     // change buttins
                     MenuObject.transform.Find("TitleBarHolder").Find("Buttons").Find("MainButtons").gameObject.SetActive(true);
                     MenuObject.transform.Find("TitleBarHolder").Find("Buttons").Find("PausedButtons").gameObject.SetActive(false);
-                    if (isTrainingPause)
-                        TrainingElements.SetActive(true);
-                    else
-                        CoreoElements.SetActive(true);
+                    
+                    switch (pauseType)
+                    {
+                        case PauseType.TRAINING:
+                            TrainingElements.SetActive(true);
+                            break;
+                        case PauseType.COREO:
+                            CoreoElements.SetActive(true);
+                            break;
+                        case PauseType.RECORD:
+                            RecordElements.SetActive(true);
+                            break;
+                        default:
+                            break;
+                    }
+
                     break;
             }
         }
@@ -92,6 +123,7 @@ namespace PoseTeacher
             menus.Add(Menus.AVATARSETTINGS, MenuObject.transform.Find("AvatarSettings").gameObject);
             menus.Add(Menus.DIFFICULTYSETTINGS, MenuHolderTr.Find("DifficultySettingsMenu").gameObject);
             menus.Add(Menus.FEEDSETTINGS, MenuHolderTr.Find("PosefeedSettingsMenu").gameObject);
+            menus.Add(Menus.RECORDMENU, MenuHolderTr.Find("RecordMenu").gameObject);
 
             CurrentMenu = Menus.TITLE;
 
@@ -159,6 +191,10 @@ namespace PoseTeacher
                     CurrentMenu = Menus.SETTINGS;
                     menus[CurrentMenu].SetActive(true);
                     break;
+                case Menus.RECORDMENU:
+                    CurrentMenu = Menus.TITLE;
+                    menus[CurrentMenu].SetActive(true);
+                    break;
                 default:
                     break;
             }
@@ -214,6 +250,9 @@ namespace PoseTeacher
                 case Menus.FEEDSETTINGS:
                     SelectedInFeedSettingsMenu(selectedMenuOption);
                     break;
+                case Menus.RECORDMENU:
+                    SelectedInRecordMovementMenu(selectedMenuOption);
+                    break;
                 default:
                     break;
             }
@@ -242,6 +281,12 @@ namespace PoseTeacher
                     menus[CurrentMenu].SetActive(false);
                     CurrentMenu = Menus.SETTINGS;
                     ActivateTeachers();
+                    menus[CurrentMenu].SetActive(true);
+                    break;
+                // Title -> Record movement Menu
+                case 3:
+                    menus[CurrentMenu].SetActive(false);
+                    CurrentMenu = Menus.RECORDMENU;
                     menus[CurrentMenu].SetActive(true);
                     break;
                 default:
@@ -362,6 +407,24 @@ namespace PoseTeacher
                     break;
             }
             HighlightSelectedFeed();
+        }
+
+        private void SelectedInRecordMovementMenu(int selectedMenuOption)
+        {
+            switch (selectedMenuOption)
+            {
+                // Start recording
+                case 0:
+                    // TODO
+                    StartRecording();
+                    break;
+                // Placeholder for recorded movements
+                case 1:
+                    // TODO
+                    break;
+                default:
+                    break;
+            }
         }
 
 
@@ -494,6 +557,14 @@ namespace PoseTeacher
             {
                 avatar.avatarContainer.SetActive(false);
             }
+        }
+
+        private void StartRecording()
+        {
+            MenuObject.SetActive(false);
+            PoseteacherMain main = MainObject.GetComponent<PoseteacherMain>();
+            main.StartRecordingMode(false);
+            RecordElements.SetActive(true);
         }
     }
 }

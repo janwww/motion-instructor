@@ -4937,11 +4937,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   nodeList:
-  - Name: PlaybackMenu
-    Offset: {x: 0, y: 0}
-    Radius: 0
-    Transform: {fileID: 1499953010328553748}
-    Colliders: []
   - Name: RecordMenu
     Offset: {x: 0, y: 0}
     Radius: 0
@@ -4964,7 +4959,7 @@ MonoBehaviour:
   radius: 2
   radialRange: 180
   distance: 0
-  rows: 3
+  rows: 2
   columns: 1
   cellWidth: 0.096
   cellHeight: 0.064
