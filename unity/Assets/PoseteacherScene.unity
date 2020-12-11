@@ -15628,7 +15628,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1813381914}
-  - component: {fileID: 1813381911}
   - component: {fileID: 1813381913}
   - component: {fileID: 1813381912}
   m_Layer: 0
@@ -15638,44 +15637,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1813381911
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1813381909}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dc495e2b050a91944a49bbb0ea9cc9d9, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  videoRenderer: {fileID: 0}
-  avatarPrefab: {fileID: 0}
-  avatarTPrefab: {fileID: 0}
-  recording_mode: 0
-  playback_speed: 1
-  isMaleSMPL: 1
-  usingKinectAlternative: 1
-  SelfPoseInputSource: 2
-  mirroring: 1
-  normal_material: {fileID: 0}
-  correct_material: {fileID: 0}
-  incorrect_material: {fileID: 0}
-  shouldCheckCorrectness: 1
-  correctionThresh: 30
-  similarityBodyNr: total
-  similaritySelfNr: 0
-  similarityTeacherNr: 0
-  similarityScore: 0
-  similarityKalmanQ: 0.000001
-  similarityKalmanR: 0.01
-  similarityTotalScore: 0
-  similarityScoreRaw: []
-  gobject: {fileID: 1744107165}
-  newobject: {fileID: 1813381909}
-  coord: {fileID: 1300287501}
-  vectorElementsN: 200
 --- !u!222 &1813381912
 CanvasRenderer:
   m_ObjectHideFlags: 2
