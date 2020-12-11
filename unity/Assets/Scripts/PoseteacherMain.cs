@@ -417,6 +417,7 @@ namespace PoseTeacher
         public List<double> similarityScoreRaw; // similarity value for all body sticks
         AvatarSimilarity avatarSimilarity;
         VisualisationSimilarity avatarVisualisationSimilarity;
+        Graphtest graphtest;
         public static double similarityScoreExtern = 0.0; // similarity value between 0 and 1 for defined body part (extern global variable for plot)
         public static double similarityTotalScoreExtern = 0.0; // Total score (extern global variable for plot)
 
@@ -558,6 +559,8 @@ namespace PoseTeacher
             // initialize similarity calculation instance and assign selected avatars
             avatarSimilarity = new AvatarSimilarity(avatarListSelf[similaritySelfNr], avatarListTeacher[similarityTeacherNr], similarityBodyNr, similarityKalmanQ, similarityKalmanR);
             avatarVisualisationSimilarity = new VisualisationSimilarity(avatarListSelf[similaritySelfNr]);
+            graphtest = new Graphtest((float)similarityScoreExtern);
+            //graphtest.Start_plot((float)similarityScoreExtern);
            //  randomGraph = new RandomGraph();
         }
 
@@ -581,6 +584,8 @@ namespace PoseTeacher
 
             //avatarVisualisationSimilarity.Update(similarityScoreRaw);// avatarVisualisationSimilarity.Update(similarityScore);
             avatarVisualisationSimilarity.UpdatePart(similarityBodyNr, similarityScore);
+            graphtest.Update_plot(similarityScoreExtern);
+
             // randomGraph.Update();
             // Playback for teacher avatar(s)
             if (recording_mode == 2) // playback

@@ -1,12 +1,24 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using System;
+using System.Collections.Generic;
+using UnityEngine;
+using Microsoft.Azure.Kinect.Sensor;
+using Microsoft.Azure.Kinect.Sensor.BodyTracking;
+using UnityEngine.UI;
+using System.IO;
+using System.Collections;
+using NativeWebSocket;
+using System.Security.Permissions;
+
 
 namespace PoseTeacher
 {
-    public class Graphtest : PoseteacherMain
+    public class Graphtest
     {
         public GameObject gobject;
         public GameObject newobject;
@@ -17,13 +29,23 @@ namespace PoseTeacher
         LineRenderer lineRenderer, lineRenderer_coordx, lineRenderer_coordy;
         Vector3[] values, valuesDynamic, values_x, values_y, start_axis_x, start_axis_y, end_axis_x, end_axis_y, coordx, coordy;
         float begin_x, begin_y, end_x, end_y, step_x, step_y;
+        float similarityScore;
 
         // Start is called before the first frame update
-        void Start()
+
+        public Graphtest(float similarityScoreExtern)
+        {
+            gobject = GameObject.Find("Dataline"); 
+            similarityScore = similarityScoreExtern;
+            lineRenderer = gobject.GetComponent<LineRenderer>();
+            Start_plot(similarityScore);
+
+        }
+        public void Start_plot(float similarityScoreExtern)
         {
 
-           
-            lineRenderer = gobject.GetComponent<LineRenderer>();
+            //float similarityScoreExtern = 0.0f;
+            //lineRenderer = gobject.GetComponent<LineRenderer>();
 
             begin_x = 0.0f;
             begin_y = 0.0f;
@@ -35,7 +57,7 @@ namespace PoseTeacher
             for (int i = 0; i < 11; i++)
             {
                 //vertical lines of a grid
-                GameObject vert = Instantiate(gobject);
+                GameObject vert = GameObject.Instantiate(gobject);
 
                 vert.GetComponent<Renderer>().material.color = Color.white;
                 LineRenderer lineRenderer_vert = vert.GetComponent<LineRenderer>();
@@ -47,7 +69,7 @@ namespace PoseTeacher
                 lineRenderer_vert.SetPosition(1, new Vector3(begin_x + i * step_x, end_y, 8.7f));
 
                 //horisontal lines of a grid
-                GameObject hor = Instantiate(gobject);
+                GameObject hor = GameObject.Instantiate(gobject);
                 if (i == 0 || i == 10)
                 {
                     hor.GetComponent<Renderer>().material.color = Color.green;
@@ -71,17 +93,18 @@ namespace PoseTeacher
 
             }
 
-
+            //float similarityScoreExtern = (float)PoseteacherMain.similarityScoreExtern;
             valuesDynamic = new Vector3[vectorElementsN];
             for (int i = 0; i < vectorElementsN; i++)
             {
                 valuesDynamic[i] = new Vector3((float)i / vectorElementsN, (float)similarityScoreExtern, 0.0f);
             }
         }
-            void Update()
+            public void Update_plot(double similarityScoreExtern)
             {
                 Color c1 = Color.red;
                 Color c2 = Color.red;
+                
                 lineRenderer.startColor = Color.red;
                 lineRenderer.endColor = Color.red;
                 lineRenderer.widthMultiplier = 0.4f;
