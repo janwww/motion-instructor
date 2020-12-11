@@ -22,54 +22,8 @@ namespace PoseTeacher
         void Start()
         {
 
-            //    Transform canvas = newobject.transform.Find("TextContent");
-            //    text_0.transform.parent = canvas;
-            //GameObject xaxis = Instantiate(gobject);
-            //Transform canvas = newobject.transform.Find("Backplate");
-            //xaxis.transform.parent = canvas;
-            //LineRenderer lineRenderer_x = xaxis.GetComponent<LineRenderer>();
-            //lineRenderer_x.widthMultiplier = 0.2f;
-            //lineRenderer_x.startColor = Color.black;
-            //lineRenderer_x.endColor = Color.black;
-            //lineRenderer_x.positionCount = 2;
-            //lineRenderer_x.SetPosition(0, new Vector3((float)0.0f, (float)0.0f, 0.7f));
-            //lineRenderer_x.SetPosition(1, new Vector3((float)1.0f, (float)0.0f, 0.7f));
-
-            //////line renderer for yaxis
-            //////Instantiate(gobject, new Vector3(0, 0, 0), Quaternion.identity);
-            //GameObject yaxis = Instantiate(gobject);
-            ////GameObject yaxis = Instantiate(gobject);
-            ////Transform canvas = newobject.transform.Find("Backplate");
-            //yaxis.transform.parent = canvas;
-            //LineRenderer lineRenderer_y = yaxis.GetComponent<LineRenderer>();
-            //lineRenderer_y.widthMultiplier = 0.2f;
-            //lineRenderer_y.startColor = Color.black;
-            //lineRenderer_y.endColor = Color.black;
-            //lineRenderer_y.positionCount = 2;
-            //lineRenderer_y.SetPosition(0, new Vector3((float)0.0f, (float)0.0f, 0.7f));
-            //lineRenderer_y.SetPosition(1, new Vector3((float)0.0f, (float)1.0f, 0.0f));
-            //line renderer for a plot line
+           
             lineRenderer = gobject.GetComponent<LineRenderer>();
-
-            //GameObject xaxis = Instantiate(coordobject);
-            //LineRenderer lineRenderer_x = xaxis.GetComponent<LineRenderer>();
-            //GameObject yaxis = Instantiate(coordobject);
-            //LineRenderer lineRenderer_y = yaxis.GetComponent<LineRenderer>();
-            //lineRenderer_x.widthMultiplier = 0.2f;
-            //lineRenderer_y.widthMultiplier = 0.2f;
-            ////lineRenderer_x.transform.localPosition = new Vector3(0.0f, 0.0f, 0.0f);
-            ////lineRenderer_y.transform.localPosition = new Vector3(0.0f, 0.0f, 0.0f);
-            //values_x = new Vector3[vectorElementsN];
-            //values_y = new Vector3[vectorElementsN];
-            //for (int i = 0; i < vectorElementsN; i++)
-            //{
-
-            //    values_x[i] = new Vector3((float)i / vectorElementsN, 0.0f, 8.0f);
-            //    values_y[i] = new Vector3(0.0f, (float)i / vectorElementsN, 8.0f);
-
-            //    lineRenderer_x.SetPositions(values_x);
-            //    lineRenderer_y.SetPositions(values_y);
-            //}
 
             begin_x = 0.0f;
             begin_y = 0.0f;
@@ -150,6 +104,56 @@ namespace PoseTeacher
                 
             }
         }
+
+
+        //GameObject xaxis = Instantiate(coordobject);
+        //LineRenderer lineRenderer_x = xaxis.GetComponent<LineRenderer>();
+        //GameObject yaxis = Instantiate(coordobject);
+        //LineRenderer lineRenderer_y = yaxis.GetComponent<LineRenderer>();
+        //lineRenderer_x.widthMultiplier = 0.2f;
+        //lineRenderer_y.widthMultiplier = 0.2f;
+        ////lineRenderer_x.transform.localPosition = new Vector3(0.0f, 0.0f, 0.0f);
+        ////lineRenderer_y.transform.localPosition = new Vector3(0.0f, 0.0f, 0.0f);
+        //values_x = new Vector3[vectorElementsN];
+        //values_y = new Vector3[vectorElementsN];
+        //for (int i = 0; i < vectorElementsN; i++)
+        //{
+
+        //    values_x[i] = new Vector3((float)i / vectorElementsN, 0.0f, 8.0f);
+        //    values_y[i] = new Vector3(0.0f, (float)i / vectorElementsN, 8.0f);
+
+        //    lineRenderer_x.SetPositions(values_x);
+        //    lineRenderer_y.SetPositions(values_y);
+        //}
+
+
+        //    Transform canvas = newobject.transform.Find("TextContent");
+        //    text_0.transform.parent = canvas;
+        //GameObject xaxis = Instantiate(gobject);
+        //Transform canvas = newobject.transform.Find("Backplate");
+        //xaxis.transform.parent = canvas;
+        //LineRenderer lineRenderer_x = xaxis.GetComponent<LineRenderer>();
+        //lineRenderer_x.widthMultiplier = 0.2f;
+        //lineRenderer_x.startColor = Color.black;
+        //lineRenderer_x.endColor = Color.black;
+        //lineRenderer_x.positionCount = 2;
+        //lineRenderer_x.SetPosition(0, new Vector3((float)0.0f, (float)0.0f, 0.7f));
+        //lineRenderer_x.SetPosition(1, new Vector3((float)1.0f, (float)0.0f, 0.7f));
+
+        //////line renderer for yaxis
+        //////Instantiate(gobject, new Vector3(0, 0, 0), Quaternion.identity);
+        //GameObject yaxis = Instantiate(gobject);
+        ////GameObject yaxis = Instantiate(gobject);
+        ////Transform canvas = newobject.transform.Find("Backplate");
+        //yaxis.transform.parent = canvas;
+        //LineRenderer lineRenderer_y = yaxis.GetComponent<LineRenderer>();
+        //lineRenderer_y.widthMultiplier = 0.2f;
+        //lineRenderer_y.startColor = Color.black;
+        //lineRenderer_y.endColor = Color.black;
+        //lineRenderer_y.positionCount = 2;
+        //lineRenderer_y.SetPosition(0, new Vector3((float)0.0f, (float)0.0f, 0.7f));
+        //lineRenderer_y.SetPosition(1, new Vector3((float)0.0f, (float)1.0f, 0.0f));
+        //line renderer for a plot line
 
 
 
@@ -322,13 +326,13 @@ namespace PoseTeacher
 
 
     }
-        //private void OnGUI()
-        //{
-        //    DrawText();
-        //}
+    //private void OnGUI()
+    //{
+    //    DrawText();
+    //}
 
-        // Update is called once per frame
-       
+    // Update is called once per frame
+
 
 
     //values = new Vector3[200];
