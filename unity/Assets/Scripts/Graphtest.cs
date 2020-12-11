@@ -27,7 +27,7 @@ namespace PoseTeacher
 
             begin_x = 0.0f;
             begin_y = 0.0f;
-            end_x = 1.2f;
+            end_x = 1.0f;
             end_y = 1.0f;
             step_x = (end_x - begin_x) / 10; //gap between vertical lines
             step_y = (end_y - begin_y) / 10; //gap between horisontal lines
