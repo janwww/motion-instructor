@@ -182,7 +182,14 @@ namespace PoseTeacher
             string json = JsonUtility.ToJson(jdl) + Environment.NewLine;
             File.AppendAllText(WriteDataPath, json);
         }
-        
+
+        // Generate new filename with timestamp and set as file to write to
+        public void GenNewFilename()
+        {
+            string timestamp = DateTime.Now.ToString("yyyy_MM_dd-HH_mm_ss");
+            WriteDataPath = "jsondata/" + timestamp + ".txt";
+        }
+
         // reset recording file
         public void ResetRecording()
         {

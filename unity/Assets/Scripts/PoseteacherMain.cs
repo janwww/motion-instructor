@@ -11,9 +11,9 @@ using System.Security.Permissions;
 
 namespace PoseTeacher
 {
-    public enum MainState
+    public enum PlaybackSpeed
     {
-        PAUSE, PLAY_SELF, PLAY_ALL
+        s1_00, s0_50, s0_25
     }
 
     public enum Difficulty
@@ -25,65 +25,60 @@ namespace PoseTeacher
     [CLSCompliant(false)]
     public class PoseteacherMain : MonoBehaviour
     {
-
         PoseInputGetter SelfPoseInputGetter;
         PoseInputGetter TeacherPoseInputGetter;
         PoseInputGetter RecordedPoseInputGetter;
 
         // Used for displaying RGB Kinect video
-        public Renderer videoRenderer;
         GameObject streamCanvas;
         GameObject videoCube;
 
         // Refrences to containers in scene
-        // TODO find good way to reference objects. @Unity might do this for us
         List<AvatarContainer> avatarListSelf;
         List<AvatarContainer> avatarListTeacher;
-        public AvatarContainer recordAvatar;
+        public AvatarContainer recordedAvatar;
         public GameObject avatarPrefab;
         public GameObject avatarTPrefab;
 
-        //GameObject spatialAwarenessSystem;
+        // State of Main
+        //public int recording_mode = 0; // 0: not recording, 1: recording, 2: playback, 3: load_file, 4: reset_recording
+        bool isrecording = false;
+        public bool pauseSelf = false;
+        public bool pauseTeacher = true;
 
-        // Decides what action is being done with joints
-        // TODO: 
-        // Change to enum (!!! making this changes makes buttons in scene unusable)
-        // Make setter functions? For loading file and reset recording, should be rewritten as separate functions, not values here
-        // 3 and 4 are currently not used/implemented
-        // 3 not necessary as load happens automatically at playback
-        // 4 disabled to not accidentaly delete current file contents
-        public int recording_mode = 0; // 0: not recording, 1: recording, 2: playback, 3: load_file, 4: reset_recording
-        // 
-        // TODO:
-        // Change to enum? (!!! making this changes makes button playback speed change in scene unusable)
-        public int playback_speed = 1; // 1: x1 , 2: x0.5, 4: x0.25
+        // Playback speed variables
+        //private int playback_speed = 1; // 1: x1 , 2: x0.5, 4: x0.25
+        public PlaybackSpeed playbackSpeed = PlaybackSpeed.s1_00;
         private int playback_counter = 0;
         private int record_counter = 0;
         private bool show_recording = false;
 
-
-
-        // Default file to read from for techer. Should not actually be played
-        private string current_file = "";
-
-        // For fake data when emulating unput from file
+        // For fake data when emulating input from file
         // "jsondata/2020_05_26-21_23_28.txt"  "jsondata/2020_05_26-22_55_32.txt"  "jsondata/2020_05_27-00_01_59.txt"
         private readonly string fake_file = "jsondata/2020_05_27-00_01_59.txt";
-
-        // can be changed in the UI
-        // TODO: probaly change to using functions to toggle
-        public bool isMaleSMPL = true;
-        public bool usingKinectAlternative = true;
         public PoseInputSource SelfPoseInputSource = PoseInputSource.KINECT;
-
         public bool mirroring = true; // can probably be changed to private (if no UI elements use it)
 
-        // Used for showing if pose is correct
-        public Material normal_material;
-        public Material correct_material;
-        public Material incorrect_material;
-        public bool shouldCheckCorrectness = true;
-        public float correctionThresh = 30.0f;
+
+        // Used for pose similarity calculation
+        public String similarityBodyNr = "total"; // "total", "top", "middle", "bottom"
+        public int similaritySelfNr = 0; // self list element to compare
+        public int similarityTeacherNr = 0; // teacher list element to compare
+        public double similarityScore = 0; // similarity output value between 0 and 1 for defined body part
+        public double similarityPenalty = 1.0; // exponential penalty coefficient to be applied when similarity of body part not optimal fit [0....inf] -> 0 every body part has same weight
+        public bool similarityActivateKalman = true; // activate kalman 
+        public double similarityKalmanQ = 0.000001; // Kalman process noise covariance (model strength)
+        public double similarityKalmanR = 1.0; // Kalman sensor noise covariance (observation strength)
+        public double similarityTotalScore = 0; // Total score
+        public List<double> similarityScoreRaw; // similarity value for all body sticks
+        public List<double> similarityWeightRaw; // weight value for all body sticks
+        AvatarSimilarity avatarSimilarity;
+
+        // Used for showing similarity
+        VisualisationSimilarity avatarVisualisationSimilarity;
+        Graphtest graphtest;
+        public static double similarityScoreExtern = 0.0; // similarity value between 0 and 1 for defined body part (extern global variable for plot)
+        public static double similarityTotalScoreExtern = 0.0; // Total score (extern global variable for plot)
 
         public Difficulty difficulty = Difficulty.EASY;
         public void SetDifficulty(Difficulty newDifficulty)
@@ -145,26 +140,7 @@ namespace PoseTeacher
                 avatarListTeacher.Remove(avatar);
             }
         }
-        // Used for pose similarity calculation
-        public String similarityBodyNr = "total"; // "total", "top", "middle", "bottom"
-        public int similaritySelfNr = 0; // self list element to compare
-        public int similarityTeacherNr = 0; // teacher list element to compare
-        public double similarityScore = 0; // similarity output value between 0 and 1 for defined body part
-        public double similarityPenalty = 1.0; // exponential penalty coefficient to be applied when similarity of body part not optimal fit [0....inf] -> 0 every body part has same weight
-        public bool similarityActivateKalman = true; // activate kalman 
-        public double similarityKalmanQ = 0.000001; // Kalman process noise covariance (model strength)
-        public double similarityKalmanR = 1.0; // Kalman sensor noise covariance (observation strength)
-        public double similarityTotalScore = 0; // Total score
-        public List<double> similarityScoreRaw; // similarity value for all body sticks
-        public List<double> similarityWeightRaw; // weight value for all body sticks
-        AvatarSimilarity avatarSimilarity;
-        VisualisationSimilarity avatarVisualisationSimilarity;
-        Graphtest graphtest;
-        public static double similarityScoreExtern = 0.0; // similarity value between 0 and 1 for defined body part (extern global variable for plot)
-        public static double similarityTotalScoreExtern = 0.0; // Total score (extern global variable for plot)
-
-        // RandomGraph randomGraph;
-
+        
 
         // Mirror all avatar containers
         // TODO: Move code to AvatarContainer class (partial done)
@@ -208,19 +184,45 @@ namespace PoseTeacher
         }
 
         // Setters used in UI, configured in Inspector tab of respective buttons
-        // Changing the names could (shouldn't) break the link to UI
-        // Changing function signatures (parameters) WILL break the link to UI
-        public void set_SMPL(bool value)
-        {
-            isMaleSMPL = value;
-        }
         public void set_recording_mode(int rec)
         {
-            recording_mode = rec;
+            // 0: not recording, 1: recording, 2: playback, 3: load_file, 4: reset_recording
+            switch (rec)
+            {
+                case 0:
+                    pauseSelf = false;
+                    pauseTeacher = true;
+                    break;
+                case 2:
+                    pauseSelf = false;
+                    pauseTeacher = false;
+                    break;
+                default:
+                    Debug.Log("Assigned unused recording_mode");
+                    break;
+            }
         }
         public void set_playback_speed(int a)
         {
-            playback_speed = a;
+            switch (a)
+            {
+                case 1:
+                    playbackSpeed = PlaybackSpeed.s1_00;
+                    break;
+                case 2:
+                    playbackSpeed = PlaybackSpeed.s0_50;
+                    break;
+                case 4:
+                    playbackSpeed = PlaybackSpeed.s0_25;
+                    break;
+                default:
+                    Debug.Log("Assigned invalid playback speed");
+                    break;
+            }
+        }
+        public void set_playback_speed(PlaybackSpeed s)
+        {
+            playbackSpeed = s;
         }
 
         // For setting in menu
@@ -242,13 +244,6 @@ namespace PoseTeacher
             {
                 avatar.ChangeActiveType(type);
             }
-        }
-
-        // Generate new filename with timestamp and set as file to write to
-        public void gen_new_current_file()
-        {
-            string timestamp = DateTime.Now.ToString("yyyy_MM_dd-HH_mm_ss");
-            current_file = "jsondata/" + timestamp + ".txt";
         }
 
         // Do once on scene startup
@@ -277,7 +272,7 @@ namespace PoseTeacher
 
 
             GameObject newAvatar = Instantiate(avatarTPrefab);
-            recordAvatar = new AvatarContainer(newAvatar);
+            recordedAvatar = new AvatarContainer(newAvatar);
             newAvatar.SetActive(false);
 
             // Set unused containers to inactive
@@ -297,8 +292,6 @@ namespace PoseTeacher
             avatarSimilarity = new AvatarSimilarity(avatarListSelf[similaritySelfNr], avatarListTeacher[similarityTeacherNr], similarityBodyNr, similarityPenalty, similarityActivateKalman, similarityKalmanQ, similarityKalmanR);
             avatarVisualisationSimilarity = new VisualisationSimilarity(avatarListSelf[similaritySelfNr]);
             graphtest = new Graphtest((float)similarityScoreExtern);
-            //graphtest.Start_plot((float)similarityScoreExtern);
-           //  randomGraph = new RandomGraph();
         }
 
 
@@ -307,91 +300,65 @@ namespace PoseTeacher
         {
             checkKeyInput();
 
-            AnimateSelf(SelfPoseInputGetter.GetNextPose());
-       //avatarSelf.stickContainer.stick.activeSelf
-            // avatarListSelf[0].stickContainer.LeftUpperArm.GetComponent<Renderer>().material.color = Color.red;
-           // AnimateSelf(TeacherPoseInputGetter.GetNextPose());
-            // Get pose similarity
-            avatarSimilarity.Update(); // update similarity calculation with each update loop step
-            similarityScore = avatarSimilarity.similarityBodypart; // get single similarity score for selected body part
-            similarityScoreRaw = avatarSimilarity.similarityStick; // get similarity score for each stick element
-            similarityWeightRaw = avatarSimilarity.stickWeight; // get similarity score for each stick element
-            similarityTotalScore = avatarSimilarity.totalScore; // get total Score
-            similarityScoreExtern = similarityScore; // global
-            similarityTotalScoreExtern = similarityTotalScore; // global
-
-            //avatarVisualisationSimilarity.Update(similarityScoreRaw);// avatarVisualisationSimilarity.Update(similarityScore);
-            avatarVisualisationSimilarity.UpdatePart(similarityBodyNr, similarityScore);
-            graphtest.Update_plot(similarityScoreExtern);
-
-            // randomGraph.Update();
-            // Playback for teacher avatar(s)
-            if (recording_mode == 2) // playback
+            if (!pauseSelf)
             {
+                AnimateSelf(SelfPoseInputGetter.GetNextPose());
+            }
 
-                // play recording at different speeds
-                // skip pose update if counter isn't big enought
-                // TODO: maybe rewrite...
-                if (playback_speed == 1) // x1
+            int playlimit = 1;
+            switch (playbackSpeed)
+            {
+                case PlaybackSpeed.s0_25:
+                    playlimit = 4;
+                    break;
+                case PlaybackSpeed.s0_50:
+                    playlimit = 2;
+                    break;
+            }
+
+            // Playback for teacher avatar(s)
+            if (!pauseTeacher) // playback
+            {
+                playback_counter++;
+                if (playback_counter >= playlimit)
                 {
                     AnimateTeacher(TeacherPoseInputGetter.GetNextPose());
+                    playback_counter = 0;
                 }
-                else if (playback_speed == 2) // x0.5
-                {
-                    playback_counter++;
-                    if (playback_counter >= 2)
-                    {
-                        AnimateTeacher(TeacherPoseInputGetter.GetNextPose());
-                        playback_counter = 0;
-                    }
-                }
-                else //(playback_speed == 3) // x0.25
-                {
-                    playback_counter++;
-                    if (playback_counter >= 4)
-                    {
-                        AnimateTeacher(TeacherPoseInputGetter.GetNextPose());
-                        playback_counter = 0;
-                    }
-                }
+
+                // Get pose similarity
+                avatarSimilarity.Update(); // update similarity calculation with each update loop step
+                similarityScore = avatarSimilarity.similarityBodypart; // get single similarity score for selected body part
+                similarityScoreRaw = avatarSimilarity.similarityStick; // get similarity score for each stick element
+                similarityWeightRaw = avatarSimilarity.stickWeight; // get similarity score for each stick element
+                similarityTotalScore = avatarSimilarity.totalScore; // get total Score
+                similarityScoreExtern = similarityScore; // global
+                similarityTotalScoreExtern = similarityTotalScore; // global
+
+                avatarVisualisationSimilarity.UpdatePart(similarityBodyNr, similarityScore);
+                graphtest.Update_plot(similarityScoreExtern);
             }
 
             if (show_recording)
             {
-                if (playback_speed == 1) // x1
+                record_counter++;
+                if (record_counter >= playlimit)
                 {
-                    recordAvatar.MovePerson(RecordedPoseInputGetter.GetNextPose());
-                }
-                else if (playback_speed == 2) // x0.5
-                {
-                    record_counter++;
-                    if (record_counter >= 2)
-                    {
-                        recordAvatar.MovePerson(RecordedPoseInputGetter.GetNextPose());
-                        record_counter = 0;
-                    }
-                }
-                else //(playback_speed == 3) // x0.25
-                {
-                    record_counter++;
-                    if (record_counter >= 4)
-                    {
-                        recordAvatar.MovePerson(RecordedPoseInputGetter.GetNextPose());
-                        record_counter = 0;
-                    }
+                    recordedAvatar.MovePerson(RecordedPoseInputGetter.GetNextPose());
+                    record_counter = 0;
                 }
             }
 
             UpdateIndicators();
-            
         }
 
 
+        // Scale score linearly, only for testing
         private float scaleScore(float score)
         {
             float min = 0.5F;
 
-            float scaled_score = (float)(similarityScore - min) /(1-min);
+            float scaled_score = (float)(score - min) /(1-min);
             scaled_score = scaled_score < 0 ? 0 : scaled_score;
             scaled_score = scaled_score > 1 ? 1 : scaled_score;
             return scaled_score;
@@ -471,7 +438,8 @@ namespace PoseTeacher
                     GameObject scoreIndicator = scoreIndicatorTr.gameObject;
                     if (scoreIndicator.activeSelf)
                     {
-                        float progress = scaleScore((float)similarityScore);
+                        //float progress = scaleScore((float)similarityScore);
+                        float progress = (float)similarityScore;
                         scoreIndicator.GetComponent<ProgressIndicator>().SetProgress(progress);
                     }
                 }
@@ -511,6 +479,7 @@ namespace PoseTeacher
         {
             SelfPoseInputGetter.Dispose();
             TeacherPoseInputGetter.Dispose();
+            RecordedPoseInputGetter.Dispose();
         }
 
         // Change recording mode via keyboard input for debugging and to not need menu
@@ -519,27 +488,27 @@ namespace PoseTeacher
             if (Input.GetKey(KeyCode.X))
             {
                 Debug.Log("X - set recording_mode to 0 (not recording)");
-                recording_mode = 0;
+                //recording_mode = 0;
             }
             else if (Input.GetKey(KeyCode.Y))
             {
                 Debug.Log("Y - set recording_mode to 1 (recording)");
-                recording_mode = 1;
+                //recording_mode = 1;
             }
             else if (Input.GetKey(KeyCode.Z))
             {
                 Debug.Log("Z - set recording_mode to 2 (playback)");
-                recording_mode = 2;
+                //recording_mode = 2;
             }
             else if (Input.GetKey(KeyCode.L))
             {
                 Debug.Log("L - set recording_mode to 3 (load_file)");
-                recording_mode = 3;
+                //recording_mode = 3;
             }
             else if (Input.GetKey(KeyCode.R))
             {
                 Debug.Log("R - set recording_mode to 4 (reset_recording)");
-                recording_mode = 4;
+                //recording_mode = 4;
             }
         }
 
@@ -578,7 +547,7 @@ namespace PoseTeacher
             set_recording_mode(2);
         }
 
-        bool isrecording = false;
+        
         public void StartRecordingMode(bool temporary)
         {
             if (temporary)
@@ -587,7 +556,11 @@ namespace PoseTeacher
                 SelfPoseInputGetter.ResetRecording();
             }
             else
-                SelfPoseInputGetter.WriteDataPath = "jsondata/" + DateTime.Now.ToString("yyyy_MM_dd-HH_mm_ss") + ".txt";
+            {
+                // Generate new filename with timestamp
+                SelfPoseInputGetter.GenNewFilename();
+            }
+            
             SelfPoseInputGetter.recording = true;
             isrecording = true;
         }
@@ -604,7 +577,7 @@ namespace PoseTeacher
                 else
                 {
                     SelfPoseInputGetter.recording = false;
-                    recordAvatar.avatarContainer.SetActive(true);
+                    recordedAvatar.avatarContainer.SetActive(true);
                     RecordedPoseInputGetter = new PoseInputGetter(PoseInputSource.FILE) { ReadDataPath = SelfPoseInputGetter.WriteDataPath };
                     show_recording = true;
                     isrecording = false;
@@ -625,7 +598,7 @@ namespace PoseTeacher
 
         public void StopShowingRecording()
         {
-            recordAvatar.avatarContainer.SetActive(false);
+            recordedAvatar.avatarContainer.SetActive(false);
             show_recording = false;
         }
 
