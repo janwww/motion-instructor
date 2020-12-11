@@ -28,10 +28,11 @@ namespace PoseTeacher
         Tracker tracker;
 
         // Used for displaying RGB Kinect video
-        public Renderer videoRenderer;
-        RawImage m_RawImage;
-        GameObject streamCanvas;
-        GameObject videoCube;
+        private Renderer videoRenderer;
+        private RawImage m_RawImage;
+        public GameObject streamCanvas;
+
+        public GameObject VideoCube { set { if(value != null) videoRenderer = value.GetComponent<MeshRenderer>(); } }
 
         //Select a Texture in the Inspector to change it (unused)
         public Texture m_Texture;
@@ -132,10 +133,7 @@ namespace PoseTeacher
 
         private void StartAzureKinect()
         {  
-
-            // Print to log
-            Debug.Log("Try loading device");
-            this.device = Device.Open(0);
+            device = Device.Open(0);
 
             var config = new DeviceConfiguration
             {
@@ -147,12 +145,6 @@ namespace PoseTeacher
             };
             device.StartCameras(config);
             Debug.Log("Open K4A device successful. sn:" + device.SerialNum);
-
-            if (device != null)
-            {
-                Debug.Log("Found non-null device");
-                Debug.Log(device);
-            }
 
             //var calibration = device.GetCalibration(config.DepthMode, config.ColorResolution);
             var calibration = device.GetCalibration();
@@ -242,43 +234,44 @@ namespace PoseTeacher
                 case PoseInputSource.KINECT:
                     if (device != null)
                     {
-                        // TODO: move to function?
-                        // potentially simplify by not using "using" scopes
                         using (Capture capture = device.GetCapture())
                         {
                             // Make tracker estimate body
                             tracker.EnqueueCapture(capture);
 
                             // Code for getting RGB image from camera
-                            /*
-                            var color = capture.Color;
-                            if (color != null && color.WidthPixels > 0)
+
+                            Microsoft.Azure.Kinect.Sensor.Image color = capture.Color;
+                            if (color != null && color.WidthPixels > 0 && (streamCanvas != null || videoRenderer != null))
                             {
                                 UnityEngine.Object.Destroy(tex);// required to not keep old images in memory
                                 tex = new Texture2D(color.WidthPixels, color.HeightPixels, TextureFormat.BGRA32, false);
-                                tex.LoadRawTextureData(color.GetBufferCopy());
+                                tex.LoadRawTextureData(color.Memory.ToArray());
                                 tex.Apply();
 
                                 //Fetch the RawImage component from the GameObject
-                                if (streamCanvas != null)
+                                if (tex != null)
                                 {
-                                    m_RawImage = streamCanvas.GetComponent<RawImage>();
-                                    if (m_RawImage != null)
+                                    if (streamCanvas != null)
                                     {
+                                        m_RawImage = streamCanvas.GetComponent<RawImage>();
                                         m_RawImage.texture = tex;
+                                    }
+                                    if (videoRenderer != null)
+                                    {
                                         videoRenderer.material.mainTexture = tex;
                                     }
                                 }
 
                             }
-                            */
+                            
                         }
 
                         // Get pose estimate from tracker
                         using (Frame frame = tracker.PopResult())
                         {
 
-                            Debug.LogFormat("{0} bodies found.", frame.NumberOfBodies);
+                            //Debug.LogFormat("{0} bodies found.", frame.NumberOfBodies);
 
                             //  At least one body found by Body Tracking
                             if (frame.NumberOfBodies > 0)

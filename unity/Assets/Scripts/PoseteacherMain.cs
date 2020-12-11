@@ -232,9 +232,11 @@ namespace PoseTeacher
             avatarListSelf[1].avatarContainer.gameObject.SetActive(false);
             avatarListTeacher[1].avatarContainer.gameObject.SetActive(false);
 
-            SelfPoseInputGetter = new PoseInputGetter(SelfPoseInputSource){ ReadDataPath = fake_file };
+            SelfPoseInputGetter = new PoseInputGetter(SelfPoseInputSource) { ReadDataPath = fake_file };
             TeacherPoseInputGetter = new PoseInputGetter(PoseInputSource.FILE){ ReadDataPath = fake_file };
 
+            SelfPoseInputGetter.streamCanvas = streamCanvas;
+            SelfPoseInputGetter.VideoCube = videoCube;
 
             // initialize similarity calculation instance and assign selected avatars
             avatarSimilarity = new AvatarSimilarity(avatarListSelf[similaritySelfNr], avatarListTeacher[similarityTeacherNr], similarityBodyNr, similarityPenalty, similarityActivateKalman, similarityKalmanQ, similarityKalmanR);
