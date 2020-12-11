@@ -63,10 +63,10 @@ namespace PoseTeacher
             //values_y = new Vector3[vectorElementsN];
             //for (int i = 0; i < vectorElementsN; i++)
             //{
-              
+
             //    values_x[i] = new Vector3((float)i / vectorElementsN, 0.0f, 8.0f);
             //    values_y[i] = new Vector3(0.0f, (float)i / vectorElementsN, 8.0f);
-                
+
             //    lineRenderer_x.SetPositions(values_x);
             //    lineRenderer_y.SetPositions(values_y);
             //}
@@ -74,8 +74,8 @@ namespace PoseTeacher
             begin_x = 0.0f;
             begin_y = 0.0f;
             end_x = 1.2f;
-            end_y = 0.45f;
-            step_x = (end_x - begin_x)/ 10; //gap between vertical lines
+            end_y = 1.0f;
+            step_x = (end_x - begin_x) / 10; //gap between vertical lines
             step_y = (end_y - begin_y) / 10; //gap between horisontal lines
 
             for (int i = 0; i < 11; i++)
@@ -102,7 +102,8 @@ namespace PoseTeacher
                 {
                     hor.GetComponent<Renderer>().material.color = Color.white;
                 }
-                if (i == 5){
+                if (i == 5)
+                {
                     hor.GetComponent<Renderer>().material.color = Color.yellow;
                     //hor.GetComponent<Renderer>().material.mainTexture 
                 }
@@ -118,10 +119,11 @@ namespace PoseTeacher
 
 
             valuesDynamic = new Vector3[vectorElementsN];
-            for (int i = 0; i < vectorElementsN; i++){
+            for (int i = 0; i < vectorElementsN; i++)
+            {
                 valuesDynamic[i] = new Vector3((float)i / vectorElementsN, (float)similarityScoreExtern, 0.0f);
             }
-
+        }
             void Update()
             {
                 Color c1 = Color.red;
@@ -145,7 +147,7 @@ namespace PoseTeacher
                     }
                     lineRenderer.SetPositions(valuesDynamic);
                     lineRenderer.SetColors(c1, c2);
-                }
+                
             }
         }
 
