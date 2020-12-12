@@ -80,6 +80,11 @@ namespace PoseTeacher
         public static double similarityScoreExtern = 0.0; // similarity value between 0 and 1 for defined body part (extern global variable for plot)
         public static double similarityTotalScoreExtern = 0.0; // Total score (extern global variable for plot)
 
+        // Duplicates for recording
+        AvatarSimilarity recordedAvatarSimilarity;
+        VisualisationSimilarity recordedAvatarVisualisationSimilarity;
+        //Graphtest recordedGraphtest;
+
         public Difficulty difficulty = Difficulty.EASY;
         public void SetDifficulty(Difficulty newDifficulty)
         {
@@ -293,6 +298,7 @@ namespace PoseTeacher
             TeacherPoseInputGetter = new PoseInputGetter(PoseInputSource.FILE){ ReadDataPath = fake_file };
             SelfPoseInputGetter.loop = true;
             TeacherPoseInputGetter.loop = true;
+            RecordedPoseInputGetter = new PoseInputGetter(PoseInputSource.FILE) {};
 
             SelfPoseInputGetter.streamCanvas = streamCanvas;
             SelfPoseInputGetter.VideoCube = videoCube;
@@ -301,6 +307,11 @@ namespace PoseTeacher
             avatarSimilarity = new AvatarSimilarity(avatarListSelf[similaritySelfNr], avatarListTeacher[similarityTeacherNr], similarityBodyNr, similarityPenalty, similarityActivateKalman, similarityKalmanQ, similarityKalmanR);
             avatarVisualisationSimilarity = new VisualisationSimilarity(avatarListSelf[similaritySelfNr]);
             graphtest = new Graphtest((float)similarityScoreExtern);
+
+            recordedAvatarSimilarity = new AvatarSimilarity(recordedAvatar, avatarListTeacher[similarityTeacherNr], similarityBodyNr, similarityPenalty, similarityActivateKalman, similarityKalmanQ, similarityKalmanR);
+            recordedAvatarVisualisationSimilarity = new VisualisationSimilarity(recordedAvatar);
+            //recordedGraphtest = new Graphtest((float)similarityScoreExtern);
+
         }
 
 
@@ -356,6 +367,10 @@ namespace PoseTeacher
                     recordedAvatar.MovePerson(RecordedPoseInputGetter.GetNextPose());
                     record_counter = 0;
                 }
+
+                recordedAvatarSimilarity.Update();
+                recordedAvatarVisualisationSimilarity.UpdatePart(similarityBodyNr, recordedAvatarSimilarity.similarityBodypart);
+
             }
 
             UpdateIndicators();
@@ -612,7 +627,7 @@ namespace PoseTeacher
                 {
                     SelfPoseInputGetter.recording = false;
                     recordedAvatar.avatarContainer.SetActive(true);
-                    RecordedPoseInputGetter = new PoseInputGetter(PoseInputSource.FILE) { ReadDataPath = SelfPoseInputGetter.WriteDataPath };
+                    RecordedPoseInputGetter.ReadDataPath = SelfPoseInputGetter.WriteDataPath;
                     show_recording = true;
                     isrecording = false;
                 }
