@@ -45,6 +45,7 @@ namespace PoseTeacher
         bool isrecording = false;
         public bool pauseSelf = false;
         public bool pauseTeacher = true;
+        public bool isChoreography = false;
 
         // Playback speed variables
         //private int playback_speed = 1; // 1: x1 , 2: x0.5, 4: x0.25
@@ -380,7 +381,7 @@ namespace PoseTeacher
                 {
                     GameObject scoreIndicator = scoreIndicatorTr.gameObject;
                     scoreIndicator.SetActive(true);
-
+                    
                 }
 
                 Transform pulsingObjectTr = avatar.avatarContainer.transform.Find("PulsingCube");
@@ -389,6 +390,8 @@ namespace PoseTeacher
                     GameObject pulseObject = pulsingObjectTr.gameObject;
                     pulseObject.SetActive(true);
                 }
+
+                
 
             }
             foreach (AvatarContainer avatar in avatarListTeacher)
@@ -448,6 +451,15 @@ namespace PoseTeacher
                         //float progress = scaleScore((float)similarityScore);
                         float progress = (float)similarityScore;
                         scoreIndicator.GetComponent<ProgressIndicator>().SetProgress(progress);
+
+                        if (isChoreography)
+                            scoreIndicator.GetComponent<ProgressIndicator>().pTotal.SetActive(true);
+                        else
+                            scoreIndicator.GetComponent<ProgressIndicator>().pTotal.SetActive(false);
+
+                        if (isChoreography)
+                            scoreIndicator.GetComponent<ProgressIndicator>().SetTotalScore((int)similarityTotalScore);
+
                     }
                 }
 

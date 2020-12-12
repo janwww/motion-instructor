@@ -4,6 +4,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
 
 [CLSCompliant(false)]
 public class ProgressIndicator : MonoBehaviour
@@ -12,11 +14,18 @@ public class ProgressIndicator : MonoBehaviour
     public GameObject ProgressObject;
     private IProgressIndicator progressIndicator;
     private bool doIndicate = false;
+    private int totalScore;
+    public GameObject pTotal;
 
     // Start is called before the first frame update
     void Start()
     {
         progressIndicator = ProgressObject.GetComponent<IProgressIndicator>();
+        Transform pTotalTr = ProgressObject.transform.Find("ProgressTextTotal");
+        if (pTotalTr != null)
+            pTotal = pTotalTr.gameObject;
+        if (pTotal != null)
+            pTotal.SetActive(false);
     }
 
     // Update is called once per frame
@@ -26,11 +35,18 @@ public class ProgressIndicator : MonoBehaviour
         {
             doIndicate = true;
             OpenProgressIndicator(progressIndicator);
+
         }
         else if (!ProgressObject.activeSelf)
         {
             doIndicate = false;
         }
+
+        if (ProgressObject.activeSelf && pTotal != null && pTotal.activeSelf)
+        {
+            pTotal.GetComponent<TextMeshPro>().text = totalScore.ToString();
+        }
+
     }
 
     private float progress = 0;
@@ -39,6 +55,13 @@ public class ProgressIndicator : MonoBehaviour
         progress = currentProgress;
         //Debug.Log("Progress Set to " + progress);
     }
+
+    public void SetTotalScore(int currentTotalScore)
+    {
+        totalScore = currentTotalScore;
+    }
+
+
 
     private async void OpenProgressIndicator(IProgressIndicator indicator)
     {

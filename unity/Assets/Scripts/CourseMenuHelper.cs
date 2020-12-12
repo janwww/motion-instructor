@@ -294,6 +294,7 @@ namespace PoseTeacher
             TrainingHolder.SetActive(true);
             PoseteacherMain main = MainObject.GetComponent<PoseteacherMain>();
             main.ShowTeacher();
+            main.isChoreography = false;
             main.ActivateIndicators();
         }
 
@@ -303,6 +304,7 @@ namespace PoseTeacher
             CoreographyHolder.SetActive(true);
             PoseteacherMain main = MainObject.GetComponent<PoseteacherMain>();
             main.ShowTeacher();
+            main.isChoreography = true;
             main.ActivateIndicators();
         }
     }
