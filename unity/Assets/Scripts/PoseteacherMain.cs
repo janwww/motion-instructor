@@ -116,14 +116,21 @@ namespace PoseTeacher
             {
             //    GameObject avatarContainer = GameObject.Find("AvatarContainer");
                 GameObject newAvatar = Instantiate(avatarPrefab);
-                avatarListSelf.Add(new AvatarContainer(newAvatar));
+                AvatarContainer newAvatarCont = new AvatarContainer(newAvatar);
+                avatarListSelf.Add(newAvatarCont);
                 newAvatar.SetActive(true);
+                newAvatarCont.ChangeActiveType(avatarListSelf[0].activeType);
+                //newAvatar.transform.position = avatarListSelf[avatarListSelf.Count - 1].avatarContainer.transform.position;
+                //newAvatar.transform.position = newAvatar.transform.position + new Vector3(1,0,0);
+                //newAvatar.transform.position = new Vector3(1, 0, 0);
             } else
             {
             //    GameObject avatarContainer = GameObject.Find("AvatarContainerT");
                 GameObject newAvatar = Instantiate(avatarTPrefab);
-                avatarListTeacher.Add(new AvatarContainer(newAvatar));
+                AvatarContainer newAvatarCont = new AvatarContainer(newAvatar);
+                avatarListTeacher.Add(newAvatarCont);
                 newAvatar.SetActive(true);
+                newAvatarCont.ChangeActiveType(avatarListTeacher[0].activeType);
             }
         }
         public void DeleteAvatar(bool self)

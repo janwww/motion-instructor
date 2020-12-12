@@ -33271,6 +33271,7 @@ MonoBehaviour:
   state: 0
   TrainingElements: {fileID: 0}
   CoreoElements: {fileID: 0}
+  RecordElements: {fileID: 0}
 --- !u!1 &3782899516038745830
 GameObject:
   m_ObjectHideFlags: 0
@@ -50742,6 +50743,7 @@ MonoBehaviour:
   CourseMenuHolder: {fileID: 2020141732354311719}
   TrainingHolder: {fileID: 0}
   CoreographyHolder: {fileID: 0}
+  CourseDescription: {fileID: 3781055398585155374}
 --- !u!1 &4046764673426279607
 GameObject:
   m_ObjectHideFlags: 0

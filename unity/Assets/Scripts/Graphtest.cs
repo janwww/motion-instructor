@@ -21,7 +21,7 @@ namespace PoseTeacher
     public class Graphtest
     {
         public GameObject gobject;
-        public GameObject newobject;
+        public GameObject graphContainer;
         //public GameObject coordobject;
 
         public Text coord;
@@ -35,7 +35,8 @@ namespace PoseTeacher
 
         public Graphtest(float similarityScoreExtern)
         {
-            gobject = GameObject.Find("Dataline"); 
+            gobject = GameObject.Find("Dataline");
+            graphContainer = GameObject.Find("GraphTestContainer");
             similarityScore = similarityScoreExtern;
             lineRenderer = gobject.GetComponent<LineRenderer>();
             Start_plot(similarityScore);
@@ -58,18 +59,19 @@ namespace PoseTeacher
             {
                 //vertical lines of a grid
                 GameObject vert = GameObject.Instantiate(gobject);
-
+                vert.transform.parent = graphContainer.transform;
                 vert.GetComponent<Renderer>().material.color = Color.white;
                 LineRenderer lineRenderer_vert = vert.GetComponent<LineRenderer>();
                 lineRenderer_vert.widthMultiplier = 0.1f;
                 lineRenderer_vert.startColor = Color.white;
                 lineRenderer_vert.endColor = Color.white;
                 lineRenderer_vert.positionCount = 2;
-                lineRenderer_vert.SetPosition(0, new Vector3(begin_x + i * step_x, begin_y, 8.7f));
-                lineRenderer_vert.SetPosition(1, new Vector3(begin_x + i * step_x, end_y, 8.7f));
+                lineRenderer_vert.SetPosition(0, new Vector3(begin_x + i * step_x, begin_y, 8.45f));
+                lineRenderer_vert.SetPosition(1, new Vector3(begin_x + i * step_x, end_y, 8.45f));
 
                 //horisontal lines of a grid
                 GameObject hor = GameObject.Instantiate(gobject);
+                hor.transform.parent = graphContainer.transform;
                 if (i == 0 || i == 10)
                 {
                     hor.GetComponent<Renderer>().material.color = Color.green;
@@ -88,8 +90,8 @@ namespace PoseTeacher
                 lineRenderer_hor.startColor = Color.white;
                 lineRenderer_hor.endColor = Color.white;
                 lineRenderer_hor.positionCount = 2;
-                lineRenderer_hor.SetPosition(0, new Vector3(begin_x, begin_y + i * step_y, 8.7f));
-                lineRenderer_hor.SetPosition(1, new Vector3(end_x, begin_y + i * step_y, 8.7f));
+                lineRenderer_hor.SetPosition(0, new Vector3(begin_x, begin_y + i * step_y, 8.45f));
+                lineRenderer_hor.SetPosition(1, new Vector3(end_x, begin_y + i * step_y, 8.45f));
 
             }
 

@@ -72,6 +72,7 @@ namespace PoseTeacher
         public GameObject CourseMenuHolder;
         public GameObject TrainingHolder;
         public GameObject CoreographyHolder;
+        public GameObject CourseDescription;
 
         private Dictionary<string, string> courseToPath =
             new Dictionary<string, string>()
@@ -256,16 +257,21 @@ namespace PoseTeacher
 
         public void SetCourseDetails(int courseID)
         {
-            GameObject CourseDescription = GameObject.Find("CourseDescription");
+            
+            //GameObject CourseDescription = GameObject.Find("CourseDescription");
+           // GameObject CourseDescription = CourseDetails.transform.Find("DescriptionPanel").Find("Panel1").Find("TextContext").Find("CourseDescription").gameObject;
             UnityEngine.UI.Text DescriptionText = CourseDescription.GetComponent<UnityEngine.UI.Text>();
-            CourseInfoHolder info = courses.Courses[courseID]; ;
+            CourseInfoHolder info = courses.Courses[courseID]; 
+            Debug.Log("<size=30>" + info.CourseTitle + "</size>\n<size=20>" + info.CourseDescription + "</size>");
             DescriptionText.text = "<size=30>" + info.CourseTitle + "</size>\n<size=20>" + info.CourseDescription + "</size>";
         }
 
         public void SetMoveDetails(int position)
         {
-            GameObject CourseDetails = GameObject.Find("CourseDetails");
-            GameObject CourseDescription = GameObject.Find("CourseDescription"); // This is the text-holding object of CourseDetails
+            //GameObject CourseDetails = GameObject.Find("CourseDetails");
+            //GameObject CourseDescription = GameObject.Find("CourseDescription"); // This is the text-holding object of CourseDetails
+           // GameObject CourseDescription = CourseDetails.transform.Find("DescriptionPanel").Find("Panel1").Find("TextContext").Find("CourseDescription").gameObject;
+
             UnityEngine.UI.Text DescriptionText = CourseDescription.GetComponent<UnityEngine.UI.Text>();
 
             if (steps.ContainsKey(position))

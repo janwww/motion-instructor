@@ -653,12 +653,6 @@ Material:
     - _ProximityLightOuterColorOverride: {r: 0, g: 0, b: 1, a: 1}
     - _RimColor: {r: 1, g: 1, b: 1, a: 0.497}
     - _RoundCornersRadius: {r: 0.5, g: 0.5, b: 0.5, a: 0.5}
---- !u!1 &36368445 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 2020141732354311719, guid: fb7db092bc9295e41a21e9d530aac22e,
-    type: 3}
-  m_PrefabInstance: {fileID: 3782899517220044830}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &41760652
 GameObject:
   m_ObjectHideFlags: 0
@@ -7221,12 +7215,6 @@ Material:
     - _ProximityLightOuterColorOverride: {r: 0, g: 0, b: 1, a: 1}
     - _RimColor: {r: 1, g: 1, b: 1, a: 0.497}
     - _RoundCornersRadius: {r: 0.5, g: 0.5, b: 0.5, a: 0.5}
---- !u!1 &687992074 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 3782899515325153525, guid: fb7db092bc9295e41a21e9d530aac22e,
-    type: 3}
-  m_PrefabInstance: {fileID: 3782899517220044830}
-  m_PrefabAsset: {fileID: 0}
 --- !u!82 &687992078 stripped
 AudioSource:
   m_CorrespondingSourceObject: {fileID: 3782899515325153521, guid: fb7db092bc9295e41a21e9d530aac22e,
@@ -11989,12 +11977,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e95ba9d0e8917d542afe15dd4d153f61, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!1 &1283203051 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 684655731161415655, guid: 6706340894601014f913e0cea24155c8,
-    type: 3}
-  m_PrefabInstance: {fileID: 684655731679157751}
-  m_PrefabAsset: {fileID: 0}
 --- !u!21 &1302288878
 Material:
   serializedVersion: 6
@@ -13738,21 +13720,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c226daa49a5662e4788490343c19bee5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  videoRenderer: {fileID: 0}
-  avatarPrefab: {fileID: 1283203051}
-  avatarTPrefab: {fileID: 168800787}
-  recording_mode: 0
-  playback_speed: 1
-  isMaleSMPL: 1
-  usingKinectAlternative: 1
+  avatarPrefab: {fileID: 3756193403940385686, guid: ff4c6f7a61d2f1841942a3686d78bdc6,
+    type: 3}
+  avatarTPrefab: {fileID: 8558158226385229007, guid: 1e91ca8dafde2714db0b68a8737b04de,
+    type: 3}
+  pauseSelf: 0
+  pauseTeacher: 1
+  playbackSpeed: 0
   SelfPoseInputSource: 2
   mirroring: 0
-  normal_material: {fileID: 2100000, guid: 27a6136d64696da4eba1b89b3df8d3df, type: 2}
-  correct_material: {fileID: 2100000, guid: 27a6136d64696da4eba1b89b3df8d3df, type: 2}
-  incorrect_material: {fileID: 2100000, guid: c4a1b7475a654dd0acaa0cfdfba2e20c, type: 2}
-  shouldCheckCorrectness: 0
-  correctionThresh: 30
-  difficulty: 0
   similarityBodyNr: total
   similaritySelfNr: 0
   similarityTeacherNr: 0
@@ -13764,6 +13740,7 @@ MonoBehaviour:
   similarityTotalScore: 0
   similarityScoreRaw: []
   similarityWeightRaw: []
+  difficulty: 0
 --- !u!224 &1630789625
 RectTransform:
   m_ObjectHideFlags: 0
@@ -17870,11 +17847,6 @@ PrefabInstance:
       objectReference: {fileID: 1630789622}
     - target: {fileID: 6175223598122564573, guid: fb7db092bc9295e41a21e9d530aac22e,
         type: 3}
-      propertyPath: CourseMenuHolder
-      value: 
-      objectReference: {fileID: 36368445}
-    - target: {fileID: 6175223598122564573, guid: fb7db092bc9295e41a21e9d530aac22e,
-        type: 3}
       propertyPath: TrainingHolder
       value: 
       objectReference: {fileID: 1585359968}
@@ -17883,16 +17855,6 @@ PrefabInstance:
       propertyPath: CoreographyHolder
       value: 
       objectReference: {fileID: 536618239}
-    - target: {fileID: 6175223598122564573, guid: fb7db092bc9295e41a21e9d530aac22e,
-        type: 3}
-      propertyPath: MenuObject
-      value: 
-      objectReference: {fileID: 1528930376}
-    - target: {fileID: 6175223598122564573, guid: fb7db092bc9295e41a21e9d530aac22e,
-        type: 3}
-      propertyPath: buttonPrefab
-      value: 
-      objectReference: {fileID: 687992074}
     - target: {fileID: 6950095971029028176, guid: fb7db092bc9295e41a21e9d530aac22e,
         type: 3}
       propertyPath: TrainingElements
