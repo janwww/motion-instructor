@@ -60,7 +60,6 @@ namespace PoseTeacher
         public int CurrentCourse = 0;
     }
 
-    [CLSCompliant(false)]
     public class CourseMenuHelper : MonoBehaviour
     {
         public GameObject MainObject;
@@ -294,7 +293,7 @@ namespace PoseTeacher
             TrainingHolder.SetActive(true);
             PoseteacherMain main = MainObject.GetComponent<PoseteacherMain>();
             main.ShowTeacher();
-            main.isChoreography = false;
+            main.SetIsChoreography(false);
             main.ActivateIndicators();
         }
 
@@ -304,7 +303,7 @@ namespace PoseTeacher
             CoreographyHolder.SetActive(true);
             PoseteacherMain main = MainObject.GetComponent<PoseteacherMain>();
             main.ShowTeacher();
-            main.isChoreography = true;
+            main.SetIsChoreography(true);
             main.ActivateIndicators();
         }
     }

@@ -484,7 +484,7 @@ namespace PoseTeacher
             // CONSIDER: depending on how moving the various containers are invoked, this might be redundant
             //      if joint_data shows delta movements, invoking this function redundantly breaks it 
             //      (right now I think we are good)
-            stickContainer.MovePerson(joint_data_list);
+            //stickContainer.MovePerson(joint_data_list);
 
 
             // Below the orientation of the stick figure parts is applied to the robot avatar, with some additional calculations
@@ -593,7 +593,7 @@ namespace PoseTeacher
             // CONSIDER: depending on how moving the various containers are invoked, this might be redundant
             //      if joint_data shows delta movements, invoking this function redundantly breaks it 
             //      (right now I think we are good)
-            stickContainer.MovePerson(joint_data_list);
+            //stickContainer.MovePerson(joint_data_list);
 
             // Below the orientation of the stick figure parts is applied to the SMPL avatar, ith some additional calculations
             // TODO: Rewriite <check TODO moveRobotPerson, same as there>
@@ -794,7 +794,6 @@ namespace PoseTeacher
         {
             this.avatarContainer = avatarContainer;
 
-
             // Find child object avatars in scene and save references in fields
             GameObject cubeC = avatarContainer.transform.Find("CubeContainer").gameObject;
             GameObject stickC = avatarContainer.transform.Find("StickContainer").gameObject;
@@ -831,6 +830,7 @@ namespace PoseTeacher
             switch (activeType)
             {
                 case AvatarType.CUBE:
+                    stickContainer.MovePerson(live_data);
                     cubeContainer.MovePerson(live_data);
                     break;
 
@@ -839,10 +839,12 @@ namespace PoseTeacher
                     break;
 
                 case AvatarType.ROBOT:
+                    stickContainer.MovePerson(live_data);
                     robotContainer.MovePerson(live_data);
                     break;
 
                 case AvatarType.SMPL:
+                    stickContainer.MovePerson(live_data);
                     smplContainer.MovePerson(live_data);
                     break;
             }

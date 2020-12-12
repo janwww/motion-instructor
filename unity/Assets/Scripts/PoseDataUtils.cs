@@ -8,7 +8,6 @@ namespace PoseTeacher
 {
     #region Joint and Pose classes
     // Class with position and orientation of one joint
-    [CLSCompliant(false)]
     public class JointData
     {
         public Vector3 Position;
@@ -18,7 +17,6 @@ namespace PoseTeacher
     // Class with position and orientation of all joints (one pose)
     // Used for applying poses to avatars
     [Serializable]
-    [CLSCompliant(false)]
     public class PoseData
     {
         public JointData[] data;
@@ -53,7 +51,6 @@ namespace PoseTeacher
     #endregion
 
     #region Utils static functions
-    [CLSCompliant(false)]
     public static class PoseDataUtils
     {
         // Converts Azure Kinect SDK BT Body to PoseDataJSON (serializable for JSON) pose

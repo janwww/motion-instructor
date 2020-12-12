@@ -22,7 +22,6 @@ namespace PoseTeacher
     }
 
     // Main script
-    [CLSCompliant(false)]
     public class PoseteacherMain : MonoBehaviour
     {
         PoseInputGetter SelfPoseInputGetter;
@@ -292,6 +291,8 @@ namespace PoseTeacher
 
             SelfPoseInputGetter = new PoseInputGetter(SelfPoseInputSource) { ReadDataPath = fake_file };
             TeacherPoseInputGetter = new PoseInputGetter(PoseInputSource.FILE){ ReadDataPath = fake_file };
+            SelfPoseInputGetter.loop = true;
+            TeacherPoseInputGetter.loop = true;
 
             SelfPoseInputGetter.streamCanvas = streamCanvas;
             SelfPoseInputGetter.VideoCube = videoCube;
@@ -498,7 +499,8 @@ namespace PoseTeacher
         {
             SelfPoseInputGetter.Dispose();
             TeacherPoseInputGetter.Dispose();
-            RecordedPoseInputGetter.Dispose();
+            if (RecordedPoseInputGetter != null)
+                RecordedPoseInputGetter.Dispose();
         }
 
         // Change recording mode via keyboard input for debugging and to not need menu
@@ -553,7 +555,6 @@ namespace PoseTeacher
         public void SetTeacherFile(string path)
         {
             TeacherPoseInputGetter.ReadDataPath = path;
-            //SelfPoseInputGetter.ReadDataPath = path;
         }
 
         public void ShowTeacher()
@@ -562,10 +563,24 @@ namespace PoseTeacher
             {
                 avatar.avatarContainer.gameObject.SetActive(true);
             }
-            //avatarListTeacher[0].avatarContainer.gameObject.SetActive(true);
             set_recording_mode(2);
         }
 
+        public void SetIsChoreography(bool newIsChoreogaphy)
+        {
+            if (newIsChoreogaphy)
+            {
+                isChoreography = true;
+                TeacherPoseInputGetter.loop = false;
+            }
+            else
+            {
+                isChoreography = false;
+                TeacherPoseInputGetter.loop = true;
+            }
+        }
+
+        
         
         public void StartRecordingMode(bool temporary)
         {

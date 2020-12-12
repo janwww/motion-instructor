@@ -15,12 +15,12 @@ namespace PoseTeacher
         KINECT, WEBSOCKET, FILE
     }
 
-    [CLSCompliant(false)]
     public class PoseInputGetter 
     {
 
         PoseInputSource CurrentPoseInputSource;
         public bool recording = false;
+        public bool loop = false;
         PoseData CurrentPose { get; set; }
 
         // Azure Kinect variables
@@ -227,6 +227,8 @@ namespace PoseTeacher
                     // Quick and dirty way to loop (by reloading file)
                     if (SequenceEnum == null || !SequenceEnum.MoveNext())
                     {
+                        if (!loop)
+                            break;
                         LoadData();
                         SequenceEnum.MoveNext();
                         _CurrentFilePoseNumber = 1;
