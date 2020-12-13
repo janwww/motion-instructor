@@ -7778,6 +7778,21 @@ PrefabInstance:
       propertyPath: m_Name
       value: GraphTestContainer
       objectReference: {fileID: 0}
+    - target: {fileID: 7560376345536517071, guid: 3b03ccae5e882a349968c96227fc00fe,
+        type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 7560376345536517071, guid: 3b03ccae5e882a349968c96227fc00fe,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7560376345536517071, guid: 3b03ccae5e882a349968c96227fc00fe,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0.8
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 3b03ccae5e882a349968c96227fc00fe, type: 3}
 --- !u!21 &808700723
@@ -13623,7 +13638,7 @@ MonoBehaviour:
   similarityPenalty: 1
   similarityActivateKalman: 1
   similarityKalmanQ: 0.0001
-  similarityKalmanR: 1
+  similarityKalmanR: 0.01
   similarityTotalScore: 0
   similarityScoreRaw: []
   similarityWeightRaw: []
@@ -18718,11 +18733,11 @@ PrefabInstance:
         type: 3}
       propertyPath: onFirstHandDetected.m_PersistentCalls.m_Calls.Array.data[1].m_Target
       value: 
-      objectReference: {fileID: 1630789624}
+      objectReference: {fileID: 1434572249}
     - target: {fileID: 6271061595930305360, guid: e5038f103da448644ba3d16936730a2c,
         type: 3}
       propertyPath: onFirstHandDetected.m_PersistentCalls.m_Calls.Array.data[1].m_MethodName
-      value: set_recording_mode
+      value: SetPause
       objectReference: {fileID: 0}
     - target: {fileID: 6271061595930305360, guid: e5038f103da448644ba3d16936730a2c,
         type: 3}
@@ -18787,12 +18802,62 @@ PrefabInstance:
     - target: {fileID: 6271061595930305360, guid: e5038f103da448644ba3d16936730a2c,
         type: 3}
       propertyPath: onFirstHandDetected.m_PersistentCalls.m_Calls.Array.data[2].m_MethodName
-      value: SetPause
+      value: SetMute
       objectReference: {fileID: 0}
     - target: {fileID: 6271061595930305360, guid: e5038f103da448644ba3d16936730a2c,
         type: 3}
       propertyPath: onFirstHandDetected.m_PersistentCalls.m_Calls.Array.data[2].m_Arguments.m_ObjectArgumentAssemblyTypeName
       value: UnityEngine.Object, UnityEngine
+      objectReference: {fileID: 0}
+    - target: {fileID: 6271061595930305360, guid: e5038f103da448644ba3d16936730a2c,
+        type: 3}
+      propertyPath: onFirstHandDetected.m_PersistentCalls.m_Calls.Array.data[3].m_Mode
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 6271061595930305360, guid: e5038f103da448644ba3d16936730a2c,
+        type: 3}
+      propertyPath: onFirstHandDetected.m_PersistentCalls.m_Calls.Array.data[3].m_Arguments.m_BoolArgument
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6271061595930305360, guid: e5038f103da448644ba3d16936730a2c,
+        type: 3}
+      propertyPath: onFirstHandDetected.m_PersistentCalls.m_Calls.Array.data[3].m_CallState
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 6271061595930305360, guid: e5038f103da448644ba3d16936730a2c,
+        type: 3}
+      propertyPath: onFirstHandDetected.m_PersistentCalls.m_Calls.Array.data[3].m_Target
+      value: 
+      objectReference: {fileID: 1434572249}
+    - target: {fileID: 6271061595930305360, guid: e5038f103da448644ba3d16936730a2c,
+        type: 3}
+      propertyPath: onFirstHandDetected.m_PersistentCalls.m_Calls.Array.data[3].m_MethodName
+      value: SetMute
+      objectReference: {fileID: 0}
+    - target: {fileID: 6271061595930305360, guid: e5038f103da448644ba3d16936730a2c,
+        type: 3}
+      propertyPath: onFirstHandDetected.m_PersistentCalls.m_Calls.Array.data[3].m_Arguments.m_ObjectArgumentAssemblyTypeName
+      value: UnityEngine.Object, UnityEngine
+      objectReference: {fileID: 0}
+    - target: {fileID: 6271061595930305360, guid: e5038f103da448644ba3d16936730a2c,
+        type: 3}
+      propertyPath: onFirstHandDetected.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 1630789624}
+    - target: {fileID: 6271061595930305360, guid: e5038f103da448644ba3d16936730a2c,
+        type: 3}
+      propertyPath: onFirstHandDetected.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: set_recording_mode
+      objectReference: {fileID: 0}
+    - target: {fileID: 6271061595930305360, guid: e5038f103da448644ba3d16936730a2c,
+        type: 3}
+      propertyPath: onFirstHandDetected.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 6271061595930305360, guid: e5038f103da448644ba3d16936730a2c,
+        type: 3}
+      propertyPath: onFirstHandDetected.m_PersistentCalls.m_Calls.Array.data[1].m_Mode
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 8356912288782071889, guid: e5038f103da448644ba3d16936730a2c,
         type: 3}
