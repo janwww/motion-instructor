@@ -343,7 +343,7 @@ namespace PoseTeacher
                 similarityScoreExtern = similarityScore; // global
                 similarityTotalScoreExtern = similarityTotalScore; // global
 
-                avatarVisualisationSimilarity.UpdatePart(similarityBodyNr, similarityScore);
+                avatarVisualisationSimilarity.UpdatePart(similarityBodyNr, similarityScoreRaw);
                 graphtest.Update_plot(similarityScoreExtern);
             }
 

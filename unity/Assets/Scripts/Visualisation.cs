@@ -83,7 +83,7 @@ namespace PoseTeacher
                 index++;
             }
         }
-        public void UpdatePart(string bodyNrIn, double score)
+        public void UpdatePart(string bodyNrIn, List<double> weights_score)
         {
             // update a color for a specific body part bodyNrIn. Sets grad color to "1" and blue to "0"
             List<double> weights = get_weights(bodyNrIn);
@@ -95,7 +95,7 @@ namespace PoseTeacher
                 }
                 if (weights[i] == 1)
                 {
-                    set_grad_color(stickparts[i], Color.red, Color.green, score);
+                    set_grad_color(stickparts[i], Color.red, Color.green, weights_score[i]);
                 }
             }
         }
