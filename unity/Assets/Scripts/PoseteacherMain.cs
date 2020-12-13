@@ -626,5 +626,22 @@ namespace PoseTeacher
             show_recording = !show_recording;
         }
 
+        private bool graphAllowed = true;
+        public void ChangeGraphVisibilityAllowed()
+        {
+            graphAllowed = !graphAllowed;
+            if (graphtest != null)
+                graphtest.graphContainer.SetActive(graphAllowed);
+        }
+
+
+        private bool videoCubeAllowed = true;
+        public void ChangeVideoCubeVisibilityAllowed()
+        {
+            videoCubeAllowed = !videoCubeAllowed;
+            if (videoCube != null)
+                videoCube.SetActive(videoCubeAllowed);
+        }
+
     }
 }
