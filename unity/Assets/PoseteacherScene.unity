@@ -19263,6 +19263,16 @@ PrefabInstance:
       propertyPath: m_Name
       value: EndCoreoScreen
       objectReference: {fileID: 0}
+    - target: {fileID: 9050449464387764149, guid: 97375dd3e6ebe4a41a1e50432fa96840,
+        type: 3}
+      propertyPath: Main
+      value: 
+      objectReference: {fileID: 1630789622}
+    - target: {fileID: 9050449464387764149, guid: 97375dd3e6ebe4a41a1e50432fa96840,
+        type: 3}
+      propertyPath: CourseHelper
+      value: 
+      objectReference: {fileID: 51247927}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 97375dd3e6ebe4a41a1e50432fa96840, type: 3}
 --- !u!1001 &9212582092368191315
