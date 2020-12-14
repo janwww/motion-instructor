@@ -176,6 +176,30 @@ namespace PoseTeacher
                 coreographies.Add(coreographie.Position, coreographie);
             }
 
+            courses.CurrentCourse = course_steps.CourseID;
+            isTraining = true;
+
+            GenerateCourseMenu();
+        }
+
+        public void LoadFreeplay()
+        {
+            ClearState();
+
+            int id = 0;
+            foreach (KeyValuePair<string, string> entry in courseToPath)
+            {
+                string json_data = File.ReadAllText(entry.Value);
+                CourseJSON course_steps = JsonUtility.FromJson<CourseJSON>(json_data);
+                CourseInfoHolder course = new CourseInfoHolder();
+
+                foreach (CoreographieContainer coreographie in course_steps.coreographies)
+                {
+                    coreographies.Add(id++, coreographie);
+                }
+            }
+            isTraining = false;
+
             GenerateCourseMenu();
         }
 
@@ -208,6 +232,7 @@ namespace PoseTeacher
                     Debug.Log("Step/coreography not found.");
                     return;
                 }
+                int x = i;
 
                 var onClickReciever = newButton.GetComponent<Interactable>().GetReceiver<InteractableOnPressReceiver>();
                 var onFocusReciever = newButton.GetComponent<Interactable>().GetReceiver<InteractableOnFocusReceiver>();
@@ -220,7 +245,13 @@ namespace PoseTeacher
                     onClickReciever = newButton.GetComponent<Interactable>().AddReceiver<InteractableOnPressReceiver>();
                 }
                 onFocusReciever.OnFocusOn.AddListener(() => CourseDetails.SetActive(true));
-                onFocusReciever.OnFocusOn.AddListener(() => CourseMenuHelperObject.GetComponent<CourseMenuHelper>().SetMoveDetails(pos));
+                if (isTraining)
+                    onFocusReciever.OnFocusOn.AddListener(() => CourseMenuHelperObject.GetComponent<CourseMenuHelper>().SetMoveDetails(pos));
+                else
+                {
+                    
+                    onFocusReciever.OnFocusOn.AddListener(() => CourseMenuHelperObject.GetComponent<CourseMenuHelper>().SetMoveDetails(x));
+                }
                 onFocusReciever.OnFocusOn.AddListener(() => MainObject.GetComponent<PoseteacherMain>().SetTeacherFile(movementLocation));
                 //onFocusReciever.OnFocusOn.AddListener(() => MainObject.GetComponent<PoseteacherMain>().loadRecording(movementLocation));
                 //onFocusReciever.OnFocusOn.AddListener(() => MainObject.GetComponent<PoseteacherMain>().fake_file = movementLocation);
@@ -232,7 +263,10 @@ namespace PoseTeacher
                 } 
                 else if (coreographies.ContainsKey(i))
                 {
-                    onClickReciever.OnPress.AddListener(() => CourseMenuHelperObject.GetComponent<CourseMenuHelper>().StartCoreography(pos));
+                    if (isTraining)
+                        onClickReciever.OnPress.AddListener(() => CourseMenuHelperObject.GetComponent<CourseMenuHelper>().StartCoreography(pos));
+                    else
+                        onClickReciever.OnPress.AddListener(() => CourseMenuHelperObject.GetComponent<CourseMenuHelper>().StartCoreography(x));
                 }
                 onClickReciever.OnPress.AddListener(() => CourseDetails.SetActive(false));
 
@@ -357,6 +391,11 @@ namespace PoseTeacher
             } else
             {
                 // TODO if we are doing only coreographies (Free play)
+                if (coreographies.ContainsKey(CurrentStepOrCoreo + 1))
+                {
+                    MainObject.GetComponent<PoseteacherMain>().SetTeacherFile(coreographies[CurrentStepOrCoreo + 1].FileLocation);
+                    StartCoreography(CurrentStepOrCoreo + 1);
+                }
             }
         }
 
