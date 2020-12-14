@@ -314,16 +314,15 @@ namespace PoseTeacher
 
         }
 
-        private int temporaryCounter = 0;
-        public bool temporaryBool = false;
         // Done at each application update
         void Update()
         {
 
-            if (temporaryCounter == 1000)
+            if (TeacherPoseInputGetter.CurrentFilePoseNumber >= TeacherPoseInputGetter.TotalFilePoseNumber && isChoreography)
+            {
                 CoreoEnded();
-            if (temporaryBool) 
-                temporaryCounter++;
+            }
+                
 
             checkKeyInput();
 
@@ -648,8 +647,14 @@ namespace PoseTeacher
                     SelfPoseInputGetter.recording = false;
                     recordedAvatar.avatarContainer.SetActive(true);
                     RecordedPoseInputGetter.ReadDataPath = SelfPoseInputGetter.WriteDataPath;
-                    //pauseRecordingkAnimation = true;
+                    
                     isrecording = false;
+
+                    if (!isChoreography)
+                    {
+                        pauseRecordingAnimation = false;
+                    }
+                    
                 }
             }
         }

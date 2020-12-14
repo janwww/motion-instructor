@@ -76,7 +76,8 @@ namespace PoseTeacher
         private Dictionary<string, string> courseToPath =
             new Dictionary<string, string>()
             {
-                { "salsa", "jsondata/courses/salsa_male.txt" }
+                { "salsa", "jsondata/courses/salsa_male.txt" },
+                { "salsaf", "jsondata/courses/salsa_female.txt" }
             };
 
         private Dictionary<int, StepContainer> steps = new Dictionary<int, StepContainer>();
@@ -318,7 +319,6 @@ namespace PoseTeacher
             main.ResetTotalScore();
             main.StartRecordingMode(true); // These main calls would probably be better of in a single call when next refactored...
             main.pauseTeacher = false;
-            main.temporaryBool = true;
         }
 
         public string CurrentStepName()

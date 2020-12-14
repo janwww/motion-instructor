@@ -168,12 +168,13 @@ namespace PoseTeacher
                 count++;
             }
             _TotalFilePoseNumber = count;
-            _CurrentFilePoseNumber = 0;
+            
         }
 
         private void LoadData()
         {
             SequenceEnum = File.ReadLines(ReadDataPath).GetEnumerator();
+            _CurrentFilePoseNumber = 0;
         }
 
         public void RestartFile()
