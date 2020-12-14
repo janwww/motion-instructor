@@ -22,7 +22,6 @@ namespace PoseTeacher
     }
 
     // Main script
-    [CLSCompliant(false)]
     public class PoseteacherMain : MonoBehaviour
     {
         PoseInputGetter SelfPoseInputGetter;
@@ -80,6 +79,11 @@ namespace PoseTeacher
         Graphtest graphtest;
         public static double similarityScoreExtern = 0.0; // similarity value between 0 and 1 for defined body part (extern global variable for plot)
         public static double similarityTotalScoreExtern = 0.0; // Total score (extern global variable for plot)
+
+        // Duplicates for recording
+        AvatarSimilarity recordedAvatarSimilarity;
+        VisualisationSimilarity recordedAvatarVisualisationSimilarity;
+        //Graphtest recordedGraphtest;
 
         public Difficulty difficulty = Difficulty.EASY;
         public void SetDifficulty(Difficulty newDifficulty)
@@ -292,6 +296,9 @@ namespace PoseTeacher
 
             SelfPoseInputGetter = new PoseInputGetter(SelfPoseInputSource) { ReadDataPath = fake_file };
             TeacherPoseInputGetter = new PoseInputGetter(PoseInputSource.FILE){ ReadDataPath = fake_file };
+            SelfPoseInputGetter.loop = true;
+            TeacherPoseInputGetter.loop = true;
+            RecordedPoseInputGetter = new PoseInputGetter(PoseInputSource.FILE) {};
 
             SelfPoseInputGetter.streamCanvas = streamCanvas;
             SelfPoseInputGetter.VideoCube = videoCube;
@@ -300,6 +307,11 @@ namespace PoseTeacher
             avatarSimilarity = new AvatarSimilarity(avatarListSelf[similaritySelfNr], avatarListTeacher[similarityTeacherNr], similarityBodyNr, similarityPenalty, similarityActivateKalman, similarityKalmanQ, similarityKalmanR);
             avatarVisualisationSimilarity = new VisualisationSimilarity(avatarListSelf[similaritySelfNr]);
             graphtest = new Graphtest((float)similarityScoreExtern);
+
+            recordedAvatarSimilarity = new AvatarSimilarity(recordedAvatar, avatarListTeacher[similarityTeacherNr], similarityBodyNr, similarityPenalty, similarityActivateKalman, similarityKalmanQ, similarityKalmanR);
+            recordedAvatarVisualisationSimilarity = new VisualisationSimilarity(recordedAvatar);
+            //recordedGraphtest = new Graphtest((float)similarityScoreExtern);
+
         }
 
 
@@ -355,6 +367,10 @@ namespace PoseTeacher
                     recordedAvatar.MovePerson(RecordedPoseInputGetter.GetNextPose());
                     record_counter = 0;
                 }
+
+                recordedAvatarSimilarity.Update();
+                recordedAvatarVisualisationSimilarity.UpdatePart(similarityBodyNr, recordedAvatarSimilarity.similarityStick);
+
             }
 
             UpdateIndicators();
@@ -498,7 +514,8 @@ namespace PoseTeacher
         {
             SelfPoseInputGetter.Dispose();
             TeacherPoseInputGetter.Dispose();
-            RecordedPoseInputGetter.Dispose();
+            if (RecordedPoseInputGetter != null)
+                RecordedPoseInputGetter.Dispose();
         }
 
         // Change recording mode via keyboard input for debugging and to not need menu
@@ -553,7 +570,6 @@ namespace PoseTeacher
         public void SetTeacherFile(string path)
         {
             TeacherPoseInputGetter.ReadDataPath = path;
-            //SelfPoseInputGetter.ReadDataPath = path;
         }
 
         public void ShowTeacher()
@@ -562,10 +578,24 @@ namespace PoseTeacher
             {
                 avatar.avatarContainer.gameObject.SetActive(true);
             }
-            //avatarListTeacher[0].avatarContainer.gameObject.SetActive(true);
             set_recording_mode(2);
         }
 
+        public void SetIsChoreography(bool newIsChoreogaphy)
+        {
+            if (newIsChoreogaphy)
+            {
+                isChoreography = true;
+                TeacherPoseInputGetter.loop = false;
+            }
+            else
+            {
+                isChoreography = false;
+                TeacherPoseInputGetter.loop = true;
+            }
+        }
+
+        
         
         public void StartRecordingMode(bool temporary)
         {
@@ -597,7 +627,7 @@ namespace PoseTeacher
                 {
                     SelfPoseInputGetter.recording = false;
                     recordedAvatar.avatarContainer.SetActive(true);
-                    RecordedPoseInputGetter = new PoseInputGetter(PoseInputSource.FILE) { ReadDataPath = SelfPoseInputGetter.WriteDataPath };
+                    RecordedPoseInputGetter.ReadDataPath = SelfPoseInputGetter.WriteDataPath;
                     show_recording = true;
                     isrecording = false;
                 }

@@ -10,10 +10,7 @@
 			"Description":"Feel the rhythm of Salsa!\nSimple side step: point and step.",
 			"Blocks": [
 				{
-					"FileLocation":"jsondata/2020_05_26-21_23_28.txt"
-				},
-				{
-					"FileLocation":"jsondata/2020_05_26-21_23_28.txt"
+					"FileLocation":"jsondata/salsa_m/2020_12_14-15_46_29.txt"
 				}
 			]
 		},
@@ -23,10 +20,7 @@
 			"Description":"Move to the rhythm of Salsa!\nSimple steps on 1-2-3, with a little twist.",
 			"Blocks": [
 				{
-					"FileLocation":"jsondata/2020_05_26-22_55_32.txt"
-				},
-				{
-					"FileLocation":"jsondata/2020_05_26-22_55_32.txt"
+					"FileLocation":"jsondata/salsa_m/2020_12_14-15_52_25.txt"
 				}
 			]
 		},
@@ -36,10 +30,7 @@
 			"Description":"Spin her around!\nUse your hands to spin your (imaginary) partner.",
 			"Blocks": [
 				{
-					"FileLocation":"jsondata/2020_05_26-22_55_32.txt"
-				},
-				{
-					"FileLocation":"jsondata/2020_05_26-22_55_32.txt"
+					"FileLocation":"jsondata/salsa_m/2020_12_14-15_58_08.txt"
 				}
 			]
 		},
@@ -49,10 +40,7 @@
 			"Description":"Lead the follower to your other side,\ncompleting a 180 degree turn.",
 			"Blocks": [
 				{
-					"FileLocation":"jsondata/2020_05_26-21_23_28.txt"
-				},
-				{
-					"FileLocation":"jsondata/2020_05_26-21_23_28.txt"
+					"FileLocation":"jsondata/salsa_m/2020_12_14-16_02_14.txt"
 				}
 			]
 		},
@@ -62,10 +50,7 @@
 			"Description":"placeholder...",
 			"Blocks": [
 				{
-					"FileLocation":"jsondata/2020_05_26-21_23_28.txt"
-				},
-				{
-					"FileLocation":"jsondata/2020_05_26-21_23_28.txt"
+					"FileLocation":"jsondata/salsa_m/2020_12_14-16_16_55.txt"
 				}
 			]
 		},
@@ -75,10 +60,7 @@
 			"Description":"placeholder...",
 			"Blocks": [
 				{
-					"FileLocation":"jsondata/2020_05_26-21_23_28.txt"
-				},
-				{
-					"FileLocation":"jsondata/2020_05_26-21_23_28.txt"
+					"FileLocation":"jsondata/salsa_m/2020_12_14-16_21_06.txt"
 				}
 			]
 		}
@@ -86,10 +68,10 @@
 	"coreographies": [
 		{
 			"Position":4,
-			"Name":"Coreography 1",
+			"Name":"Simple Salsa Coreography (Male)",
 			"Description":"Concatenate the basic steps into a coreography.\n Many uses this as their first move to get into the rhythm.",
 			"HighScore":0,
-			"FileLocation":"jsondata/2020_05_26-21_23_28.txt"
+			"FileLocation":"jsondata/salsa_m/2020_12_14-16_08_32.txt"
 		}
 	]
 }

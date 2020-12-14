@@ -4,14 +4,9 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using System;
-using System.Collections.Generic;
-using UnityEngine;
 using Microsoft.Azure.Kinect.Sensor;
 using Microsoft.Azure.Kinect.BodyTracking;
-using UnityEngine.UI;
 using System.IO;
-using System.Collections;
 using NativeWebSocket;
 using System.Security.Permissions;
 
