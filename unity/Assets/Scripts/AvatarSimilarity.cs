@@ -610,5 +610,10 @@ namespace PoseTeacher
             totalScore = totalScore + similarityBodypart;
 
         }
+
+        public void ResetTotalScore()
+        {
+            totalScore = 0;
+        }
 	}
 }

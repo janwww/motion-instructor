@@ -234,10 +234,14 @@ namespace PoseTeacher
                         _CurrentFilePoseNumber = 1;
                     }
 
-
-                    string frame_json = SequenceEnum.Current;
+                                        string frame_json = SequenceEnum.Current;
                     PoseData fake_live_data = PoseDataUtils.JSONstring2PoseData(frame_json);
                     CurrentPose = fake_live_data;
+
+                    if (recording) // recording
+                    {
+                        File.AppendAllText(WriteDataPath, frame_json + Environment.NewLine);
+                    }
                     break;
 
                 case PoseInputSource.KINECT:

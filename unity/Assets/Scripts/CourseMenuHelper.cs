@@ -84,6 +84,10 @@ namespace PoseTeacher
 
         private CoursesHolder courses = new CoursesHolder();
 
+        private int CurrentStepOrCoreo = 0;
+        private int CurrentBlock = 0;
+        private bool isTraining = true;
+
         public void LoadAllCourseInfos()
         {
             foreach (KeyValuePair<string, string> entry in courseToPath)
@@ -223,11 +227,11 @@ namespace PoseTeacher
                 
                 if (steps.ContainsKey(i))
                 {
-                    onClickReciever.OnPress.AddListener(() => CourseMenuHelperObject.GetComponent<CourseMenuHelper>().StartStep());
+                    onClickReciever.OnPress.AddListener(() => CourseMenuHelperObject.GetComponent<CourseMenuHelper>().StartStep(pos));
                 } 
                 else if (coreographies.ContainsKey(i))
                 {
-                    onClickReciever.OnPress.AddListener(() => CourseMenuHelperObject.GetComponent<CourseMenuHelper>().StartCoreography());
+                    onClickReciever.OnPress.AddListener(() => CourseMenuHelperObject.GetComponent<CourseMenuHelper>().StartCoreography(pos));
                 }
                 onClickReciever.OnPress.AddListener(() => CourseDetails.SetActive(false));
 
@@ -287,9 +291,12 @@ namespace PoseTeacher
 
         }
 
-        public void StartStep()
+        public void StartStep(int stepid)
         {
+            CurrentStepOrCoreo = stepid;
+            CurrentBlock = 0;
             MenuObject.SetActive(false);
+            CoreographyHolder.SetActive(false);
             TrainingHolder.SetActive(true);
             PoseteacherMain main = MainObject.GetComponent<PoseteacherMain>();
             main.ShowTeacher();
@@ -297,14 +304,86 @@ namespace PoseTeacher
             main.ActivateIndicators();
         }
 
-        public void StartCoreography()
+        public void StartCoreography(int coreoid)
         {
+            CurrentStepOrCoreo = coreoid;
+            CurrentBlock = 0;
             MenuObject.SetActive(false);
+            TrainingHolder.SetActive(false);
             CoreographyHolder.SetActive(true);
             PoseteacherMain main = MainObject.GetComponent<PoseteacherMain>();
             main.ShowTeacher();
             main.SetIsChoreography(true);
             main.ActivateIndicators();
+            main.ResetTotalScore();
+            main.StartRecordingMode(true); // These main calls would probably be better of in a single call when next refactored...
+            main.pauseTeacher = false;
+            main.temporaryBool = true;
+        }
+
+        public string CurrentStepName()
+        {
+            if (steps.ContainsKey(CurrentStepOrCoreo))
+            {
+                return steps[CurrentStepOrCoreo].Name;
+            }
+            else if (coreographies.ContainsKey(CurrentStepOrCoreo))
+            {
+                return coreographies[CurrentStepOrCoreo].Name;
+            }
+
+            return "No Name Found";
+        }
+
+        public void StartNextStep()
+        {
+            if (isTraining)
+            {
+                if (steps.ContainsKey(CurrentStepOrCoreo + 1)) {
+                    MainObject.GetComponent<PoseteacherMain>().SetTeacherFile(steps[CurrentStepOrCoreo + 1].Blocks[0].FileLocation);
+                    StartStep(CurrentStepOrCoreo + 1);
+
+                } else if (coreographies.ContainsKey(CurrentStepOrCoreo + 1))
+                {
+                    MainObject.GetComponent<PoseteacherMain>().SetTeacherFile(coreographies[CurrentStepOrCoreo + 1].FileLocation);
+                    StartCoreography(CurrentStepOrCoreo + 1);
+                } else
+                {
+                    // TODO: No other step available, handle ending everything
+                }
+
+
+
+            } else
+            {
+                // TODO if we are doing only coreographies (Free play)
+            }
+        }
+
+        public void StartNextBlock()
+        {
+            if (coreographies.ContainsKey(CurrentStepOrCoreo))
+            {
+                // Move to next Step (most likely we will never end up here
+                StartNextStep();
+            }
+            CurrentBlock++;
+            if (CurrentBlock < steps[CurrentStepOrCoreo].Blocks.Length)
+                // Move to next block
+                MainObject.GetComponent<PoseteacherMain>().SetTeacherFile(steps[CurrentStepOrCoreo].Blocks[CurrentBlock].FileLocation);
+            else
+                // Move to next step, consider notifying the user...
+                StartNextStep();
+
+        }
+
+        public void StartPreviousBlock()
+        {
+            CurrentBlock--;
+            if (CurrentBlock >= 0)
+                MainObject.GetComponent<PoseteacherMain>().SetTeacherFile(steps[CurrentStepOrCoreo].Blocks[CurrentBlock].FileLocation);
+
+            // TODO else no previous block available (msg user?) move to previous step?
         }
     }
 }

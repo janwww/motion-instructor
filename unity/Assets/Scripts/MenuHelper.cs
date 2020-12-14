@@ -8,7 +8,7 @@ namespace PoseTeacher
     public enum Menus
     {
         TITLE, DANCE, COURSES, SPECCOURSE, SETTINGS, AVATARSETTINGS,
-        DIFFICULTYSETTINGS, FEEDSETTINGS, RECORDMENU, COREOMENU
+        DIFFICULTYSETTINGS, FEEDSETTINGS, FEEDBACKSETTINGS, RECORDMENU, COREOMENU
     }
     public enum MenuState
     {
@@ -124,6 +124,7 @@ namespace PoseTeacher
             menus.Add(Menus.DIFFICULTYSETTINGS, MenuHolderTr.Find("DifficultySettingsMenu").gameObject);
             menus.Add(Menus.FEEDSETTINGS, MenuHolderTr.Find("PosefeedSettingsMenu").gameObject);
             menus.Add(Menus.RECORDMENU, MenuHolderTr.Find("RecordMenu").gameObject);
+            menus.Add(Menus.FEEDBACKSETTINGS, MenuHolderTr.Find("FeedbackDisplaySettingsMenu").gameObject);
 
             CurrentMenu = Menus.TITLE;
 
@@ -191,6 +192,10 @@ namespace PoseTeacher
                     CurrentMenu = Menus.SETTINGS;
                     menus[CurrentMenu].SetActive(true);
                     break;
+                case Menus.FEEDBACKSETTINGS:
+                    CurrentMenu = Menus.SETTINGS;
+                    menus[CurrentMenu].SetActive(true);
+                    break;
                 case Menus.RECORDMENU:
                     CurrentMenu = Menus.TITLE;
                     menus[CurrentMenu].SetActive(true);
@@ -252,6 +257,9 @@ namespace PoseTeacher
                     break;
                 case Menus.RECORDMENU:
                     SelectedInRecordMovementMenu(selectedMenuOption);
+                    break;
+                case Menus.FEEDBACKSETTINGS:
+                    SelectedInFeedbackSettingsMenu(selectedMenuOption);
                     break;
                 default:
                     break;
@@ -360,6 +368,11 @@ namespace PoseTeacher
                     HighlightSelectedDifficulty();
                     menus[CurrentMenu].SetActive(true);
                     break;
+                case 3:
+                    menus[CurrentMenu].SetActive(false);
+                    CurrentMenu = Menus.FEEDBACKSETTINGS;
+                    menus[CurrentMenu].SetActive(true);
+                    break;
                 default:
                     break;
             }
@@ -421,6 +434,23 @@ namespace PoseTeacher
                 // Placeholder for recorded movements
                 case 1:
                     // TODO
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        private void SelectedInFeedbackSettingsMenu(int selectedMenuOption)
+        {
+            switch (selectedMenuOption)
+            {
+                // VideoCube toggle pressed
+                case 0:
+                    MainObject.GetComponent<PoseteacherMain>().ChangeVideoCubeVisibilityAllowed();
+                    break;
+                // Graph toggle pressed
+                case 1:
+                    MainObject.GetComponent<PoseteacherMain>().ChangeGraphVisibilityAllowed();
                     break;
                 default:
                     break;
