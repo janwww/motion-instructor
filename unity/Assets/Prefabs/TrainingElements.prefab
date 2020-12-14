@@ -48,67 +48,7 @@ PrefabInstance:
       propertyPath: m_Mesh
       value: 
       objectReference: {fileID: 0}
-    - target: {fileID: 1616355653438457828, guid: dc179de8abc9c1c4c91cd8d9997b8b28,
-        type: 3}
-      propertyPath: m_Mesh
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 2665847548664129302, guid: dc179de8abc9c1c4c91cd8d9997b8b28,
-        type: 3}
-      propertyPath: m_Mesh
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 2665847548664129384, guid: dc179de8abc9c1c4c91cd8d9997b8b28,
-        type: 3}
-      propertyPath: m_HorizontalAlignment
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 2665847548664129384, guid: dc179de8abc9c1c4c91cd8d9997b8b28,
-        type: 3}
-      propertyPath: m_VerticalAlignment
-      value: 512
-      objectReference: {fileID: 0}
-    - target: {fileID: 2665847548664129384, guid: dc179de8abc9c1c4c91cd8d9997b8b28,
-        type: 3}
-      propertyPath: m_textAlignment
-      value: 65535
-      objectReference: {fileID: 0}
-    - target: {fileID: 2665847548812577076, guid: dc179de8abc9c1c4c91cd8d9997b8b28,
-        type: 3}
-      propertyPath: m_Mesh
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 2665847548812577098, guid: dc179de8abc9c1c4c91cd8d9997b8b28,
-        type: 3}
-      propertyPath: m_HorizontalAlignment
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 2665847548812577098, guid: dc179de8abc9c1c4c91cd8d9997b8b28,
-        type: 3}
-      propertyPath: m_VerticalAlignment
-      value: 512
-      objectReference: {fileID: 0}
-    - target: {fileID: 2665847548812577098, guid: dc179de8abc9c1c4c91cd8d9997b8b28,
-        type: 3}
-      propertyPath: m_textAlignment
-      value: 65535
-      objectReference: {fileID: 0}
-    - target: {fileID: 2665847549187755410, guid: dc179de8abc9c1c4c91cd8d9997b8b28,
-        type: 3}
-      propertyPath: m_HorizontalAlignment
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 2665847549187755410, guid: dc179de8abc9c1c4c91cd8d9997b8b28,
-        type: 3}
-      propertyPath: m_VerticalAlignment
-      value: 512
-      objectReference: {fileID: 0}
-    - target: {fileID: 2665847549187755410, guid: dc179de8abc9c1c4c91cd8d9997b8b28,
-        type: 3}
-      propertyPath: m_textAlignment
-      value: 65535
-      objectReference: {fileID: 0}
-    - target: {fileID: 2665847549187755500, guid: dc179de8abc9c1c4c91cd8d9997b8b28,
+    - target: {fileID: 1115457100028946277, guid: dc179de8abc9c1c4c91cd8d9997b8b28,
         type: 3}
       propertyPath: m_Mesh
       value: 
@@ -117,11 +57,6 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: HandMenu_Training_HideOnHandDrop
-      objectReference: {fileID: 0}
-    - target: {fileID: 2665847549521150357, guid: dc179de8abc9c1c4c91cd8d9997b8b28,
-        type: 3}
-      propertyPath: m_IsActive
-      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2665847549521150358, guid: dc179de8abc9c1c4c91cd8d9997b8b28,
         type: 3}
@@ -178,61 +113,6 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 3160555749263688608, guid: dc179de8abc9c1c4c91cd8d9997b8b28,
-        type: 3}
-      propertyPath: m_Mesh
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 3307930098594596158, guid: dc179de8abc9c1c4c91cd8d9997b8b28,
-        type: 3}
-      propertyPath: m_Mesh
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 3307930098594596160, guid: dc179de8abc9c1c4c91cd8d9997b8b28,
-        type: 3}
-      propertyPath: m_HorizontalAlignment
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 3307930098594596160, guid: dc179de8abc9c1c4c91cd8d9997b8b28,
-        type: 3}
-      propertyPath: m_VerticalAlignment
-      value: 512
-      objectReference: {fileID: 0}
-    - target: {fileID: 3307930098594596160, guid: dc179de8abc9c1c4c91cd8d9997b8b28,
-        type: 3}
-      propertyPath: m_textAlignment
-      value: 65535
-      objectReference: {fileID: 0}
-    - target: {fileID: 3601082564988045850, guid: dc179de8abc9c1c4c91cd8d9997b8b28,
-        type: 3}
-      propertyPath: m_Mesh
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 4153087436963505474, guid: dc179de8abc9c1c4c91cd8d9997b8b28,
-        type: 3}
-      propertyPath: m_Mesh
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 4831165533737719976, guid: dc179de8abc9c1c4c91cd8d9997b8b28,
-        type: 3}
-      propertyPath: m_HorizontalAlignment
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 4831165533737719976, guid: dc179de8abc9c1c4c91cd8d9997b8b28,
-        type: 3}
-      propertyPath: m_VerticalAlignment
-      value: 512
-      objectReference: {fileID: 0}
-    - target: {fileID: 4831165533737719976, guid: dc179de8abc9c1c4c91cd8d9997b8b28,
-        type: 3}
-      propertyPath: m_textAlignment
-      value: 65535
-      objectReference: {fileID: 0}
-    - target: {fileID: 4831165533737720022, guid: dc179de8abc9c1c4c91cd8d9997b8b28,
-        type: 3}
-      propertyPath: m_Mesh
-      value: 
-      objectReference: {fileID: 0}
     - target: {fileID: 5450754711321017730, guid: dc179de8abc9c1c4c91cd8d9997b8b28,
         type: 3}
       propertyPath: m_Mesh
@@ -243,7 +123,12 @@ PrefabInstance:
       propertyPath: m_Mesh
       value: 
       objectReference: {fileID: 0}
-    - target: {fileID: 6994788599489498807, guid: dc179de8abc9c1c4c91cd8d9997b8b28,
+    - target: {fileID: 6475223620198526083, guid: dc179de8abc9c1c4c91cd8d9997b8b28,
+        type: 3}
+      propertyPath: m_Mesh
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 6677434774516202846, guid: dc179de8abc9c1c4c91cd8d9997b8b28,
         type: 3}
       propertyPath: m_Mesh
       value: 
@@ -258,37 +143,7 @@ PrefabInstance:
       propertyPath: m_Mesh
       value: 
       objectReference: {fileID: 0}
-    - target: {fileID: 8006299593822521688, guid: dc179de8abc9c1c4c91cd8d9997b8b28,
-        type: 3}
-      propertyPath: m_Mesh
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 8201116937734736058, guid: dc179de8abc9c1c4c91cd8d9997b8b28,
-        type: 3}
-      propertyPath: m_HorizontalAlignment
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 8201116937734736058, guid: dc179de8abc9c1c4c91cd8d9997b8b28,
-        type: 3}
-      propertyPath: m_VerticalAlignment
-      value: 512
-      objectReference: {fileID: 0}
-    - target: {fileID: 8201116937734736058, guid: dc179de8abc9c1c4c91cd8d9997b8b28,
-        type: 3}
-      propertyPath: m_textAlignment
-      value: 65535
-      objectReference: {fileID: 0}
-    - target: {fileID: 8201116937734736068, guid: dc179de8abc9c1c4c91cd8d9997b8b28,
-        type: 3}
-      propertyPath: m_Mesh
-      value: 
-      objectReference: {fileID: 0}
     - target: {fileID: 8260552199466572982, guid: dc179de8abc9c1c4c91cd8d9997b8b28,
-        type: 3}
-      propertyPath: m_Mesh
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 8796506449015472321, guid: dc179de8abc9c1c4c91cd8d9997b8b28,
         type: 3}
       propertyPath: m_Mesh
       value: 

@@ -302,10 +302,17 @@ namespace PoseTeacher
             graphtest = new Graphtest((float)similarityScoreExtern);
         }
 
-
+        private int temporaryCounter = 0;
+        public bool temporaryBool = false;
         // Done at each application update
         void Update()
         {
+
+            if (temporaryCounter == 1000)
+                CoreoEnded();
+            if (temporaryBool) 
+                temporaryCounter++;
+
             checkKeyInput();
 
             if (!pauseSelf)
@@ -569,10 +576,12 @@ namespace PoseTeacher
         
         public void StartRecordingMode(bool temporary)
         {
+            Debug.Log("Start recording mode");
             if (temporary)
             {
-                SelfPoseInputGetter.WriteDataPath = "jsondata/temporary.txt";
-                SelfPoseInputGetter.ResetRecording();
+                //SelfPoseInputGetter.WriteDataPath = "jsondata/temporary.txt";
+                //SelfPoseInputGetter.ResetRecording();
+                SelfPoseInputGetter.GenNewFilename();
             }
             else
             {
@@ -586,6 +595,7 @@ namespace PoseTeacher
 
         public void StopRecordingMode(bool abort = false)
         {
+            Debug.Log("Stop recording mode");
             if (isrecording)
             {
                 if (abort)
@@ -621,6 +631,24 @@ namespace PoseTeacher
             show_recording = false;
         }
 
+        public void StartStopShowingRecording()
+        {
+            if (show_recording)
+            {
+                recordedAvatar.avatarContainer.SetActive(false);
+                show_recording = false;
+            } else
+            {
+                recordedAvatar.avatarContainer.SetActive(true);
+                show_recording = true;
+            }
+        }
+
+        public void RestartShowRecording()
+        {
+            //RecordedPoseInputGetter.RestartRecording();
+        }
+
         public void PauseShowingRecording()
         {
             show_recording = !show_recording;
@@ -643,5 +671,49 @@ namespace PoseTeacher
                 videoCube.SetActive(videoCubeAllowed);
         }
 
+        public GameObject EndCoreoScreen;
+        public GameObject CourseHelper;
+
+        public void CoreoEnded()
+        {
+            // Show CoreoEndScreen with proper data
+            StopRecordingMode();
+            pauseTeacher = true;
+            CoreoEndScreen endScreenHelper = EndCoreoScreen.GetComponent<CoreoEndScreen>();
+            CourseMenuHelper courseHelper = CourseHelper.GetComponent<CourseMenuHelper>();
+            endScreenHelper.SetCoreoName(courseHelper.CurrentStepName());
+            endScreenHelper.SetScore((int)similarityTotalScore);
+            EndCoreoScreen.SetActive(true);
+        }
+
+        public void RestartCoreo()
+        {
+            ResetTotalScore();
+            // it should be RestartRecording instead of Reset...
+            //TeacherPoseInputGetter.RestartRecording();
+            RestartShowRecording(); // We might will have a naming error, consider using GenNewFilename for "temporary" recordings too...
+            pauseTeacher = false;
+        }
+
+        public void LoopStepMovement()
+        {
+
+        }
+
+        public void RestartStep()
+        {
+            //TeacherPoseInputGetter.RestartRecording();
+        }
+
+        public void CoreoShowRestartRecording()
+        {
+            //TeacherPoseInputGetter.RestartRecording();
+            RestartShowRecording();
+        }
+
+        public void ResetTotalScore()
+        {
+            avatarSimilarity.ResetTotalScore();
+        }
     }
 }
