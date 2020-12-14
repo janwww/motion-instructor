@@ -742,7 +742,7 @@ namespace PoseTeacher
 
         public void LoopStepMovement()
         {
-
+            TeacherPoseInputGetter.loop = !TeacherPoseInputGetter.loop;
         }
 
         public void RestartStep()

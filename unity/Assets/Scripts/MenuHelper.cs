@@ -563,10 +563,30 @@ namespace PoseTeacher
                 case Menus.SETTINGS:
                     TitleText.text = "<size=120%>Settings</size>";
                     break;
+                case Menus.AVATARSETTINGS:
+                    TitleText.text = "<size=120%>Avatar Settings</size>\nChange the avatar type and add more to the scene!";
+                    break;
+                case Menus.DIFFICULTYSETTINGS:
+                    TitleText.text = "<size=120%>Difficulty Settings</size>\nHarder settings mean more precise movements!";
+                    break;
+                case Menus.FEEDSETTINGS:
+                    TitleText.text = "<size=120%>Pose Input Settings</size>\nWhat channel do you want to send your poses?";
+                    break;
+                case Menus.FEEDBACKSETTINGS:
+                    TitleText.text = "<size=120%>Visualization Settings</size>\nAdd additional objects that shows how close you follow!";
+                    break;
+                case Menus.RECORDMENU:
+                    TitleText.text = "<size=120%>Record</size>\nRecord your own movements!";
+                    break;
+                case Menus.COREOMENU:
+                    TitleText.text = "<size=120%>Free Play!</size>\nTry your favourite coreographies!";
+                    break;
                 default:
                     break;
             }
         }
+        // AVATARSETTINGS,
+//        DIFFICULTYSETTINGS, FEEDSETTINGS, FEEDBACKSETTINGS, RECORDMENU, COREOMENU
 
         public void SetCourseDetailsText(int courseID)
         {

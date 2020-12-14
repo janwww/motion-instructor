@@ -123,6 +123,11 @@ PrefabInstance:
       propertyPath: OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
       objectReference: {fileID: 0}
+    - target: {fileID: 3354729503713406494, guid: 6389d6d6638e0fc4b8f066e7d8e1dfac,
+        type: 3}
+      propertyPath: m_Mesh
+      value: 
+      objectReference: {fileID: 0}
     - target: {fileID: 5318025725995389235, guid: 6389d6d6638e0fc4b8f066e7d8e1dfac,
         type: 3}
       propertyPath: OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
@@ -136,6 +141,16 @@ PrefabInstance:
     - target: {fileID: 5318025725995389235, guid: 6389d6d6638e0fc4b8f066e7d8e1dfac,
         type: 3}
       propertyPath: OnClick.m_PersistentCalls.m_Calls.Array.data[2].m_Target
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 5636545054072828447, guid: 6389d6d6638e0fc4b8f066e7d8e1dfac,
+        type: 3}
+      propertyPath: m_Mesh
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 7562390830003857902, guid: 6389d6d6638e0fc4b8f066e7d8e1dfac,
+        type: 3}
+      propertyPath: m_Mesh
       value: 
       objectReference: {fileID: 0}
     m_RemovedComponents: []

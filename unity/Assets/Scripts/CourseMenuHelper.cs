@@ -360,6 +360,35 @@ namespace PoseTeacher
             }
         }
 
+        public void StartPreviousStep()
+        {
+            if (isTraining)
+            {
+                if (steps.ContainsKey(CurrentStepOrCoreo - 1))
+                {
+                    MainObject.GetComponent<PoseteacherMain>().SetTeacherFile(steps[CurrentStepOrCoreo - 1].Blocks[0].FileLocation);
+                    StartStep(CurrentStepOrCoreo - 1);
+
+                }
+                else if (coreographies.ContainsKey(CurrentStepOrCoreo - 1))
+                {
+                    MainObject.GetComponent<PoseteacherMain>().SetTeacherFile(coreographies[CurrentStepOrCoreo - 1].FileLocation);
+                    StartCoreography(CurrentStepOrCoreo - 1);
+                }
+                else
+                {
+                    // TODO: No other step available, handle ending everything
+                }
+
+
+
+            }
+            else
+            {
+                // TODO if we are doing only coreographies (Free play)
+            }
+        }
+
         public void StartNextBlock()
         {
             if (coreographies.ContainsKey(CurrentStepOrCoreo))
@@ -382,7 +411,8 @@ namespace PoseTeacher
             CurrentBlock--;
             if (CurrentBlock >= 0)
                 MainObject.GetComponent<PoseteacherMain>().SetTeacherFile(steps[CurrentStepOrCoreo].Blocks[CurrentBlock].FileLocation);
-
+            else
+                StartPreviousStep();
             // TODO else no previous block available (msg user?) move to previous step?
         }
     }
