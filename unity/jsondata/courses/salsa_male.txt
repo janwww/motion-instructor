@@ -68,7 +68,7 @@
 	"coreographies": [
 		{
 			"Position":4,
-			"Name":"Simple Salsa Coreography (Male)",
+			"Name":"Simple Salsa (Male)",
 			"Description":"Concatenate the basic steps into a coreography.\n Many uses this as their first move to get into the rhythm.",
 			"HighScore":0,
 			"FileLocation":"jsondata/salsa_m/2020_12_14-16_08_32.txt"

@@ -26,7 +26,7 @@ namespace PoseTeacher
         private int beat_counter = 0;
         
         private bool isPaused = false;
-        private bool isMuted = false;
+        public bool isMuted = false;
 
         private Color BaseColor = new Color(1, 1, 1);
         private Color PerfectColor = new Color(0, 1, 0);
@@ -100,7 +100,11 @@ namespace PoseTeacher
             currentRating = rating;
             FramesSinceMayorBeat = 0;
             //beat_counter = 0;
-            audioSource.PlayOneShot(conga_bar);
+            if (!isMuted)
+            {
+                audioSource.PlayOneShot(conga_bar);
+            }
+                
         }
 
         public void BeatSubscriber(ScoreRating rating = ScoreRating.UNRATED)
@@ -108,14 +112,17 @@ namespace PoseTeacher
             currentRating = rating;
             FramesSinceMinorBeat = 0;
             beat_counter = (beat_counter + 1) % 4;
-            switch(beat_counter)
+            if (!isMuted)
             {
-                case 0: audioSource.PlayOneShot(clave_beat1); break;
-                case 1: audioSource.PlayOneShot(clave_beat2); break;
-                case 2: audioSource.PlayOneShot(clave_beat3); break;
-                case 3: audioSource.PlayOneShot(clave_beat4); break;
-                default: break;
-            }
+                switch (beat_counter)
+                {
+                    case 0: audioSource.PlayOneShot(clave_beat1); break;
+                    case 1: audioSource.PlayOneShot(clave_beat2); break;
+                    case 2: audioSource.PlayOneShot(clave_beat3); break;
+                    case 3: audioSource.PlayOneShot(clave_beat4); break;
+                    default: break;
+                }
+            }  
         }
 
         public void EnableMinorBeat(bool enable)

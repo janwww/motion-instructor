@@ -51,7 +51,7 @@ namespace PoseTeacher
         public PlaybackSpeed playbackSpeed = PlaybackSpeed.s1_00;
         private int playback_counter = 0;
         private int record_counter = 0;
-        private bool show_recording = false;
+        private bool pauseRecordingAnimation = true;
 
         // For fake data when emulating input from file
         // "jsondata/2020_05_26-21_23_28.txt"  "jsondata/2020_05_26-22_55_32.txt"  "jsondata/2020_05_27-00_01_59.txt"
@@ -298,7 +298,7 @@ namespace PoseTeacher
             TeacherPoseInputGetter = new PoseInputGetter(PoseInputSource.FILE){ ReadDataPath = fake_file };
             SelfPoseInputGetter.loop = true;
             TeacherPoseInputGetter.loop = true;
-            RecordedPoseInputGetter = new PoseInputGetter(PoseInputSource.FILE) {};
+            RecordedPoseInputGetter = new PoseInputGetter(PoseInputSource.FILE) { ReadDataPath = fake_file };
 
             SelfPoseInputGetter.streamCanvas = streamCanvas;
             SelfPoseInputGetter.VideoCube = videoCube;
@@ -366,7 +366,7 @@ namespace PoseTeacher
                 graphtest.Update_plot(similarityScoreExtern);
             }
 
-            if (show_recording)
+            if (!pauseRecordingAnimation)
             {
                 record_counter++;
                 if (record_counter >= playlimit)
@@ -594,11 +594,21 @@ namespace PoseTeacher
             {
                 isChoreography = true;
                 TeacherPoseInputGetter.loop = false;
+
+                // Mute cube
+                Transform pulsingObjectTr = avatarListSelf[0].avatarContainer.transform.Find("PulsingCube");
+                ScorePulse sp  = pulsingObjectTr.GetComponent<ScorePulse>();
+                sp.isMuted = true;
             }
             else
             {
                 isChoreography = false;
                 TeacherPoseInputGetter.loop = true;
+
+                // Unmute cube
+                Transform pulsingObjectTr = avatarListSelf[0].avatarContainer.transform.Find("PulsingCube");
+                ScorePulse sp = pulsingObjectTr.GetComponent<ScorePulse>();
+                sp.isMuted = false;
             }
         }
 
@@ -638,7 +648,7 @@ namespace PoseTeacher
                     SelfPoseInputGetter.recording = false;
                     recordedAvatar.avatarContainer.SetActive(true);
                     RecordedPoseInputGetter.ReadDataPath = SelfPoseInputGetter.WriteDataPath;
-                    show_recording = true;
+                    //pauseRecordingkAnimation = true;
                     isrecording = false;
                 }
             }
@@ -658,30 +668,30 @@ namespace PoseTeacher
         public void StopShowingRecording()
         {
             recordedAvatar.avatarContainer.SetActive(false);
-            show_recording = false;
+            pauseRecordingAnimation = true;
         }
 
         public void StartStopShowingRecording()
         {
-            if (show_recording)
+            if (!pauseRecordingAnimation)
             {
                 recordedAvatar.avatarContainer.SetActive(false);
-                show_recording = false;
+                pauseRecordingAnimation = false;
             } else
             {
                 recordedAvatar.avatarContainer.SetActive(true);
-                show_recording = true;
+                pauseRecordingAnimation = true;
             }
         }
 
         public void RestartShowRecording()
         {
-            //RecordedPoseInputGetter.RestartRecording();
+            RecordedPoseInputGetter.RestartFile();
         }
 
         public void PauseShowingRecording()
         {
-            show_recording = !show_recording;
+            pauseRecordingAnimation = !pauseRecordingAnimation;
         }
 
         private bool graphAllowed = true;
@@ -708,7 +718,7 @@ namespace PoseTeacher
         {
             // Show CoreoEndScreen with proper data
             StopRecordingMode();
-            pauseTeacher = true;
+            
             CoreoEndScreen endScreenHelper = EndCoreoScreen.GetComponent<CoreoEndScreen>();
             CourseMenuHelper courseHelper = CourseHelper.GetComponent<CourseMenuHelper>();
             endScreenHelper.SetCoreoName(courseHelper.CurrentStepName());
@@ -720,9 +730,9 @@ namespace PoseTeacher
         {
             ResetTotalScore();
             // it should be RestartRecording instead of Reset...
-            //TeacherPoseInputGetter.RestartRecording();
+            TeacherPoseInputGetter.RestartFile();
             RestartShowRecording(); // We might will have a naming error, consider using GenNewFilename for "temporary" recordings too...
-            pauseTeacher = false;
+            //pauseTeacher = false;
         }
 
         public void LoopStepMovement()
@@ -732,13 +742,15 @@ namespace PoseTeacher
 
         public void RestartStep()
         {
-            //TeacherPoseInputGetter.RestartRecording();
+            TeacherPoseInputGetter.RestartFile();
         }
 
         public void CoreoShowRestartRecording()
         {
-            //TeacherPoseInputGetter.RestartRecording();
+            TeacherPoseInputGetter.RestartFile();
             RestartShowRecording();
+            pauseRecordingAnimation = false;
+
         }
 
         public void ResetTotalScore()

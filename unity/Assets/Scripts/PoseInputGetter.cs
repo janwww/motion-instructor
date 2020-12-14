@@ -15,7 +15,7 @@ namespace PoseTeacher
         KINECT, WEBSOCKET, FILE
     }
 
-    public class PoseInputGetter 
+    public class PoseInputGetter
     {
 
         PoseInputSource CurrentPoseInputSource;
@@ -32,7 +32,7 @@ namespace PoseTeacher
         private RawImage m_RawImage;
         public GameObject streamCanvas;
 
-        public GameObject VideoCube { set { if(value != null) videoRenderer = value.GetComponent<MeshRenderer>(); } }
+        public GameObject VideoCube { set { if (value != null) videoRenderer = value.GetComponent<MeshRenderer>(); } }
 
         //Select a Texture in the Inspector to change it (unused)
         public Texture m_Texture;
@@ -48,11 +48,11 @@ namespace PoseTeacher
         private string _ReadDataPath;
         public string ReadDataPath {
             get { return _ReadDataPath; }
-            set { _ReadDataPath = value; GetTotalPoseNumber(); LoadData(); } 
+            set { _ReadDataPath = value; GetTotalPoseNumber(); LoadData(); }
         }
 
         private int _TotalFilePoseNumber;
-         public int TotalFilePoseNumber
+        public int TotalFilePoseNumber
         {
             get { return _TotalFilePoseNumber; }
         }
@@ -73,7 +73,7 @@ namespace PoseTeacher
                 case PoseInputSource.KINECT:
                     StartAzureKinect();
                     break;
-                
+
                 case PoseInputSource.WEBSOCKET:
                     StartWebsocket();
                     break;
@@ -132,7 +132,7 @@ namespace PoseTeacher
         }
 
         private void StartAzureKinect()
-        {  
+        {
             device = Device.Open(0);
 
             var config = new DeviceConfiguration
@@ -174,6 +174,11 @@ namespace PoseTeacher
         private void LoadData()
         {
             SequenceEnum = File.ReadLines(ReadDataPath).GetEnumerator();
+        }
+
+        public void RestartFile()
+        {
+            LoadData();
         }
 
         // Appends the passed pose (PoseDataJSON format) to the file as JSON

@@ -25,7 +25,7 @@ namespace PoseTeacher {
         public void ShowRecordingPressed()
         {
             Main.GetComponent<PoseteacherMain>().CoreoShowRestartRecording();
-            EndCoreoScreen.SetActive(false);
+            //EndCoreoScreen.SetActive(false);
         }
 
         public void RestartCoreoPressed()
