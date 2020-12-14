@@ -358,6 +358,7 @@ namespace PoseTeacher
             {
                 // TODO if we are doing only coreographies (Free play)
             }
+            MainObject.GetComponent<PoseteacherMain>().StopShowingRecording();
         }
 
         public void StartNextBlock()

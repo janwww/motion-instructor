@@ -9,6 +9,7 @@ namespace PoseTeacher {
 
         private string CoreoName = "Coreo placeholder";
         private int Score = -1;
+        private int MaxScore = -1;
 
         public GameObject EndCoreoScreen;
         private GameObject CoreoScoreDescription;
@@ -46,9 +47,10 @@ namespace PoseTeacher {
             UpdateText();
         }
 
-        public void SetScore(int score)
+        public void SetScore(int score, int maxscore)
         {
             Score = score;
+            MaxScore = maxscore;
             UpdateText();
         }
 
@@ -60,7 +62,7 @@ namespace PoseTeacher {
         public void UpdateText()
         {
             Text text = CoreoScoreDescription.GetComponent<Text>();
-            text.text = CoreoName + "\nScore: <color=yellow>" + Score + "</color>";
+            text.text = CoreoName + "\nScore: <color=yellow>" + Score +"/"+ MaxScore + "</color>";
         }
     }
 }

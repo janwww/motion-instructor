@@ -15,6 +15,7 @@ public class ProgressIndicator : MonoBehaviour
     private IProgressIndicator progressIndicator;
     private bool doIndicate = false;
     private int totalScore;
+    private int maxTotalScore;
     public GameObject pTotal;
 
     // Start is called before the first frame update
@@ -44,7 +45,7 @@ public class ProgressIndicator : MonoBehaviour
 
         if (ProgressObject.activeSelf && pTotal != null && pTotal.activeSelf)
         {
-            pTotal.GetComponent<TextMeshPro>().text = totalScore.ToString();
+            pTotal.GetComponent<TextMeshPro>().text = totalScore + "/" + maxTotalScore;
         }
 
     }
@@ -56,9 +57,11 @@ public class ProgressIndicator : MonoBehaviour
         //Debug.Log("Progress Set to " + progress);
     }
 
-    public void SetTotalScore(int currentTotalScore)
+    public void SetTotalScore(int currentTotalScore, int currentMaxTotalScore)
     {
         totalScore = currentTotalScore;
+        maxTotalScore = currentMaxTotalScore;
+        pTotal.GetComponent<TextMeshPro>().text = totalScore + "/" + maxTotalScore;
     }
 
 

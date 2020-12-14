@@ -310,7 +310,6 @@ namespace PoseTeacher
 
             recordedAvatarSimilarity = new AvatarSimilarity(recordedAvatar, avatarListTeacher[similarityTeacherNr], similarityBodyNr, similarityPenalty, similarityActivateKalman, similarityKalmanQ, similarityKalmanR);
             recordedAvatarVisualisationSimilarity = new VisualisationSimilarity(recordedAvatar);
-            //recordedGraphtest = new Graphtest((float)similarityScoreExtern);
 
         }
 
@@ -318,7 +317,7 @@ namespace PoseTeacher
         void Update()
         {
 
-            if (TeacherPoseInputGetter.CurrentFilePoseNumber >= TeacherPoseInputGetter.TotalFilePoseNumber && isChoreography)
+            if (isChoreography && TeacherPoseInputGetter.CurrentFilePoseNumber >= TeacherPoseInputGetter.TotalFilePoseNumber)
             {
                 CoreoEnded();
             }
@@ -357,7 +356,15 @@ namespace PoseTeacher
                 similarityScore = avatarSimilarity.similarityBodypart; // get single similarity score for selected body part
                 similarityScoreRaw = avatarSimilarity.similarityStick; // get similarity score for each stick element
                 similarityWeightRaw = avatarSimilarity.stickWeight; // get similarity score for each stick element
-                similarityTotalScore = avatarSimilarity.totalScore; // get total Score
+
+                // Only update total score if doing a choreography and paying attention
+                if (isChoreography && TeacherPoseInputGetter.CurrentFilePoseNumber < TeacherPoseInputGetter.TotalFilePoseNumber && pauseRecordingAnimation)
+                {
+                    similarityTotalScore = avatarSimilarity.totalScore; 
+                }
+                
+
+                // TODO: replace by usng direct values above
                 similarityScoreExtern = similarityScore; // global
                 similarityTotalScoreExtern = similarityTotalScore; // global
 
@@ -470,17 +477,19 @@ namespace PoseTeacher
                     GameObject scoreIndicator = scoreIndicatorTr.gameObject;
                     if (scoreIndicator.activeSelf)
                     {
-                        //float progress = scaleScore((float)similarityScore);
-                        float progress = (float)similarityScore;
-                        scoreIndicator.GetComponent<ProgressIndicator>().SetProgress(progress);
-
                         if (isChoreography)
+                        {
                             scoreIndicator.GetComponent<ProgressIndicator>().pTotal.SetActive(true);
+                            float progress = (float)similarityTotalScore / TeacherPoseInputGetter.TotalFilePoseNumber;
+                            scoreIndicator.GetComponent<ProgressIndicator>().SetProgress(progress);
+                            scoreIndicator.GetComponent<ProgressIndicator>().SetTotalScore((int)similarityTotalScore, TeacherPoseInputGetter.TotalFilePoseNumber);
+                        }
                         else
+                        {
                             scoreIndicator.GetComponent<ProgressIndicator>().pTotal.SetActive(false);
-
-                        if (isChoreography)
-                            scoreIndicator.GetComponent<ProgressIndicator>().SetTotalScore((int)similarityTotalScore);
+                            scoreIndicator.GetComponent<ProgressIndicator>().SetProgress((float)similarityScore);
+                        }
+                            
 
                     }
                 }
@@ -727,7 +736,7 @@ namespace PoseTeacher
             CoreoEndScreen endScreenHelper = EndCoreoScreen.GetComponent<CoreoEndScreen>();
             CourseMenuHelper courseHelper = CourseHelper.GetComponent<CourseMenuHelper>();
             endScreenHelper.SetCoreoName(courseHelper.CurrentStepName());
-            endScreenHelper.SetScore((int)similarityTotalScore);
+            endScreenHelper.SetScore((int)similarityTotalScore, TeacherPoseInputGetter.TotalFilePoseNumber);
             EndCoreoScreen.SetActive(true);
         }
 

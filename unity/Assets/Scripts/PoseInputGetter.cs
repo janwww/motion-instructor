@@ -115,8 +115,8 @@ namespace PoseTeacher
                 poseLiveWS = PoseDataUtils.Remote2PoseData(remote_joints);
             };
 
-            // Keep sending messages at every 0.3s
             // TODO: if using websocket, make this work
+            // Keep sending messages at every 0.3s
             //InvokeRepeating("SendWebSocketMessage", 0.0f, 0.3f);
 
             await websocket.Connect();
@@ -168,7 +168,7 @@ namespace PoseTeacher
                 count++;
             }
             _TotalFilePoseNumber = count;
-            
+            //Debug.LogFormat("TotalFilePoseNumber: {0}", _TotalFilePoseNumber);
         }
 
         private void LoadData()
@@ -216,7 +216,6 @@ namespace PoseTeacher
                     if (poseLiveWS != null)
                     {
                         // Assign last pose from websocket
-                        // TODO: maybe animate in websocket code directly upon recieveing?
                         CurrentPose = poseLiveWS;
                     }
                     else
@@ -228,19 +227,23 @@ namespace PoseTeacher
 
                 case PoseInputSource.FILE:
 
-                    _CurrentFilePoseNumber++;
-                    // TODO: Only load once
-                    // Quick and dirty way to loop (by reloading file)
-                    if (SequenceEnum == null || !SequenceEnum.MoveNext())
+                    if (SequenceEnum != null && SequenceEnum.MoveNext())
                     {
-                        if (!loop)
+                        _CurrentFilePoseNumber++;
+                    }
+                    else
+                    {
+                        // Quick and dirty way to loop (by reloading file)
+                        if (SequenceEnum != null && !loop)
                             break;
                         LoadData();
                         SequenceEnum.MoveNext();
                         _CurrentFilePoseNumber = 1;
-                    }
 
-                                        string frame_json = SequenceEnum.Current;
+                    }
+                    
+
+                    string frame_json = SequenceEnum.Current;
                     PoseData fake_live_data = PoseDataUtils.JSONstring2PoseData(frame_json);
                     CurrentPose = fake_live_data;
 
