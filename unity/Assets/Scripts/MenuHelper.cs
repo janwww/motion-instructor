@@ -7,7 +7,7 @@ namespace PoseTeacher
 {
     public enum Menus
     {
-        TITLE, DANCE, COURSES, SPECCOURSE, SETTINGS, AVATARSETTINGS,
+        TITLE, DANCE, COURSES, SPECCOURSE, FREEPLAY, SETTINGS, AVATARSETTINGS,
         DIFFICULTYSETTINGS, FEEDSETTINGS, FEEDBACKSETTINGS, RECORDMENU, COREOMENU
     }
     public enum MenuState
@@ -118,6 +118,7 @@ namespace PoseTeacher
             menus.Add(Menus.TITLE, MenuHolderTr.Find("TitleMenu").gameObject);
             menus.Add(Menus.DANCE, MenuHolderTr.Find("DanceMenu").gameObject);
             menus.Add(Menus.COURSES, MenuHolderTr.Find("CourseMenu").gameObject);
+            menus.Add(Menus.FREEPLAY, MenuHolderTr.Find("SpecCourseMenu").gameObject);
             menus.Add(Menus.SPECCOURSE, MenuHolderTr.Find("SpecCourseMenu").gameObject);
             menus.Add(Menus.SETTINGS, MenuHolderTr.Find("SettingsMenu").gameObject);
             menus.Add(Menus.AVATARSETTINGS, MenuObject.transform.Find("AvatarSettings").gameObject);
@@ -168,6 +169,10 @@ namespace PoseTeacher
                     menus[CurrentMenu].SetActive(true);
                     break;
                 case Menus.COURSES:
+                    CurrentMenu = Menus.DANCE;
+                    menus[CurrentMenu].SetActive(true);
+                    break;
+                case Menus.FREEPLAY:
                     CurrentMenu = Menus.DANCE;
                     menus[CurrentMenu].SetActive(true);
                     break;
@@ -243,6 +248,9 @@ namespace PoseTeacher
                 case Menus.COURSES:
                     SelectedInCoursesMenu(selectedMenuOption);
                     break;
+                case Menus.FREEPLAY:
+                    // This is ccurently done in CourseMenuHelper StartStep/StartCoreography function
+                    break;
                 case Menus.SPECCOURSE:
                     // This is ccurently done in CourseMenuHelper StartStep/StartCoreography function
                     break;
@@ -314,9 +322,10 @@ namespace PoseTeacher
                     break;
                 // Dance -> Freeplay Menu
                 case 1:
-                    /*   menus[CurrentMenu].SetActive(false);
-                       CurrentMenu = Menus.FREEPLAY;
-                       menus[CurrentMenu].SetActive(true); */
+                    menus[CurrentMenu].SetActive(false);
+                    CurrentMenu = Menus.FREEPLAY;
+                    courseMenuHelper.LoadFreeplay();
+                    menus[CurrentMenu].SetActive(true);
                     break;
                 default:
                     break;
@@ -337,6 +346,10 @@ namespace PoseTeacher
                     break;
                 // Courses -> Salsa female Menu
                 case 1:
+                    menus[CurrentMenu].SetActive(false);
+                    CurrentMenu = Menus.SPECCOURSE;
+                    courseMenuHelper.LoadCourse("salsaf");
+                    menus[CurrentMenu].SetActive(true);
                     break;
                 default:
                     break;
@@ -556,6 +569,9 @@ namespace PoseTeacher
                 case Menus.COURSES:
                     TitleText.text = "<size=120%>Courses</size>\nSelect the dance style you want to learn!";
                     break;
+                case Menus.FREEPLAY:
+                    TitleText.text = "<size=120%>Free play</size>\nChallenge yourself in your favourite coreographies!";
+                    break;
                 case Menus.SPECCOURSE:
                     CourseInfoHolder info = courseMenuHelper.GetCurrentCourseInfo();
                     TitleText.text = "<size=120%>" + info.CourseTitle + "</size>\n" + info.CourseShortDescription;
@@ -563,10 +579,30 @@ namespace PoseTeacher
                 case Menus.SETTINGS:
                     TitleText.text = "<size=120%>Settings</size>";
                     break;
+                case Menus.AVATARSETTINGS:
+                    TitleText.text = "<size=120%>Avatar Settings</size>\nChange the avatar type and add more to the scene!";
+                    break;
+                case Menus.DIFFICULTYSETTINGS:
+                    TitleText.text = "<size=120%>Difficulty Settings</size>\nHarder settings mean more precise movements!";
+                    break;
+                case Menus.FEEDSETTINGS:
+                    TitleText.text = "<size=120%>Pose Input Settings</size>\nWhat channel do you want to send your poses?";
+                    break;
+                case Menus.FEEDBACKSETTINGS:
+                    TitleText.text = "<size=120%>Visualization Settings</size>\nAdd additional objects that shows how close you follow!";
+                    break;
+                case Menus.RECORDMENU:
+                    TitleText.text = "<size=120%>Record</size>\nRecord your own movements!";
+                    break;
+                case Menus.COREOMENU:
+                    TitleText.text = "<size=120%>Free Play!</size>\nTry your favourite coreographies!";
+                    break;
                 default:
                     break;
             }
         }
+        // AVATARSETTINGS,
+//        DIFFICULTYSETTINGS, FEEDSETTINGS, FEEDBACKSETTINGS, RECORDMENU, COREOMENU
 
         public void SetCourseDetailsText(int courseID)
         {
