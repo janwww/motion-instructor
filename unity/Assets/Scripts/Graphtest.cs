@@ -346,25 +346,4 @@ namespace PoseTeacher
 
 
     }
-    //private void OnGUI()
-    //{
-    //    DrawText();
-    //}
-
-    // Update is called once per frame
-
-
-
-    //values = new Vector3[200];
-    //values_x = new Vector3[400];
-    //values_y = new Vector3[400];
-    //coordx = new Vector3[100];
-    //coordy = new Vector3[100];
-    //for (int i = 0; i < 100; i++)
-    //{
-    //    coordx[i] = new Vector3(0, ((float)i - 50f) / 100, 0.0f);
-    //    coordy[i] = new Vector3((float)i / 100, -50f, 0.0f);
-    //    lineRenderer_coordx.SetPositions(coordx);
-    //    lineRenderer_coordy.SetPositions(coordy);
-    //}
 }
