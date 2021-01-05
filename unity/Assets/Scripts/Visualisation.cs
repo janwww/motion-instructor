@@ -11,7 +11,7 @@ using System.Globalization;
 namespace PoseTeacher
 {
     class VisualisationSimilarity //: MonoBehaviour
-    {
+    {   //Class for the visualisation of score similarity
         public AvatarContainer self;
         public List<string> stickNames;
         public List<GameObject> stickparts;
@@ -21,10 +21,10 @@ namespace PoseTeacher
         public List<double> weightsTotal;
         public int stickNumber; // number of sticks existing in avatar
         public GameObject bodypart;
-        public Color tempcolor;
+        public Color tempcolor; //variable for body visualisation color
         int index;
         double weight;
-        public string file_weights;
+        public string file_weights; //file of binary weights for body parts
         public Dictionary<string, List<double>> weights_dictionary;
         // AvatarSimilarity avatarSimilarity;
 
@@ -33,7 +33,6 @@ namespace PoseTeacher
             string file_weights = "jsondata/joints.csv";
             weights_dictionary = set_weights(file_weights);
             self = selfIn;
-            //stickNumber = stickNames.Count;
             stickparts = new List<GameObject>(new GameObject[]
             {   //list of body joints
                 self.stickContainer.LeftLowerLeg,
@@ -69,7 +68,6 @@ namespace PoseTeacher
         });
      
             setColor(self);
-            // avatarSimilarity = new AvatarSimilarity(self); //if we want to inherit from AvatarSimilarity
         }
          
 
@@ -133,7 +131,6 @@ namespace PoseTeacher
             //returns binary mask for body parts. Takes name as a body part description 
             //weights can be retrieved from stickweight field in the class AvatarSimilarity
 
-            // List<double> return_weights= weightsTotal;
             // initially all similarities are 1 which corresponds to green
             List<double> return_weights = Enumerable.Repeat(1.0, 30).ToList();  
             if (name.Equals("top"))
