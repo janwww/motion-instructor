@@ -1,4 +1,7 @@
 # MR Motion Instructor
+[**Report**](https://placeholder) | [**Presentation**](https://placeholder) | [**Video**](https://placeholder)
+
+[Jan ](https://github.com/janwww), [Rudolf Varga](https://github.com/ketjatekos), [Felix Pfreundtner](https://github.com/felixpfreundtner), [Daniil Emtsev](https://github.com/daniil-777) and [Utkarsh Bajpai](https://github.com/Utkarsh-Bajpai)
 
 # Abstract
 Learning complex movements can be a time-consuming process, but it is necessary for the mastery of activities like Karate Kata, Yoga and dance choreographies. It is important to have a teacher in person to demonstrate the correct pose sequences step by step and correct errors in the student’s body postures.
