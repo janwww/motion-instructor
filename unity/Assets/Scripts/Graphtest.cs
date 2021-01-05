@@ -367,21 +367,4 @@ namespace PoseTeacher
     //    lineRenderer_coordx.SetPositions(coordx);
     //    lineRenderer_coordy.SetPositions(coordy);
     //}
-    //for (int i = 0; i < 400; i++)
-    //{
-    //    values_x[i] = new Vector3(0, ((float)i - 100) / 200, 0.0f);
-    //    lineRenderer_x.SetPositions(values_x);
-    //}
-
-    //for (int i = 0; i < 300; i++)
-    //{
-    //    values_y[i] = new Vector3((float)i / 400, -0.5f, 0.0f);
-    //    lineRenderer_y.SetPositions(values_y);
-    //}
-
-    //for (int i = 0; i < 200; i++)
-    //{
-    //    values[i] = new Vector3((float)i / 200, Mathf.Sin((float)i / 10) / 4, 0.0f);
-    //    lineRenderer.SetPositions(values);
-    //}
 }
