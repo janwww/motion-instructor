@@ -13,7 +13,7 @@ using System.Security.Permissions;
 
 namespace PoseTeacher
 {
-    public class Graphtest
+    public class Graph
     //The class for visualisation of similarity score development over time
     {
         public GameObject gobject;
@@ -27,7 +27,7 @@ namespace PoseTeacher
 
         // Start is called before the first frame update
 
-        public Graphtest(float similarityScoreExtern)
+        public Graph(float similarityScoreExtern)
         {
             //constructor. Initialise objects for the plot visualisation
             gobject = GameObject.Find("Dataline");

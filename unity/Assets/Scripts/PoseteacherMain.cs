@@ -76,7 +76,7 @@ namespace PoseTeacher
 
         // Used for showing similarity
         VisualisationSimilarity avatarVisualisationSimilarity;
-        Graphtest graphtest;
+        Graph graphtest;
         public static double similarityScoreExtern = 0.0; // similarity value between 0 and 1 for defined body part (extern global variable for plot)
         public static double similarityTotalScoreExtern = 0.0; // Total score (extern global variable for plot)
 
@@ -306,7 +306,7 @@ namespace PoseTeacher
             // initialize similarity calculation instance and assign selected avatars
             avatarSimilarity = new AvatarSimilarity(avatarListSelf[similaritySelfNr], avatarListTeacher[similarityTeacherNr], similarityBodyNr, similarityPenalty, similarityActivateKalman, similarityKalmanQ, similarityKalmanR);
             avatarVisualisationSimilarity = new VisualisationSimilarity(avatarListSelf[similaritySelfNr]);
-            graphtest = new Graphtest((float)similarityScoreExtern);
+            graphtest = new Graph((float)similarityScoreExtern);
 
             recordedAvatarSimilarity = new AvatarSimilarity(recordedAvatar, avatarListTeacher[similarityTeacherNr], similarityBodyNr, similarityPenalty, similarityActivateKalman, similarityKalmanQ, similarityKalmanR);
             recordedAvatarVisualisationSimilarity = new VisualisationSimilarity(recordedAvatar);
