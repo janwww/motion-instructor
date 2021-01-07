@@ -99,7 +99,6 @@ namespace PoseTeacher
         {
             currentRating = rating;
             FramesSinceMayorBeat = 0;
-            //beat_counter = 0;
             if (!isMuted)
             {
                 audioSource.PlayOneShot(conga_bar);
