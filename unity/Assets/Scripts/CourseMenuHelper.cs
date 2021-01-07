@@ -9,19 +9,24 @@ using Microsoft.MixedReality.Toolkit.UI;
 
 namespace PoseTeacher
 {
+    // contains a single Block of a Step
     [Serializable]
     public class BlockContainer
     {
         public string FileLocation;
     }
-        [Serializable]
+
+    // contains a Step of a Course
+    [Serializable]
     public class StepContainer
     {
-        public int Position;
+        public int Position; // step position in the course
         public string Name;
         public string Description;
-        public BlockContainer[] Blocks;
+        public BlockContainer[] Blocks; // a step could contain multiple parts (blocks)
     }
+
+    // contains a Course
     [Serializable]
     public class CourseJSON
     {
@@ -32,6 +37,7 @@ namespace PoseTeacher
         public StepContainer[] steps;
         public CoreographieContainer[] coreographies;
     }
+    // contains a Coreography of a Course
     [Serializable]
     public class CoreographieContainer
     {
@@ -41,11 +47,8 @@ namespace PoseTeacher
         public int HighScore;
         public string FileLocation;
     }
-    public class CoreographiesJSON
-    {
-        public CoreographieContainer[] coreographies;
-    }
 
+    // Helper class to contain Course information without the steps
     public class CourseInfoHolder
     {
         public int CourseID { get; set; }
@@ -54,6 +57,7 @@ namespace PoseTeacher
         public string CourseDescription { get; set; }
     }
 
+    // Helper class to contain all information of all Courses without the steps
     public class CoursesHolder
     {
         public List<CourseInfoHolder> Courses = new List<CourseInfoHolder>();
@@ -62,17 +66,18 @@ namespace PoseTeacher
 
     public class CourseMenuHelper : MonoBehaviour
     {
-        public GameObject MainObject;
-        public GameObject MenuObject;
-        public GameObject buttonPrefab;
-        public GameObject CourseDetails;
-        public GameObject CourseButtonCollection;
-        public GameObject CourseMenuHelperObject;
-        public GameObject CourseMenuHolder;
-        public GameObject TrainingHolder;
-        public GameObject CoreographyHolder;
-        public GameObject CourseDescription;
+        public GameObject MainObject; // Main GameObject
+        public GameObject MenuObject; // Menu new GameObject
+        public GameObject buttonPrefab; // Button GameObject that will be instantiated in the course menus
+        public GameObject CourseDetails; // CourseDetails gameObject in Menu new GO
+        public GameObject CourseButtonCollection; // Button Collection GameObject for specific courses
+        public GameObject CourseMenuHelperObject; // GameObject that this script is assigned to
+        public GameObject CourseMenuHolder; // GameObject that contains the specific course Button Collection (can be deleted prob)
+        public GameObject TrainingHolder; // TrainingElements GamObject
+        public GameObject CoreographyHolder; // CoreograpyElements GameObject
+        public GameObject CourseDescription; // The GameObject that containe the Text of Course Details
 
+        // The list of courses. This has to be updated when a new course is added.
         private Dictionary<string, string> courseToPath =
             new Dictionary<string, string>()
             {
@@ -85,10 +90,12 @@ namespace PoseTeacher
 
         private CoursesHolder courses = new CoursesHolder();
 
+        // fields to store current state of the course
         private int CurrentStepOrCoreo = 0;
         private int CurrentBlock = 0;
         private bool isTraining = true;
 
+        // Loads the Course info without storing the steps for all available courses
         public void LoadAllCourseInfos()
         {
             foreach (KeyValuePair<string, string> entry in courseToPath)
@@ -104,10 +111,13 @@ namespace PoseTeacher
             }
         }
 
+        // Dynamically generates a Menu where all Courses are listed
+        // Have to call LoadAddCourseInfos first.
         public void GenerateCoursesMenu(GameObject coursesMenuButtonCollection)
         {
             foreach (CourseInfoHolder info in courses.Courses)
             {
+                // Create Button for a specific course
                 GameObject newButton = Instantiate(buttonPrefab);
                 newButton.transform.localScale += new Vector3(2, 2, 0);
                 newButton.name = info.CourseTitle;
@@ -115,6 +125,8 @@ namespace PoseTeacher
 
                 buttonConfigHelper.MainLabelText = info.CourseTitle;
 
+                // On Focus give user more information on the course
+                // FIXME: Order of calls could be wrong when moving from one course to an other quickly, leading to course info not changing.
                 var onFocusReciever = newButton.GetComponent<Interactable>().GetReceiver<InteractableOnFocusReceiver>();
                 if (onFocusReciever == null)
                 {
@@ -124,6 +136,7 @@ namespace PoseTeacher
                 onFocusReciever.OnFocusOn.AddListener(() => SetCourseDetails(info.CourseID));
                 onFocusReciever.OnFocusOff.AddListener(() => CourseDetails.SetActive(false));
 
+                // On Click open the menu of the particular course
                 var onClickReciever = newButton.GetComponent<Interactable>().GetReceiver<InteractableOnPressReceiver>();
                 if (onClickReciever == null)
                 {
@@ -131,30 +144,37 @@ namespace PoseTeacher
                 }
                 onClickReciever.OnPress.AddListener(() => MenuObject.GetComponent<MenuHelper>().SelectedMenuOption(info.CourseID));
 
+                // Add Button to the Collection and display it
                 newButton.SetActive(true);
                 newButton.transform.SetParent(coursesMenuButtonCollection.transform);
             }
 
             Microsoft.MixedReality.Toolkit.Utilities.GridObjectCollection objCollectionComponent =
                 coursesMenuButtonCollection.GetComponent<Microsoft.MixedReality.Toolkit.Utilities.GridObjectCollection>();
-
+            // Update, so Button are displayed on the grid instead of on top of each other
             objCollectionComponent.UpdateCollection();
         }
 
+        // Returns the course infomarion without steps for a particular course.
         public CourseInfoHolder GetCourseInfo(int courseID)
         {
             return courses.Courses[courseID];
         }
 
+        // Returns the course information without steps for the currently selected/played course.
         public CourseInfoHolder GetCurrentCourseInfo()
         {
             return courses.Courses[courses.CurrentCourse];
         }
 
+        // Load a particular course with step information.
+        // Param courseName (in): the name that represents the course in the courseToPath dictionary
         public void LoadCourse(string courseName)
         {
+            // Delete the previous course that was loaded
             ClearState();
 
+            // Find course to be loaded
             string jsonPath;
             bool courseFound = courseToPath.TryGetValue(courseName, out jsonPath);
             if (!courseFound)
@@ -163,10 +183,10 @@ namespace PoseTeacher
                 return;
             }
 
+            // Read the course
             string json_data = File.ReadAllText(jsonPath);
-            Debug.Log(json_data);
             CourseJSON course_steps = JsonUtility.FromJson<CourseJSON>(json_data);
-            Debug.Log(course_steps.ToString());
+
             foreach (StepContainer step in course_steps.steps)
             {
                 steps.Add((step.Position), step);
@@ -182,6 +202,7 @@ namespace PoseTeacher
             GenerateCourseMenu();
         }
 
+        // Load all Coreographies.
         public void LoadFreeplay()
         {
             ClearState();
@@ -203,10 +224,12 @@ namespace PoseTeacher
             GenerateCourseMenu();
         }
 
+        // Dynamically generates a Menu where all steps and coreographies of a course are listed or all coreographies of all courses are listed.
         private void GenerateCourseMenu()
         {
             for(int i = 0; i < steps.Count + coreographies.Count; i++)
             {
+                // Create button for step/coreography
                 GameObject newButton = Instantiate(buttonPrefab);
 
                 newButton.transform.localScale += new Vector3(2, 2, 0);
@@ -232,8 +255,12 @@ namespace PoseTeacher
                     Debug.Log("Step/coreography not found.");
                     return;
                 }
+                // x is used in callback methods where the ref of i would be already changed and result in error
                 int x = i;
 
+                // On Focus give user more information on the step/coreo and sets the teacher avatar already, so the move could potentially be shown while in the menu. (currently not active feature)
+                // FIXME: Order of calls could be wrong when moving from one course to an other quickly, leading to course info not changing.
+                // On click starts the coreo or step (there was an issue with onClick not working, changed to onPress)
                 var onClickReciever = newButton.GetComponent<Interactable>().GetReceiver<InteractableOnPressReceiver>();
                 var onFocusReciever = newButton.GetComponent<Interactable>().GetReceiver<InteractableOnFocusReceiver>();
                 if (onFocusReciever == null)
@@ -248,13 +275,10 @@ namespace PoseTeacher
                 if (isTraining)
                     onFocusReciever.OnFocusOn.AddListener(() => CourseMenuHelperObject.GetComponent<CourseMenuHelper>().SetMoveDetails(pos));
                 else
-                {
-                    
+                {                  
                     onFocusReciever.OnFocusOn.AddListener(() => CourseMenuHelperObject.GetComponent<CourseMenuHelper>().SetMoveDetails(x));
                 }
                 onFocusReciever.OnFocusOn.AddListener(() => MainObject.GetComponent<PoseteacherMain>().SetTeacherFile(movementLocation));
-                //onFocusReciever.OnFocusOn.AddListener(() => MainObject.GetComponent<PoseteacherMain>().loadRecording(movementLocation));
-                //onFocusReciever.OnFocusOn.AddListener(() => MainObject.GetComponent<PoseteacherMain>().fake_file = movementLocation);
                 onFocusReciever.OnFocusOff.AddListener(() => CourseDetails.SetActive(false));
                 
                 if (steps.ContainsKey(i))
@@ -270,18 +294,18 @@ namespace PoseTeacher
                 }
                 onClickReciever.OnPress.AddListener(() => CourseDetails.SetActive(false));
 
+                // Add Button to the Collection and display it
                 newButton.SetActive(true);
-                // Vector3 pos = newButton.transform.position;
-                // Vector3 pos2 = CourseButtonCollection.transform.position;
                 newButton.transform.SetParent(CourseButtonCollection.transform);
             }
 
             Microsoft.MixedReality.Toolkit.Utilities.GridObjectCollection objCollectionComponent = 
                 CourseButtonCollection.GetComponent<Microsoft.MixedReality.Toolkit.Utilities.GridObjectCollection>();
-
+            // Update, so Button are displayed on the grid instead of on top of each other
             objCollectionComponent.UpdateCollection();
         }
 
+        // Removes all Steps and Coreographies currently stored. Removes all butons from the specific course list.
         private void ClearState()
         {
             steps.Clear();
@@ -293,23 +317,19 @@ namespace PoseTeacher
             }
         }
 
+        // Sets the course's detail on the CourseDescription panel under the Menu
         public void SetCourseDetails(int courseID)
         {
             
-            //GameObject CourseDescription = GameObject.Find("CourseDescription");
-           // GameObject CourseDescription = CourseDetails.transform.Find("DescriptionPanel").Find("Panel1").Find("TextContext").Find("CourseDescription").gameObject;
             UnityEngine.UI.Text DescriptionText = CourseDescription.GetComponent<UnityEngine.UI.Text>();
             CourseInfoHolder info = courses.Courses[courseID]; 
             Debug.Log("<size=30>" + info.CourseTitle + "</size>\n<size=20>" + info.CourseDescription + "</size>");
             DescriptionText.text = "<size=30>" + info.CourseTitle + "</size>\n<size=20>" + info.CourseDescription + "</size>";
         }
 
+        // Sets the step's or coreo's detail on the CourseDescription panel under the Menu
         public void SetMoveDetails(int position)
         {
-            //GameObject CourseDetails = GameObject.Find("CourseDetails");
-            //GameObject CourseDescription = GameObject.Find("CourseDescription"); // This is the text-holding object of CourseDetails
-           // GameObject CourseDescription = CourseDetails.transform.Find("DescriptionPanel").Find("Panel1").Find("TextContext").Find("CourseDescription").gameObject;
-
             UnityEngine.UI.Text DescriptionText = CourseDescription.GetComponent<UnityEngine.UI.Text>();
 
             if (steps.ContainsKey(position))
@@ -326,6 +346,8 @@ namespace PoseTeacher
 
         }
 
+        // Starts a step
+        // TODO: consider one function in PoseteacherMain instead of a list of methods that have to be called (move responsibility)
         public void StartStep(int stepid)
         {
             CurrentStepOrCoreo = stepid;
@@ -339,6 +361,8 @@ namespace PoseTeacher
             main.ActivateIndicators();
         }
 
+        // Starts a coreography
+        // TODO: consider one function in PoseteacherMain instead of a list of methods that have to be called (move responsibility)
         public void StartCoreography(int coreoid)
         {
             CurrentStepOrCoreo = coreoid;
@@ -355,6 +379,7 @@ namespace PoseTeacher
             main.pauseTeacher = false;
         }
 
+        // Returns with the name of the currently played Step or Coreography
         public string CurrentStepName()
         {
             if (steps.ContainsKey(CurrentStepOrCoreo))
@@ -369,6 +394,7 @@ namespace PoseTeacher
             return "No Name Found";
         }
 
+        // Loads the next step (or coreography) and starts it
         public void StartNextStep()
         {
             if (isTraining)
@@ -399,6 +425,7 @@ namespace PoseTeacher
             }
         }
 
+        // Loads the previous step (or coreography) and starts it
         public void StartPreviousStep()
         {
             if (isTraining)
@@ -429,6 +456,7 @@ namespace PoseTeacher
             MainObject.GetComponent<PoseteacherMain>().StopShowingRecording();
         }
 
+        // Loads the next block of the current step or the next step if no more blocks are available.
         public void StartNextBlock()
         {
             if (coreographies.ContainsKey(CurrentStepOrCoreo))
@@ -446,6 +474,7 @@ namespace PoseTeacher
 
         }
 
+        // Loads the previous block of the current step or the next step if no more blocks are available.
         public void StartPreviousBlock()
         {
             CurrentBlock--;
