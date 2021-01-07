@@ -5,15 +5,18 @@ using UnityEngine;
 
 namespace PoseTeacher
 {
+    // All possible Menus that can be displayed in the main menu
     public enum Menus
     {
         TITLE, DANCE, COURSES, SPECCOURSE, FREEPLAY, SETTINGS, AVATARSETTINGS,
         DIFFICULTYSETTINGS, FEEDSETTINGS, FEEDBACKSETTINGS, RECORDMENU, COREOMENU
     }
+    // State of what type of "main" menu the user is in
     public enum MenuState
     {
         INMAIN, PAUSED
     }
+    // Enum to help recover ingame state
     public enum PauseType
     {
         TRAINING, COREO, RECORD
@@ -34,9 +37,11 @@ namespace PoseTeacher
         public GameObject TrainingElements;
         public GameObject CoreoElements;
         public GameObject RecordElements;
-       // private bool isTrainingPause = true;
+       
         private PauseType pauseType = PauseType.TRAINING;
 
+        // Sets the state (and pausetype) of the new menu and displays it.
+        // Saves the current state to allow going back to the old menu state on unpause
         public void setState(string state)
         {
             switch (state)
@@ -132,12 +137,12 @@ namespace PoseTeacher
             courseMenuHelper = MenuObject.transform.Find("CourseMenuHelper").gameObject.GetComponent<CourseMenuHelper>();
             courseMenuHelper.LoadAllCourseInfos();
             courseMenuHelper.GenerateCoursesMenu(menus[Menus.COURSES].transform.Find("CourseMenuButtonCollection").gameObject);
-            // TODO: create the buttons from code
 
             TitleText = MenuObject.transform.Find("TitleBarHolder").Find("TitleBar").Find("Title").gameObject.GetComponent<TextMeshPro>();
             SetTitleBarText();
         }
 
+        // Sets the menu to the TITLE menu screen (home)
         public void BackToHome()
         {
             if (CurrentMenu != Menus.TITLE)
@@ -153,6 +158,7 @@ namespace PoseTeacher
             SetTitleBarText();
         }
 
+        // Sets the menu to the parent menu screen of the current menu screen
         public void BackToPreviousMenu()
         {
             // Set current Menu to Inactive
@@ -212,11 +218,14 @@ namespace PoseTeacher
             SetTitleBarText();
         }
 
+        // Resumes to the step/coreo/recording from the menu
         public void BackToGame()
         {
+            // consider refactoring code from the setState function to here?
             setState("INMAIN");
         }
 
+        // Sets the menu to the main Settings menu screen (mainly for paused state)
         public void BackToSetting()
         {
             menus[CurrentMenu].SetActive(false);
@@ -224,6 +233,7 @@ namespace PoseTeacher
             menus[CurrentMenu].SetActive(true);
         }
 
+        // Inactivates the previous menu and activates the current (new) menu
         private void UpdateMenu()
         {
             foreach (KeyValuePair<Menus, GameObject> menu in menus)
@@ -234,6 +244,9 @@ namespace PoseTeacher
             SetTitleBarText();
         }
 
+        // Handles Menu option selection (e.g. progressing menu to other parts...)
+        // For actions to be taken see SelectedIn<ScreenName>Menu() functions
+        // param selectedmenuOption (in): an id of the selected option, unique only up to a single menu screen. (multiple screen can have the same ids)
         public void SelectedMenuOption(int selectedMenuOption)
         {
 
@@ -286,7 +299,7 @@ namespace PoseTeacher
                     CurrentMenu = Menus.DANCE;
                     menus[CurrentMenu].SetActive(true);
                     break;
-                // Title -> Workout Menu
+                // Title -> Workout Menu (currently inactive)
                 case 1:
                     /*   menus[CurrentMenu].SetActive(false);
                        CurrentMenu = Menus.WORKOUT;
@@ -470,7 +483,7 @@ namespace PoseTeacher
             }
         }
 
-
+        // Modify the currently selected difficulty's button to stand out
         private void HighlightSelectedDifficulty()
         {
             menus[CurrentMenu].transform.Find("DifficultySettingsMenuButtonCollection").Find("EasyDifficultySettingsButton").
@@ -497,6 +510,7 @@ namespace PoseTeacher
             }
         }
 
+        // Modify the currently selected Feed's button to stand out
         private void HighlightSelectedFeed()
         {
             menus[CurrentMenu].transform.Find("PosefeedSettingsMenuButtonCollection").Find("KinectFeedButton").
@@ -523,6 +537,7 @@ namespace PoseTeacher
             }
         }
 
+        // Modify the currently selected avatar type's button to stand out
         public void HighlightSelectedAvatarType()
         {
             menus[CurrentMenu].transform.Find("VerticalGrid").Find("AvatarTypes").Find("AvatarTypesButtonCollection").Find("CubeAvatarButton").
@@ -555,6 +570,7 @@ namespace PoseTeacher
             }
         }
 
+        // Modify the TitleBar text based on the currently active menu screen.
         private void SetTitleBarText()
         {
             
@@ -601,14 +617,14 @@ namespace PoseTeacher
                     break;
             }
         }
-        // AVATARSETTINGS,
-//        DIFFICULTYSETTINGS, FEEDSETTINGS, FEEDBACKSETTINGS, RECORDMENU, COREOMENU
 
+        // Sets the course's detail on the CourseDescription panel under the Menu
         public void SetCourseDetailsText(int courseID)
         {
             courseMenuHelper.SetCourseDetails(courseID);
         }
 
+        // Activate all teacher avatars
         private void ActivateTeachers()
         {
             foreach (AvatarContainer avatar in MainObject.GetComponent<PoseteacherMain>().GetTeacherAvatarContainers())
@@ -616,7 +632,7 @@ namespace PoseTeacher
                 avatar.avatarContainer.SetActive(true);
             }
         }
-
+        // Inactivate all teacher avatars
         private void DeactivateTeachers()
         {
             foreach (AvatarContainer avatar in MainObject.GetComponent<PoseteacherMain>().GetTeacherAvatarContainers())
@@ -624,7 +640,7 @@ namespace PoseTeacher
                 avatar.avatarContainer.SetActive(false);
             }
         }
-
+        // Starts the recording
         private void StartRecording()
         {
             MenuObject.SetActive(false);
