@@ -4,21 +4,11 @@ using UnityEngine;
 
 public class AudioAdjuster : MonoBehaviour
 {
-    //AudioListener listener;
-    //public GameObject holder;
+    // Storage for non-muted sound level to restore after unmute
     private float soundLevel = 0;
-    // Start is called before the first frame update
-    void Start()
-    {
-      //  listener = holder.GetComponent<AudioListener>();    
-    }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
+    // Mutes if Audio is currently unmuted, unmutes otherwise.
+    // Mutes all AudioSource in the scene.
     public void MuteOrUnmute()
     {
         if (AudioListener.volume != 0)
