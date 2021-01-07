@@ -9,14 +9,18 @@ namespace PoseTeacher
         MISS, OK, GOOD, PERFECT, UNRATED
     }
 
+    // Script for Pulsing object based on musical beats and scores
     public class ScorePulse : MonoBehaviour
     {
+        // State to display the change of the object graduatly
         private int FramesSinceMayorBeat;
         private int FramesSinceMinorBeat;
         private bool EnabledMinorBeat = true;
 
-        public GameObject PulsingObject;
+        public GameObject PulsingObject; // Object that this script is assigned to
 
+        // Audiofiles and objects. Consider moving them away from the pulsing object to their own script. (bring SetMute() function too)
+        // Audiofiles and objects. Consider moving them away from the pulsing object to their own script. (bring SetMute() function too)
         private AudioSource audioSource;
         public AudioClip clave_beat1;
         public AudioClip clave_beat2;
@@ -46,6 +50,8 @@ namespace PoseTeacher
         }
 
         // Update is called once per frame
+        // TODO sync with music (use the beat and bar subscriber properly)
+        // TODO consider using fixed rate update for scaling changes instead of frame based?
         void Update()
         {
             if (!isPaused)
@@ -77,6 +83,7 @@ namespace PoseTeacher
                 FramesSinceMayorBeat++;
                 FramesSinceMinorBeat++;
 
+                // TODO remove this from here and call Beat and BarSubscriber from the correct place
                 if (FramesSinceMinorBeat == 30)
                     BeatSubscriber(ScoreRating.OK);
 
@@ -85,16 +92,19 @@ namespace PoseTeacher
             }
         }
 
+        // pause the pulsing effect
         public void SetPause(bool isPaused)
         {
             this.isPaused = isPaused;
         }
 
+        // mute the sound effects. If they are moved, move this function too.
         public void SetMute(bool isMuted)
         {
             this.isMuted = isMuted;
         }
 
+        // Notify this object of a Bar thats happening.
         public void BarSubscriber(ScoreRating rating = ScoreRating.UNRATED)
         {
             currentRating = rating;
@@ -106,6 +116,7 @@ namespace PoseTeacher
                 
         }
 
+        // Notfiy this object of a Beat thats happening
         public void BeatSubscriber(ScoreRating rating = ScoreRating.UNRATED)
         {
             currentRating = rating;
@@ -124,11 +135,13 @@ namespace PoseTeacher
             }  
         }
 
+        // Enable or Disable Beats (only Bars)
         public void EnableMinorBeat(bool enable)
         {
             EnabledMinorBeat = enable;
         }
 
+        // Sets the color of the object based on the current rating
         private void SetMaterialColor()
         {
             switch(currentRating)
