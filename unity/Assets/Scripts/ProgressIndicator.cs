@@ -11,12 +11,12 @@ using TMPro;
 public class ProgressIndicator : MonoBehaviour
 {
 
-    public GameObject ProgressObject;
-    private IProgressIndicator progressIndicator;
-    private bool doIndicate = false;
+    public GameObject ProgressObject; // Object that this script is assigned to
+    private IProgressIndicator progressIndicator; // a component of ProgressObject
+    private bool doIndicate = false; // conform to MRTK documentation on progres indicators
     private int totalScore;
     private int maxTotalScore;
-    public GameObject pTotal;
+    public GameObject pTotal; // The progress indicator's text holder
 
     // Start is called before the first frame update
     void Start()
@@ -30,6 +30,7 @@ public class ProgressIndicator : MonoBehaviour
     }
 
     // Update is called once per frame
+    // conforms to the MRTK documentation on progress indicators
     void Update()
     {
         if (ProgressObject.activeSelf && doIndicate == false)
@@ -50,12 +51,14 @@ public class ProgressIndicator : MonoBehaviour
 
     }
 
+    // updates (but not display) the current progress. 
     private float progress = 0;
     public void SetProgress(float currentProgress)
     {
         progress = currentProgress;
     }
 
+    // updates and displays the current and total score on the progressindicator's text field
     public void SetTotalScore(int currentTotalScore, int currentMaxTotalScore)
     {
         totalScore = currentTotalScore;
@@ -64,7 +67,7 @@ public class ProgressIndicator : MonoBehaviour
     }
 
 
-
+    // async task to display the progress of the indicator. See MRTK documentation on progress indicators for more details.
     private async void OpenProgressIndicator(IProgressIndicator indicator)
     {
         await indicator.OpenAsync();
