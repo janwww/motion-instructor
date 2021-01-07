@@ -54,7 +54,6 @@ public class ProgressIndicator : MonoBehaviour
     public void SetProgress(float currentProgress)
     {
         progress = currentProgress;
-        //Debug.Log("Progress Set to " + progress);
     }
 
     public void SetTotalScore(int currentTotalScore, int currentMaxTotalScore)
