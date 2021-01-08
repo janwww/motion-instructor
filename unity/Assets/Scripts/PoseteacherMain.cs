@@ -420,7 +420,7 @@ namespace PoseTeacher
                     pulseObject.SetActive(true);
                 }
 
-                
+                avatar.MoveIndicators(true);
 
             }
             foreach (AvatarContainer avatar in avatarListTeacher)
@@ -431,7 +431,7 @@ namespace PoseTeacher
                     GameObject progressIndicator = progressIndicatorTr.gameObject;
                     progressIndicator.SetActive(true);
                 }
-
+                avatar.MoveIndicators(true);
             }
         }
 
