@@ -126,15 +126,14 @@ namespace PoseTeacher
                 buttonConfigHelper.MainLabelText = info.CourseTitle;
 
                 // On Focus give user more information on the course
-                // FIXME: Order of calls could be wrong when moving from one course to an other quickly, leading to course info not changing.
                 var onFocusReciever = newButton.GetComponent<Interactable>().GetReceiver<InteractableOnFocusReceiver>();
                 if (onFocusReciever == null)
                 {
                     onFocusReciever = newButton.GetComponent<Interactable>().AddReceiver<InteractableOnFocusReceiver>();
                 }
-                onFocusReciever.OnFocusOn.AddListener(() => CourseDetails.SetActive(true));
+                onFocusReciever.OnFocusOn.AddListener(() => ActivateDetails());
                 onFocusReciever.OnFocusOn.AddListener(() => SetCourseDetails(info.CourseID));
-                onFocusReciever.OnFocusOff.AddListener(() => CourseDetails.SetActive(false));
+                onFocusReciever.OnFocusOff.AddListener(() => DeactivateDetails());
 
                 // On Click open the menu of the particular course
                 var onClickReciever = newButton.GetComponent<Interactable>().GetReceiver<InteractableOnPressReceiver>();
@@ -258,41 +257,40 @@ namespace PoseTeacher
                 // x is used in callback methods where the ref of i would be already changed and result in error
                 int x = i;
 
-                // On Focus give user more information on the step/coreo and sets the teacher avatar already, so the move could potentially be shown while in the menu. (currently not active feature)
-                // FIXME: Order of calls could be wrong when moving from one course to an other quickly, leading to course info not changing.
-                // On click starts the coreo or step (there was an issue with onClick not working, changed to onPress)
-                var onClickReciever = newButton.GetComponent<Interactable>().GetReceiver<InteractableOnPressReceiver>();
+                // On Focus give user more information on the step/coreo
+                // On press starts the coreo or step
+                var onPressReciever = newButton.GetComponent<Interactable>().GetReceiver<InteractableOnPressReceiver>();
                 var onFocusReciever = newButton.GetComponent<Interactable>().GetReceiver<InteractableOnFocusReceiver>();
                 if (onFocusReciever == null)
                 {
                     onFocusReciever = newButton.GetComponent<Interactable>().AddReceiver<InteractableOnFocusReceiver>();
                 }
-                if (onClickReciever == null)
+                if (onPressReciever == null)
                 {
-                    onClickReciever = newButton.GetComponent<Interactable>().AddReceiver<InteractableOnPressReceiver>();
+                    onPressReciever = newButton.GetComponent<Interactable>().AddReceiver<InteractableOnPressReceiver>();
                 }
-                onFocusReciever.OnFocusOn.AddListener(() => CourseDetails.SetActive(true));
+                onFocusReciever.OnFocusOn.AddListener(() => ActivateDetails());
                 if (isTraining)
                     onFocusReciever.OnFocusOn.AddListener(() => CourseMenuHelperObject.GetComponent<CourseMenuHelper>().SetMoveDetails(pos));
                 else
                 {                  
                     onFocusReciever.OnFocusOn.AddListener(() => CourseMenuHelperObject.GetComponent<CourseMenuHelper>().SetMoveDetails(x));
                 }
-                onFocusReciever.OnFocusOn.AddListener(() => MainObject.GetComponent<PoseteacherMain>().SetTeacherFile(movementLocation));
-                onFocusReciever.OnFocusOff.AddListener(() => CourseDetails.SetActive(false));
+                onPressReciever.OnPress.AddListener(() => MainObject.GetComponent<PoseteacherMain>().SetTeacherFile(movementLocation));
+                onFocusReciever.OnFocusOff.AddListener(() => DeactivateDetails());
                 
                 if (steps.ContainsKey(i))
                 {
-                    onClickReciever.OnPress.AddListener(() => CourseMenuHelperObject.GetComponent<CourseMenuHelper>().StartStep(pos));
+                    onPressReciever.OnPress.AddListener(() => CourseMenuHelperObject.GetComponent<CourseMenuHelper>().StartStep(pos));
                 } 
                 else if (coreographies.ContainsKey(i))
                 {
                     if (isTraining)
-                        onClickReciever.OnPress.AddListener(() => CourseMenuHelperObject.GetComponent<CourseMenuHelper>().StartCoreography(pos));
+                        onPressReciever.OnPress.AddListener(() => CourseMenuHelperObject.GetComponent<CourseMenuHelper>().StartCoreography(pos));
                     else
-                        onClickReciever.OnPress.AddListener(() => CourseMenuHelperObject.GetComponent<CourseMenuHelper>().StartCoreography(x));
+                        onPressReciever.OnPress.AddListener(() => CourseMenuHelperObject.GetComponent<CourseMenuHelper>().StartCoreography(x));
                 }
-                onClickReciever.OnPress.AddListener(() => CourseDetails.SetActive(false));
+                onPressReciever.OnPress.AddListener(() => DeactivateDetails(true));
 
                 // Add Button to the Collection and display it
                 newButton.SetActive(true);
@@ -483,6 +481,27 @@ namespace PoseTeacher
             else
                 StartPreviousStep();
             // TODO else no previous block available (msg user?) move to previous step?
+        }
+
+        private int activeFocuses = 0;
+        private void ActivateDetails()
+        {
+            if (activeFocuses < 0) activeFocuses = 0;
+            activeFocuses++;
+            if (activeFocuses > 0)
+            {
+                CourseDetails.SetActive(true);
+            }
+        }
+
+        private void DeactivateDetails(bool forcezero = false)
+        {
+            activeFocuses--;
+            if (forcezero) activeFocuses = 0;
+            if (activeFocuses == 0)
+            {
+                CourseDetails.SetActive(false);
+            }
         }
     }
 }
