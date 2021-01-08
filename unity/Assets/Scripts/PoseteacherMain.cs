@@ -145,11 +145,13 @@ namespace PoseTeacher
                 AvatarContainer avatar = avatarListSelf[avatarListSelf.Count - 1];
                 avatar.avatarContainer.SetActive(false);
                 avatarListSelf.Remove(avatar);
+                Destroy(avatar.avatarContainer.gameObject);
             } else if (!self && avatarListTeacher.Count > 1)
             {
                 AvatarContainer avatar = avatarListTeacher[avatarListTeacher.Count - 1];
                 avatar.avatarContainer.SetActive(false);
                 avatarListTeacher.Remove(avatar);
+                Destroy(avatar.avatarContainer.gameObject);
             }
         }
         
