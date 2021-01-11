@@ -21,7 +21,7 @@ namespace PoseTeacher
         PoseInputSource CurrentPoseInputSource;
         public bool recording = false;
         public bool loop = false;
-        PoseData CurrentPose { get; set; }
+        public PoseData CurrentPose { get; set; }
 
         // Azure Kinect variables
         Device device;

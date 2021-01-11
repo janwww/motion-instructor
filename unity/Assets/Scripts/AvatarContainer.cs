@@ -12,8 +12,11 @@ namespace PoseTeacher
     }
 
     // Base interface for different type of containers (cube, stick etc.)
-    public interface IContainer
+    public interface IAvatarSubContainer
     {
+        // CONSIDER moving GameObject
+        GameObject SubContainerObject { get; set; }
+
         // Activates/Deactivates the contained GameObject object
         void SetActive(bool active);
         // Move the contained GameObject object based on the input JointData
@@ -24,17 +27,39 @@ namespace PoseTeacher
 
     // Class that contains information about the cube contained in an AvatarContainer object
     // TODO move debugObject functionalities from AvatarContainer to CubeContainer
-    public class CubeContainer : IContainer
+    public class CubeContainer : IAvatarSubContainer
     {
         // CONSIDER moving GameObject to interface? Change the interface to abstract base class with SetActive function there
-        public GameObject cube;
+        //public GameObject cube;
+
+        public GameObject SubContainerObject { get; set; }
 
         // References to cubes of the cubes avatar
-        public GameObject[] debugObjects;
+        public GameObject[] cubeObjects;
+
 
         public CubeContainer(GameObject container)
         {
-            cube = container;
+            SubContainerObject = container;
+
+            cubeObjects = new GameObject[(int)JointId.Count];
+
+            for (var i = 0; i < (int)JointId.Count; i++)
+            {
+                // Find cube children, and insert refrences in same order as joints from the BT SDK
+                // Note: cube objects in Scene have same name as the joints in the SDK
+                Transform cubeTrI = SubContainerObject.transform.Find(Enum.GetName(typeof(JointId), i));
+                if (cubeTrI == null)
+                {
+                    Debug.Log(Enum.GetName(typeof(JointId), i));
+                    continue;
+                }
+                var cubeI = cubeTrI.gameObject;
+                //TODO Add predefined scales for different cubes
+                //cubeI.transform.localScale = Vector3.one * 0.4f;
+                cubeI.transform.SetParent(SubContainerObject.transform);
+                cubeObjects[i] = cubeI;
+            }
         }
 
         public void MovePerson(PoseData joint_data_list)
@@ -47,28 +72,28 @@ namespace PoseTeacher
                 var orientation = joint.Orientation;
                 var v = new Vector3(pos[0], -pos[1], pos[2]) * 0.004f;
                 var r = new Quaternion(orientation[0], orientation[1], orientation[2], orientation[3]);
-                var obj = debugObjects[(int)jt];
+                var obj = cubeObjects[(int)jt];
                 obj.transform.localPosition = v;
                 obj.transform.localRotation = r;
-                obj.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
             }
         }
 
         public Vector3 GetReferencePosition()
         {
-            return cube.transform.position;
+            return SubContainerObject.transform.position;
         }
 
         public void SetActive(bool active)
         {
-            cube.SetActive(active);
+            SubContainerObject.SetActive(active);
         }
     }
 
     // Class that contains information about the stick figure contained in an AvatarContainer object
-    public class StickContainer : IContainer
+    public class StickContainer : IAvatarSubContainer
     {
-        public GameObject stick;
+        //public GameObject stick;
+        public GameObject SubContainerObject { get; set; }
 
         // References to parts of the stick person avatar
         public GameObject LeftLowerLeg, RightLowerLeg, LeftUpperArm, RightUpperArm, LeftUpperLeg, RightUpperLeg, TorsoLeft,
@@ -78,7 +103,8 @@ namespace PoseTeacher
 
         public StickContainer(GameObject container)
         {
-            stick = container;
+            SubContainerObject = container;
+            GameObject stick = container;
 
             // Find children of the stick person avatar in scene and save references in fields
             LeftLowerLeg = stick.transform.Find("LLLeg").gameObject;
@@ -455,27 +481,28 @@ namespace PoseTeacher
 
         public void SetActive(bool active)
         {
-            stick.SetActive(active);
+            SubContainerObject.SetActive(active);
         }
 
 
     }
 
     // Class that contains information about the robot and joints contained in an AvatarContainer object
-    public class RobotContainer : IContainer
+    public class RobotContainer : IAvatarSubContainer
     {
         // stick needed for Move calculations
         // CONSIDER: own stick or global stick for avatar?
         //      is this realistic enough or should MovePerson be changed to container?
         //      "If way to apply pose to a humanoid rig is discovered, that would work directly and be simpler"
         public StickContainer stickContainer;
-        public GameObject robot;
+        //public GameObject robot;
+        public GameObject SubContainerObject { get; set; }
 
         // CONSIDER references to parts ( ?= stick person parts)
 
         public RobotContainer(GameObject container, StickContainer stickSkeleton)
         {
-            robot = container;
+            SubContainerObject = container;
             stickContainer = stickSkeleton;
         }
 
@@ -493,6 +520,7 @@ namespace PoseTeacher
 
 
             // Get Robot body parts references
+            GameObject robot = SubContainerObject;
             GameObject right_shoulder_joint, right_upper_arm_joint, right_forearm_joint, left_upper_arm_joint, left_forearm_joint;
             GameObject left_thigh_joint, left_knee_joint, right_thigh_joint, right_knee_joint;
             GameObject robotKyle = robot.transform.Find("Robot Kyle").gameObject;
@@ -567,24 +595,25 @@ namespace PoseTeacher
 
         public void SetActive(bool active)
         {
-            robot.SetActive(active);
+            SubContainerObject.SetActive(active);
         }
     }
 
     // Class that contains information about the skinned multi-person linear body model contained in an AvatarContainer object
     // TODO: add changer function for male/female
-    public class SmplContainer : IContainer
+    public class SmplContainer : IAvatarSubContainer
     {
         // stick needed for Move calculations
         // CONSIDER: see robot
         public StickContainer stickContainer;
-        public GameObject smpl;
+        //public GameObject smpl;
+        public GameObject SubContainerObject { get; set; }
 
         // CONSIDER references to parts ( ?= stick person parts)
 
         public SmplContainer(GameObject container, StickContainer stickSkeleton)
         {
-            smpl = container;
+            SubContainerObject = container;
             stickContainer = stickSkeleton;
         }
 
@@ -600,8 +629,8 @@ namespace PoseTeacher
 
             // get SMPL body parts
             GameObject smpl_body;
-            GameObject smpl_male = smpl.transform.Find("SMPL_m_unityDoubleBlends_lbs_10_scale5_207_v1.0.0").gameObject;
-            GameObject smpl_female = smpl.transform.Find("SMPL_f_unityDoubleBlends_lbs_10_scale5_207_v1.0.0").gameObject;
+            GameObject smpl_male = SubContainerObject.transform.Find("SMPL_m_unityDoubleBlends_lbs_10_scale5_207_v1.0.0").gameObject;
+            GameObject smpl_female = SubContainerObject.transform.Find("SMPL_f_unityDoubleBlends_lbs_10_scale5_207_v1.0.0").gameObject;
             GameObject L_hip, R_hip, L_Shoulder, R_Shoulder, R_Elbow, L_Elbow, L_Knee, R_Knee;
             bool set = false;
             if (smpl_male.activeSelf == true)
@@ -633,10 +662,10 @@ namespace PoseTeacher
                 }
                 else
                 {
-                    L_Shoulder = smpl.transform.Find("m_avg_L_Shoulder").gameObject;
-                    R_Shoulder = smpl.transform.Find("m_avg_R_Shoulder").gameObject;
-                    L_hip = smpl.transform.Find("m_avg_L_Hip").gameObject;
-                    R_hip = smpl.transform.Find("m_avg_R_Hip").gameObject;
+                    L_Shoulder = SubContainerObject.transform.Find("m_avg_L_Shoulder").gameObject;
+                    R_Shoulder = SubContainerObject.transform.Find("m_avg_R_Shoulder").gameObject;
+                    L_hip = SubContainerObject.transform.Find("m_avg_L_Hip").gameObject;
+                    R_hip = SubContainerObject.transform.Find("m_avg_R_Hip").gameObject;
                 }
 
                 L_Knee = L_hip.transform.Find("m_avg_L_Knee").gameObject;
@@ -683,10 +712,10 @@ namespace PoseTeacher
                 }
                 else
                 {
-                    L_Shoulder = smpl.transform.Find("f_avg_L_Shoulder").gameObject;
-                    R_Shoulder = smpl.transform.Find("f_avg_R_Shoulder").gameObject;
-                    L_hip = smpl.transform.Find("f_avg_L_Hip").gameObject;
-                    R_hip = smpl.transform.Find("f_avg_R_Hip").gameObject;
+                    L_Shoulder = SubContainerObject.transform.Find("f_avg_L_Shoulder").gameObject;
+                    R_Shoulder = SubContainerObject.transform.Find("f_avg_R_Shoulder").gameObject;
+                    L_hip = SubContainerObject.transform.Find("f_avg_L_Hip").gameObject;
+                    R_hip = SubContainerObject.transform.Find("f_avg_R_Hip").gameObject;
                 }
                 L_Knee = L_hip.transform.Find("f_avg_L_Knee").gameObject;
                 GameObject L_Ankle = L_Knee.transform.Find("f_avg_L_Ankle").gameObject;
@@ -704,10 +733,10 @@ namespace PoseTeacher
 
             if (set == true)
             {
-                L_Shoulder.transform.SetParent(smpl.transform);
-                R_Shoulder.transform.SetParent(smpl.transform);
-                L_hip.transform.SetParent(smpl.transform);
-                R_hip.transform.SetParent(smpl.transform);
+                L_Shoulder.transform.SetParent(SubContainerObject.transform);
+                R_Shoulder.transform.SetParent(SubContainerObject.transform);
+                L_hip.transform.SetParent(SubContainerObject.transform);
+                R_hip.transform.SetParent(SubContainerObject.transform);
             }
 
             // Some manually tested rotations are applied after the calculated pose, as there are offsets
@@ -739,7 +768,7 @@ namespace PoseTeacher
 
         public void SetActive(bool active)
         {
-            smpl.SetActive(active);
+            SubContainerObject.SetActive(active);
         }
     }
 
@@ -751,46 +780,22 @@ namespace PoseTeacher
     public class AvatarContainer
     {
 
-        // TODO: if cube avatar class is created, migrate this to there. Otherwise move the getting of other refrences from init to here
-        // if the function stays, it should assign direcly to the field of the class
-        // create function declaration and move this function under initializer
-        void prepareGameObjects(GameObject avatarContainer, ref GameObject[] debugObjects)
-        {
-            // Gets refernces to the cube children of the cube container
-            // TODO: do this after finding cubeContainer and setting to field is done in init, to not run Find again
-            GameObject cubeC = avatarContainer.transform.Find("CubeContainer").gameObject;
-            debugObjects = new GameObject[(int)JointId.Count];
-            for (var i = 0; i < (int)JointId.Count; i++)
-            {
-                // Find cube children, and insert refrences in same order as joints from the BT SDK
-                // Note: cube objects have same name as the joints in the SDK
-                if (cubeC.transform.Find(Enum.GetName(typeof(JointId), i)) == null)
-                    Debug.Log(Enum.GetName(typeof(JointId), i));
-                var cube = cubeC.transform.Find(Enum.GetName(typeof(JointId), i)).gameObject;
-                
-                cube.transform.localScale = Vector3.one * 0.4f;
-                cube.transform.SetParent(cubeC.transform);
-                debugObjects[i] = cube;
-            }
-
-        }
-
         // References to avatar objects in scene part of the container
         public GameObject avatarContainer;
         public CubeContainer cubeContainer;
         public StickContainer stickContainer;
         public RobotContainer robotContainer;
         public SmplContainer smplContainer;
-        public Dictionary<AvatarType, IContainer> containers;
+        public Dictionary<AvatarType, IAvatarSubContainer> containers;
 
         // state flags for the contained avatar objects
         // CONSIDER: public/private
-        public bool isMirrored = true;  // PREVIOUS COMMENT "can probably be changed to private (if no UI elements use it)"
+        public bool isMirrored = false;  // PREVIOUS COMMENT "can probably be changed to private (if no UI elements use it)"
         public AvatarType activeType = AvatarType.STICK;
 
 
         // Initialization of class object
-        public AvatarContainer(GameObject avatarContainer)
+        public AvatarContainer(GameObject avatarContainer, bool mirror = false)
         {
             this.avatarContainer = avatarContainer;
 
@@ -804,17 +809,12 @@ namespace PoseTeacher
             robotContainer = new RobotContainer(robotC, stickContainer);
             smplContainer = new SmplContainer(smplC, stickContainer);
 
-            containers = new Dictionary<AvatarType, IContainer>();
+            containers = new Dictionary<AvatarType, IAvatarSubContainer>();
             containers.Add(AvatarType.CUBE, cubeContainer);
             containers.Add(AvatarType.STICK, stickContainer);
             containers.Add(AvatarType.ROBOT, robotContainer);
             containers.Add(AvatarType.SMPL, smplContainer);
-
-            // TODO: already mentionned above:
-            // if the function stays, it should assign direcly to the field of the class
-            GameObject[] debugObjects = { };
-            prepareGameObjects(avatarContainer, ref debugObjects);
-            this.cubeContainer.debugObjects = debugObjects;
+            
 
             // Deactivate all other avatars except stickContainer
             // Note: it is necessary to do this after getting references, otherwise objects can't be found in scene
@@ -822,6 +822,9 @@ namespace PoseTeacher
             cubeContainer.SetActive(false);
             robotContainer.SetActive(false);
             smplContainer.SetActive(false);
+
+            Mirror(mirror);
+            
         }
 
         // Move active avatar based on the input JointData
@@ -906,18 +909,33 @@ namespace PoseTeacher
             MoveIndicators();
         }
 
-        // Mirrors the avatar
-        public void Mirror()
+        // Sets the mirroring of the avatar, toggles mirror if default parameter
+        public void Mirror(bool? mirror = null)
         {
-            if (isMirrored == true)
+            if(mirror == null)
+            {
+                mirror = !isMirrored;
+            }
+
+            if (mirror == false)
             {
                 isMirrored = false;
-                avatarContainer.transform.localScale = new Vector3(1.0f, 1.0f, 1.0f);
+                foreach (IAvatarSubContainer container in containers.Values)
+                {
+                    Vector3 prevScale = container.SubContainerObject.transform.localScale;
+                    container.SubContainerObject.transform.localScale = new Vector3(Math.Abs(prevScale.x), prevScale.y, prevScale.z);
+                }
+                //avatarContainer.transform.localScale = new Vector3(1.0f, 1.0f, 1.0f);
             }
             else
             {
                 isMirrored = true;
-                avatarContainer.transform.localScale = new Vector3(-1.0f, 1.0f, 1.0f);
+                foreach (IAvatarSubContainer container in containers.Values)
+                {
+                    Vector3 prevScale = container.SubContainerObject.transform.localScale;
+                    container.SubContainerObject.transform.localScale = new Vector3(-Math.Abs(prevScale.x), prevScale.y, prevScale.z);
+                }
+                //avatarContainer.transform.localScale = new Vector3(-1.0f, 1.0f, 1.0f);
             }
         }
     }

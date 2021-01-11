@@ -68,19 +68,7 @@ namespace PoseTeacher
         // Mirrors all Avatars. 
         public void MirrorAvatars()
         {
-            poseteacher = MainObject.GetComponent<PoseteacherMain>();
-
-            List<AvatarContainer> selfs = poseteacher.GetSelfAvatarContainers();
-            foreach (AvatarContainer avatar in selfs)
-            {
-                avatar.Mirror();
-            }
-
-            List<AvatarContainer> teachers = poseteacher.GetTeacherAvatarContainers();
-            foreach (AvatarContainer avatar in teachers)
-            {
-                avatar.Mirror();
-            }
+            poseteacher.do_mirror();
         }
     }
 }

@@ -30,7 +30,7 @@ namespace PoseTeacher
         PoseInputGetter RecordedPoseInputGetter;
 
         // Used for displaying RGB Kinect video
-        GameObject streamCanvas;
+        //GameObject streamCanvas;
         GameObject videoCube;
 
         // Refrences to containers in scene
@@ -58,7 +58,7 @@ namespace PoseTeacher
         // "jsondata/2020_05_26-21_23_28.txt"  "jsondata/2020_05_26-22_55_32.txt"  "jsondata/2020_05_27-00_01_59.txt"
         private readonly string fake_file = "jsondata/2020_05_27-00_01_59.txt";
         public PoseInputSource SelfPoseInputSource = PoseInputSource.KINECT;
-        public bool mirroring = true; // can probably be changed to private (if no UI elements use it)
+        public bool mirroring = false; // can probably be changed to private (if no UI elements use it)
 
 
         // Used for pose similarity calculation
@@ -122,10 +122,11 @@ namespace PoseTeacher
             {
             //    GameObject avatarContainer = GameObject.Find("AvatarContainer");
                 GameObject newAvatar = Instantiate(avatarPrefab);
-                AvatarContainer newAvatarCont = new AvatarContainer(newAvatar);
+                AvatarContainer newAvatarCont = new AvatarContainer(newAvatar, mirroring);
                 avatarListSelf.Add(newAvatarCont);
                 newAvatar.SetActive(true);
                 newAvatarCont.ChangeActiveType(avatarListSelf[0].activeType);
+                newAvatarCont.MovePerson(TeacherPoseInputGetter.CurrentPose);
                 //newAvatar.transform.position = avatarListSelf[avatarListSelf.Count - 1].avatarContainer.transform.position;
                 //newAvatar.transform.position = newAvatar.transform.position + new Vector3(1,0,0);
                 //newAvatar.transform.position = new Vector3(1, 0, 0);
@@ -133,10 +134,11 @@ namespace PoseTeacher
             {
             //    GameObject avatarContainer = GameObject.Find("AvatarContainerT");
                 GameObject newAvatar = Instantiate(avatarTPrefab);
-                AvatarContainer newAvatarCont = new AvatarContainer(newAvatar);
+                AvatarContainer newAvatarCont = new AvatarContainer(newAvatar, mirroring);
                 avatarListTeacher.Add(newAvatarCont);
                 newAvatar.SetActive(true);
                 newAvatarCont.ChangeActiveType(avatarListTeacher[0].activeType);
+                newAvatarCont.MovePerson(TeacherPoseInputGetter.CurrentPose);
             }
         }
         public void DeleteAvatar(bool self)
@@ -177,7 +179,7 @@ namespace PoseTeacher
                 }
 
                 videoCube.transform.localScale = new Vector3(-1f, 0.6f, 0.1f);
-                streamCanvas.transform.localScale = new Vector3(32f, 16f, 1f);
+                //streamCanvas.transform.localScale = new Vector3(32f, 16f, 1f);
             }
             else
             {
@@ -192,7 +194,7 @@ namespace PoseTeacher
                 }
 
                 videoCube.transform.localScale = new Vector3(1f, 0.6f, 0.1f);
-                streamCanvas.transform.localScale = new Vector3(-32f, 16f, 1f);
+                //streamCanvas.transform.localScale = new Vector3(-32f, 16f, 1f);
             }
         }
 
@@ -262,12 +264,8 @@ namespace PoseTeacher
         // Do once on scene startup
         private void Start()
         {
-            Debug.Log("OnEnable");
-
-            //StartWebsocket();
-
             // Get refrences to objects used to show RGB video (Kinect)
-            streamCanvas = GameObject.Find("RawImage");
+            //streamCanvas = GameObject.Find("RawImage");
             videoCube = GameObject.Find("VideoCube");
 
             // Find avatar container objects, and initialize their respective AvatarContainer classes
@@ -301,7 +299,7 @@ namespace PoseTeacher
             TeacherPoseInputGetter.loop = true;
             RecordedPoseInputGetter = new PoseInputGetter(PoseInputSource.FILE) { ReadDataPath = fake_file };
 
-            SelfPoseInputGetter.streamCanvas = streamCanvas;
+            //SelfPoseInputGetter.streamCanvas = streamCanvas;
             SelfPoseInputGetter.VideoCube = videoCube;
 
             // initialize similarity calculation instance and assign selected avatars
@@ -311,6 +309,9 @@ namespace PoseTeacher
 
             recordedAvatarSimilarity = new AvatarSimilarity(recordedAvatar, avatarListTeacher[similarityTeacherNr], similarityBodyNr, similarityPenalty, similarityActivateKalman, similarityKalmanQ, similarityKalmanR);
             recordedAvatarVisualisationSimilarity = new VisualisationSimilarity(recordedAvatar);
+
+            // Default is to have a mirrored view
+            do_mirror();
 
         }
 
