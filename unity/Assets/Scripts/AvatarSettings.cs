@@ -1,4 +1,5 @@
 ﻿using Microsoft.MixedReality.Toolkit.UI;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -37,31 +38,9 @@ namespace PoseTeacher
         public void ChangeAvatarType(string typeString)
         {
             // Convert string to enum
-            // TODO: consider using centralised way for converting (adding new avatar should not break this code...)
-            AvatarType type = AvatarType.CUBE;
-            switch(typeString)
-            {
-                case "CUBE": type = AvatarType.CUBE; break;
-                case "STICK": type = AvatarType.STICK; break;
-                case "ROBOT": type = AvatarType.ROBOT; break;
-                case "SMPL": type = AvatarType.SMPL; break;
-                default: type = AvatarType.STICK; break;
-            }
+            AvatarType aType = (AvatarType) Enum.Parse(typeof(AvatarType), typeString);
 
-            poseteacher = MainObject.GetComponent<PoseteacherMain>();
-
-            // Change all Avatars
-            List<AvatarContainer> selfs = poseteacher.GetSelfAvatarContainers();
-            foreach (AvatarContainer avatar in selfs)
-            {
-                avatar.ChangeActiveType(type);
-            }
-
-            List<AvatarContainer> teachers = poseteacher.GetTeacherAvatarContainers();
-            foreach (AvatarContainer avatar in teachers)
-            {
-                avatar.ChangeActiveType(type);
-            }
+            poseteacher.SetAvatarTypes(aType);
             
         }
 

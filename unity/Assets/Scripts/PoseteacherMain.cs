@@ -77,9 +77,7 @@ namespace PoseTeacher
 
         // Used for showing similarity
         VisualisationSimilarity avatarVisualisationSimilarity;
-        Graph graphtest;
-        public static double similarityScoreExtern = 0.0; // similarity value between 0 and 1 for defined body part (extern global variable for plot)
-        public static double similarityTotalScoreExtern = 0.0; // Total score (extern global variable for plot)
+        Graph graph;
 
         // Duplicates for recording
         AvatarSimilarity recordedAvatarSimilarity;
@@ -240,13 +238,6 @@ namespace PoseTeacher
             playbackSpeed = s;
         }
 
-        // For setting in menu
-        // TODO maybe organize wrapper functions in separate class for menu?
-        public void SetAvatarTypesCube() => SetAvatarTypes(AvatarType.CUBE);
-        public void SetAvatarTypesStick() => SetAvatarTypes(AvatarType.STICK);
-        public void SetAvatarTypesRobot() => SetAvatarTypes(AvatarType.ROBOT);
-        public void SetAvatarTypesSMPL() => SetAvatarTypes(AvatarType.SMPL);
-
         // Set the avatar type for all AvatarGos
         public void SetAvatarTypes(AvatarType type)
         {
@@ -271,27 +262,19 @@ namespace PoseTeacher
             // Find avatar container objects, and initialize their respective AvatarContainer classes
             GameObject avatarContainer = GameObject.Find("AvatarContainer");
             GameObject avatarContainerT = GameObject.Find("AvatarContainerT");
-            GameObject avatarContainer2 = GameObject.Find("AvatarContainer2");
-            GameObject avatarContainerT2 = GameObject.Find("AvatarContainerT2");
 
             avatarListSelf = new List<AvatarContainer>();
             avatarListTeacher = new List<AvatarContainer>();
             avatarListSelf.Add(new AvatarContainer(avatarContainer));
-          //  avatarListSelf.Add(new AvatarContainer(avatarContainer2));
             avatarListTeacher.Add(new AvatarContainer(avatarContainerT));
-            //  avatarListTeacher.Add(new AvatarContainer(avatarContainerT2));
 
 
             GameObject newAvatar = Instantiate(avatarTPrefab);
             recordedAvatar = new AvatarContainer(newAvatar);
             newAvatar.SetActive(false);
 
-            // Set unused containers to inactive
+            // Set teacher container to inactive at start
             avatarListTeacher[0].avatarContainer.gameObject.SetActive(false);
-            avatarContainer2.SetActive(false);
-            avatarContainerT2.SetActive(false);
-            // avatarListSelf[1].avatarContainer.gameObject.SetActive(false);
-            // avatarListTeacher[1].avatarContainer.gameObject.SetActive(false);
 
             SelfPoseInputGetter = new PoseInputGetter(SelfPoseInputSource) { ReadDataPath = fake_file };
             TeacherPoseInputGetter = new PoseInputGetter(PoseInputSource.FILE){ ReadDataPath = fake_file };
@@ -305,7 +288,7 @@ namespace PoseTeacher
             // initialize similarity calculation instance and assign selected avatars
             avatarSimilarity = new AvatarSimilarity(avatarListSelf[similaritySelfNr], avatarListTeacher[similarityTeacherNr], similarityBodyNr, similarityPenalty, similarityActivateKalman, similarityKalmanQ, similarityKalmanR);
             avatarVisualisationSimilarity = new VisualisationSimilarity(avatarListSelf[similaritySelfNr]);
-            graphtest = new Graph((float)similarityScoreExtern);
+            graph = new Graph((float)similarityScore);
 
             recordedAvatarSimilarity = new AvatarSimilarity(recordedAvatar, avatarListTeacher[similarityTeacherNr], similarityBodyNr, similarityPenalty, similarityActivateKalman, similarityKalmanQ, similarityKalmanR);
             recordedAvatarVisualisationSimilarity = new VisualisationSimilarity(recordedAvatar);
@@ -318,14 +301,12 @@ namespace PoseTeacher
         // Done at each application update
         void Update()
         {
+            checkKeyInput();
 
             if (isChoreography && TeacherPoseInputGetter.CurrentFilePoseNumber >= TeacherPoseInputGetter.TotalFilePoseNumber)
             {
                 CoreoEnded();
             }
-                
-
-            checkKeyInput();
 
             if (!pauseSelf)
             {
@@ -364,14 +345,9 @@ namespace PoseTeacher
                 {
                     similarityTotalScore = avatarSimilarity.totalScore; 
                 }
-                
-
-                // TODO: replace by usng direct values above
-                similarityScoreExtern = similarityScore; // global
-                similarityTotalScoreExtern = similarityTotalScore; // global
 
                 avatarVisualisationSimilarity.UpdatePart(similarityBodyNr, similarityScoreRaw);
-                graphtest.Update_plot(similarityScoreExtern);
+                graph.Update_plot(similarityScore);
             }
 
             if (!pauseRecordingAnimation)
@@ -391,18 +367,6 @@ namespace PoseTeacher
             UpdateIndicators();
         }
 
-
-        // Scale score linearly, only for testing
-        private float scaleScore(float score)
-        {
-            float min = 0.5F;
-
-            float scaled_score = (float)(score - min) /(1-min);
-            scaled_score = scaled_score < 0 ? 0 : scaled_score;
-            scaled_score = scaled_score > 1 ? 1 : scaled_score;
-            return scaled_score;
-        }
-
         public void ActivateIndicators()
         {
             foreach (AvatarContainer avatar in avatarListSelf)
@@ -412,7 +376,6 @@ namespace PoseTeacher
                 {
                     GameObject scoreIndicator = scoreIndicatorTr.gameObject;
                     scoreIndicator.SetActive(true);
-                    
                 }
 
                 Transform pulsingObjectTr = avatar.avatarContainer.transform.Find("PulsingCube");
@@ -421,8 +384,6 @@ namespace PoseTeacher
                     GameObject pulseObject = pulsingObjectTr.gameObject;
                     pulseObject.SetActive(true);
                 }
-
-                
 
             }
             foreach (AvatarContainer avatar in avatarListTeacher)
@@ -491,8 +452,6 @@ namespace PoseTeacher
                             scoreIndicator.GetComponent<ProgressIndicator>().pTotal.SetActive(false);
                             scoreIndicator.GetComponent<ProgressIndicator>().SetProgress((float)similarityScore);
                         }
-                            
-
                     }
                 }
 
@@ -740,8 +699,8 @@ namespace PoseTeacher
         public void ChangeGraphVisibilityAllowed()
         {
             graphAllowed = !graphAllowed;
-            if (graphtest != null)
-                graphtest.graphContainer.SetActive(graphAllowed);
+            if (graph != null)
+                graph.graphContainer.SetActive(graphAllowed);
         }
 
 
@@ -771,10 +730,9 @@ namespace PoseTeacher
         public void RestartCoreo()
         {
             ResetTotalScore();
-            // it should be RestartRecording instead of Reset...
+            // RestartRecording instead of Reset...
             TeacherPoseInputGetter.RestartFile();
             RestartShowRecording(); // We might will have a naming error, consider using GenNewFilename for "temporary" recordings too...
-            //pauseTeacher = false;
         }
 
         public void LoopStepMovement()

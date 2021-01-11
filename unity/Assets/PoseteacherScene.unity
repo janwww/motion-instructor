@@ -14424,6 +14424,18 @@ GameObject:
     type: 3}
   m_PrefabInstance: {fileID: 3756193402154760789}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1855031752 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3756193403940385692, guid: ff4c6f7a61d2f1841942a3686d78bdc6,
+    type: 3}
+  m_PrefabInstance: {fileID: 3756193402154760789}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1855031747}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a98de877dee5fc341b4eb59dfdab266c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &1857789312
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -16741,6 +16753,11 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 3756193403940385680, guid: ff4c6f7a61d2f1841942a3686d78bdc6,
+        type: 3}
+      propertyPath: constraintsManager
+      value: 
+      objectReference: {fileID: 1855031752}
     - target: {fileID: 3756193403940385682, guid: ff4c6f7a61d2f1841942a3686d78bdc6,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -16779,7 +16796,7 @@ PrefabInstance:
     - target: {fileID: 3756193403940385682, guid: ff4c6f7a61d2f1841942a3686d78bdc6,
         type: 3}
       propertyPath: m_RootOrder
-      value: 8
+      value: 9
       objectReference: {fileID: 0}
     - target: {fileID: 3756193403940385682, guid: ff4c6f7a61d2f1841942a3686d78bdc6,
         type: 3}
@@ -16800,6 +16817,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: AvatarContainer2
+      objectReference: {fileID: 0}
+    - target: {fileID: 3756193403940385686, guid: ff4c6f7a61d2f1841942a3686d78bdc6,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3756193403940385693, guid: ff4c6f7a61d2f1841942a3686d78bdc6,
         type: 3}
@@ -19386,6 +19408,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: AvatarContainerT2
       objectReference: {fileID: 0}
+    - target: {fileID: 8558158226385229007, guid: 1e91ca8dafde2714db0b68a8737b04de,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 8558158226948528622, guid: 1e91ca8dafde2714db0b68a8737b04de,
         type: 3}
       propertyPath: boxDisplayConfiguration
@@ -19592,7 +19619,7 @@ PrefabInstance:
     - target: {fileID: 9212582092468432197, guid: b2687ed6193f98e4193a51d525fbbaf5,
         type: 3}
       propertyPath: m_RootOrder
-      value: 9
+      value: 8
       objectReference: {fileID: 0}
     - target: {fileID: 9212582092468432197, guid: b2687ed6193f98e4193a51d525fbbaf5,
         type: 3}
