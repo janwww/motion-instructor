@@ -124,6 +124,7 @@ namespace PoseTeacher
         public static PoseData Remote2PoseData(RemoteJointList rjl)
         {
             // format in  lightweight-human-pose-estimation-3d-demo.pytorch
+            // Lightweight human pose estimation (https://github.com/Daniil-Osokin/lightweight-human-pose-estimation-3d-demo.pytorch) (Apache-2.0 License)
             /*
             0: Neck
             1: Nose
