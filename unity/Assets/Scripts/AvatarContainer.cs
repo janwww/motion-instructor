@@ -80,7 +80,7 @@ namespace PoseTeacher
 
         public Vector3 GetReferencePosition()
         {
-            return SubContainerObject.transform.position;
+            return SubContainerObject.transform.position + new Vector3(0,-0.4f,0);
         }
 
         public void SetActive(bool active)
@@ -590,7 +590,11 @@ namespace PoseTeacher
 
         public Vector3 GetReferencePosition()
         {
-            return stickContainer.HipStick.transform.position;
+            GameObject robotKyle = robot.transform.Find("Robot Kyle").gameObject;
+            GameObject robotRoot = robotKyle.transform.Find("Root").gameObject;
+            GameObject hip = robotRoot.transform.Find("Hip").gameObject;
+            return hip.transform.position + new Vector3(0,-0.1f,0);
+            //return stickContainer.HipStick.transform.position;
         }
 
         public void SetActive(bool active)
@@ -763,7 +767,12 @@ namespace PoseTeacher
 
         public Vector3 GetReferencePosition()
         {
-            return stickContainer.HipStick.transform.position;
+            GameObject smpl_male = smpl.transform.Find("SMPL_m_unityDoubleBlends_lbs_10_scale5_207_v1.0.0").gameObject;
+            GameObject SMPLRoot = smpl_male.transform.Find("m_avg_root").gameObject;
+            GameObject pelvis = SMPLRoot.transform.Find("m_avg_Pelvis").gameObject;
+            GameObject Spine1 = pelvis.transform.Find("m_avg_Spine1").gameObject;
+            return Spine1.transform.position + new Vector3(0,0.1f,0);
+            //return stickContainer.HipStick.transform.position;
         }
 
         public void SetActive(bool active)
@@ -856,8 +865,10 @@ namespace PoseTeacher
 
         }
 
-        private void MoveIndicators()
+        public void MoveIndicators(bool forceMove = false)
         {
+            Vector3 indicatorPos = new Vector3(0,0,0), cubePos = new Vector3(0, 0, 0);
+            bool moveIndicators = forceMove;
             Transform scoreIndicatorTr = avatarContainer.transform.Find("ScoreIndicator");
             if (scoreIndicatorTr != null)
             {
@@ -865,9 +876,10 @@ namespace PoseTeacher
                 if (scoreIndicator.activeSelf)
                 {
                     Vector3 newPosition = containers[activeType].GetReferencePosition();
-                    newPosition = new Vector3(newPosition.x, 1.2f, newPosition.z);
-                    if ((scoreIndicator.transform.position - newPosition).magnitude > 1)
-                        scoreIndicator.transform.position = newPosition;
+                    indicatorPos = new Vector3(newPosition.x, newPosition.y + 0.9f, newPosition.z);
+                    if ((scoreIndicator.transform.position - indicatorPos).magnitude > 1)
+                        moveIndicators = true;
+                        
                 }
             }
 
@@ -878,9 +890,9 @@ namespace PoseTeacher
                 if (pulseObject.activeSelf)
                 {
                     Vector3 newPosition = containers[activeType].GetReferencePosition();
-                    newPosition = new Vector3(newPosition.x, 1.7f, newPosition.z);
-                    if ((pulseObject.transform.position - newPosition).magnitude > 1)
-                        pulseObject.transform.position = newPosition;
+                    cubePos = new Vector3(newPosition.x, newPosition.y + 1.4f, newPosition.z);
+                    if ((pulseObject.transform.position - cubePos).magnitude > 1)
+                        moveIndicators = true;
                     //pulseObject.transform.position = new Vector3(newPosition.x, 1.7f, newPosition.z);
                 }
             }
@@ -892,9 +904,38 @@ namespace PoseTeacher
                 if (progressIndicator.activeSelf)
                 {
                     Vector3 newPosition = containers[activeType].GetReferencePosition();
-                    newPosition = new Vector3(newPosition.x, 1.2f, newPosition.z);
-                    if ((progressIndicator.transform.position - newPosition).magnitude > 1)
-                        progressIndicator.transform.position = newPosition;
+                    indicatorPos = new Vector3(newPosition.x, newPosition.y + 0.9f, newPosition.z);
+                    if ((progressIndicator.transform.position - indicatorPos).magnitude > 1)
+                        moveIndicators = true;
+                }
+            }
+
+            if (moveIndicators)
+            {
+                if (scoreIndicatorTr != null)
+                {
+                    GameObject scoreIndicator = scoreIndicatorTr.gameObject;
+                    if (scoreIndicator.activeSelf)
+                    {
+                        scoreIndicator.transform.position = indicatorPos;
+
+                    }
+                }
+                if (pulsingObjectTr != null)
+                {
+                    GameObject pulseObject = pulsingObjectTr.gameObject;
+                    if (pulseObject.activeSelf)
+                    {
+                        pulseObject.transform.position = cubePos;
+                    }
+                }
+                if (progressIndicatorTr != null)
+                {
+                    GameObject progressIndicator = progressIndicatorTr.gameObject;
+                    if (progressIndicator.activeSelf)
+                    {
+                        progressIndicator.transform.position = indicatorPos;
+                    }
                 }
             }
         }
@@ -906,7 +947,7 @@ namespace PoseTeacher
             containers[type].SetActive(true);
             activeType = type;
 
-            MoveIndicators();
+            MoveIndicators(true);
         }
 
         // Sets the mirroring of the avatar, toggles mirror if default parameter
