@@ -13645,10 +13645,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c226daa49a5662e4788490343c19bee5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  videoCube: {fileID: 2047070474}
+  avatarContainer: {fileID: 684655731679157752}
+  avatarContainerT: {fileID: 168800787}
   avatarPrefab: {fileID: 3756193403940385686, guid: ff4c6f7a61d2f1841942a3686d78bdc6,
     type: 3}
   avatarTPrefab: {fileID: 8558158226385229007, guid: 1e91ca8dafde2714db0b68a8737b04de,
     type: 3}
+  trainingElements: {fileID: 1585359968}
   pauseSelf: 0
   pauseTeacher: 1
   isChoreography: 0
@@ -16443,6 +16447,12 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 6706340894601014f913e0cea24155c8, type: 3}
+--- !u!1 &684655731679157752 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 684655731161415655, guid: 6706340894601014f913e0cea24155c8,
+    type: 3}
+  m_PrefabInstance: {fileID: 684655731679157751}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1609218879524815173
 PrefabInstance:
   m_ObjectHideFlags: 0

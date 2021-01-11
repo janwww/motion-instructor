@@ -3,7 +3,7 @@
 
 [Jan Wiegner](https://github.com/janwww), [Rudolf Varga](https://github.com/ketjatekos), [Felix Pfreundtner](https://github.com/felixpfreundtner), [Daniil Emtsev](https://github.com/daniil-777) and [Utkarsh Bajpai](https://github.com/Utkarsh-Bajpai)
 
-# Abstract
+## Abstract
 Learning complex movements can be a time-consuming process, but it is necessary for the mastery of activities like Karate Kata, Yoga and dance choreographies. It is important to have a teacher in person to demonstrate the correct pose sequences step by step and correct errors in the student’s body postures.
 In-person sessions can be impractical due to epidemics or travel distance, while videos make it hard to see the 3D postures of the teacher and of the students. As an alternative, we propose the teaching of poses in Augmented Reality (AR) with a virtual teacher and 3D avatars.
 

@@ -26,12 +26,8 @@ namespace PoseTeacher
     }
 
     // Class that contains information about the cube contained in an AvatarContainer object
-    // TODO move debugObject functionalities from AvatarContainer to CubeContainer
     public class CubeContainer : IAvatarSubContainer
     {
-        // CONSIDER moving GameObject to interface? Change the interface to abstract base class with SetActive function there
-        //public GameObject cube;
-
         public GameObject SubContainerObject { get; set; }
 
         // References to cubes of the cubes avatar
@@ -494,6 +490,7 @@ namespace PoseTeacher
         // CONSIDER: own stick or global stick for avatar?
         //      is this realistic enough or should MovePerson be changed to container?
         //      "If way to apply pose to a humanoid rig is discovered, that would work directly and be simpler"
+
         public StickContainer stickContainer;
         //public GameObject robot;
         public GameObject SubContainerObject { get; set; }
@@ -511,11 +508,8 @@ namespace PoseTeacher
             // CONSIDER: depending on how moving the various containers are invoked, this might be redundant
             //      if joint_data shows delta movements, invoking this function redundantly breaks it 
             //      (right now I think we are good)
-            //stickContainer.MovePerson(joint_data_list);
-
 
             // Below the orientation of the stick figure parts is applied to the robot avatar, with some additional calculations
-            // TODO: is there a simpler way to do this?
             // If way to apply pose to a humanoid rig is discovered, that would work directly and be simpler
 
 
@@ -551,10 +545,6 @@ namespace PoseTeacher
             right_knee_joint = right_thigh_joint.transform.Find("Right_Knee_Joint_01").gameObject;
             left_knee_joint = left_thigh_joint.transform.Find("Left_Knee_Joint_01").gameObject;
 
-            // TODO were these unused? 
-            /*Quaternion rootTransform = Quaternion.FromToRotation(robotRoot.transform.rotation.eulerAngles, stickContainer.stick.transform.rotation.eulerAngles);
-            Quaternion relativeTransform = Quaternion.FromToRotation(transform.up, stickContainer.LeftUpperArm.transform.localRotation.eulerAngles);
-            Vector3 ea = stickContainer.RightUpperArm.transform.rotation.eulerAngles;*/
 
             // Change parents of body part to all be in global coordinates of avatar
             if (set == true)
@@ -590,7 +580,7 @@ namespace PoseTeacher
 
         public Vector3 GetReferencePosition()
         {
-            GameObject robotKyle = robot.transform.Find("Robot Kyle").gameObject;
+            GameObject robotKyle = SubContainerObject.transform.Find("Robot Kyle").gameObject;
             GameObject robotRoot = robotKyle.transform.Find("Root").gameObject;
             GameObject hip = robotRoot.transform.Find("Hip").gameObject;
             return hip.transform.position + new Vector3(0,-0.1f,0);
@@ -608,12 +598,10 @@ namespace PoseTeacher
     public class SmplContainer : IAvatarSubContainer
     {
         // stick needed for Move calculations
-        // CONSIDER: see robot
         public StickContainer stickContainer;
-        //public GameObject smpl;
         public GameObject SubContainerObject { get; set; }
 
-        // CONSIDER references to parts ( ?= stick person parts)
+        // CONSIDER references to parts ( like stick person parts)
 
         public SmplContainer(GameObject container, StickContainer stickSkeleton)
         {
@@ -623,13 +611,8 @@ namespace PoseTeacher
 
         public void MovePerson(PoseData joint_data_list)
         {
-            // CONSIDER: depending on how moving the various containers are invoked, this might be redundant
-            //      if joint_data shows delta movements, invoking this function redundantly breaks it 
-            //      (right now I think we are good)
-            //stickContainer.MovePerson(joint_data_list);
-
+            // CONSIDER: same changes as mentioned in RobotContainer
             // Below the orientation of the stick figure parts is applied to the SMPL avatar, ith some additional calculations
-            // TODO: Rewriite <check TODO moveRobotPerson, same as there>
 
             // get SMPL body parts
             GameObject smpl_body;
@@ -767,7 +750,7 @@ namespace PoseTeacher
 
         public Vector3 GetReferencePosition()
         {
-            GameObject smpl_male = smpl.transform.Find("SMPL_m_unityDoubleBlends_lbs_10_scale5_207_v1.0.0").gameObject;
+            GameObject smpl_male = SubContainerObject.transform.Find("SMPL_m_unityDoubleBlends_lbs_10_scale5_207_v1.0.0").gameObject;
             GameObject SMPLRoot = smpl_male.transform.Find("m_avg_root").gameObject;
             GameObject pelvis = SMPLRoot.transform.Find("m_avg_Pelvis").gameObject;
             GameObject Spine1 = pelvis.transform.Find("m_avg_Spine1").gameObject;

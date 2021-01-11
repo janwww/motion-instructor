@@ -80,8 +80,8 @@ namespace PoseTeacher
                     SetMaterialColor();
                 }
 
-                FramesSinceMayorBeat++;
-                FramesSinceMinorBeat++;
+                FramesSinceMayorBeat += 3 ;
+                FramesSinceMinorBeat += 3;
 
                 // TODO remove this from here and call Beat and BarSubscriber from the correct place
                 if (FramesSinceMinorBeat == 30)
