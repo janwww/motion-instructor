@@ -8,6 +8,7 @@ using System.IO;
 using System.Collections;
 using NativeWebSocket;
 using System.Security.Permissions;
+using Microsoft.MixedReality.Toolkit.UI;
 
 namespace PoseTeacher
 {
@@ -536,27 +537,53 @@ namespace PoseTeacher
         // Change recording mode via keyboard input for debugging and to not need menu
         void checkKeyInput()
         {
-            if (Input.GetKey(KeyCode.X))
+            if (Input.GetKeyDown(KeyCode.H))
+            {
+                // Toggle hand menu (in training/choreography)
+                GameObject handMenuObj = GameObject.Find("HandMenu_Training_HideOnHandDrop");
+                if(handMenuObj != null)
+                {
+                    GameObject menuContent = handMenuObj.transform.Find("MenuContent").gameObject;
+                    Transform pulsingObjectTr = avatarListSelf[0].avatarContainer.transform.Find("PulsingCube");
+                    ScorePulse sp = pulsingObjectTr.GetComponent<ScorePulse>();
+
+                    if (!menuContent.activeSelf)
+                    {
+                        Debug.Log("H - Toggle Hand Menu to active");
+                        menuContent.SetActive(true);
+                        set_recording_mode(0);
+                        sp.SetPause(true);
+                    }
+                    else
+                    {
+                        Debug.Log("H - Toggle Hand Menu to inactive");
+                        menuContent.SetActive(false);
+                        set_recording_mode(2);
+                        sp.SetPause(false);
+                    }
+                }
+            }
+            else if (Input.GetKeyDown(KeyCode.X))
             {
                 Debug.Log("X - set recording_mode to 0 (not recording)");
                 //recording_mode = 0;
             }
-            else if (Input.GetKey(KeyCode.Y))
+            else if (Input.GetKeyDown(KeyCode.Y))
             {
                 Debug.Log("Y - set recording_mode to 1 (recording)");
                 //recording_mode = 1;
             }
-            else if (Input.GetKey(KeyCode.Z))
+            else if (Input.GetKeyDown(KeyCode.Z))
             {
                 Debug.Log("Z - set recording_mode to 2 (playback)");
                 //recording_mode = 2;
             }
-            else if (Input.GetKey(KeyCode.L))
+            else if (Input.GetKeyDown(KeyCode.L))
             {
                 Debug.Log("L - set recording_mode to 3 (load_file)");
                 //recording_mode = 3;
             }
-            else if (Input.GetKey(KeyCode.R))
+            else if (Input.GetKeyDown(KeyCode.R))
             {
                 Debug.Log("R - set recording_mode to 4 (reset_recording)");
                 //recording_mode = 4;
