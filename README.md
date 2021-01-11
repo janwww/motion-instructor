@@ -63,6 +63,6 @@ As of December 10, 2020, this repository has been tested under the following env
 
 ## Alternative pose estimation (experimental)
 
-We show an example of using the Websockets for obtaining the pose combined with the [Lightweight human pose estimation](https://github.com/Daniil-Osokin/lightweight-human-pose-estimation-3d-demo.pytorch) repository. If you do not have an Azure Kinect or GPU you can use this, but it will be very slow. Depending on the version of the project, some changes might need to be made in `PoseInputGetter.cs`.
+We show an example of using the Websockets for obtaining the pose combined with the [Lightweight human pose estimation](https://github.com/Daniil-Osokin/lightweight-human-pose-estimation-3d-demo.pytorch) repository. If you do not have an Azure Kinect or GPU you can use this, but it will be very slow. 
 
-Clone the repository and copy `demo_ws.py` into it. Install the required packages according to the repository and run `demo_ws.py`. Beware that Pytorch still has issues with Python 3.8, so we recommend using Python 3.7. It should now be sending pose data over a local Websocket, which can be used if the `SelfPoseInputSource` value is set to `WEBSOCKET` for the `Main` object in the Unity Editor.
+Clone the repository and copy `alt_pose_estimation/demo_ws.py` into it. Install the required packages according to the repository and run `demo_ws.py`. Beware that Pytorch still has issues with Python 3.8, so we recommend using Python 3.7. It should now be sending pose data over a local Websocket, which can be used if the `SelfPoseInputSource` value is set to `WEBSOCKET` for the `Main` object in the Unity Editor. Depending on the version of the project, some changes might need to be made in `PoseInputGetter.cs`.
