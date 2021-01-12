@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-
 
 namespace PoseTeacher
 {
@@ -12,11 +10,13 @@ namespace PoseTeacher
         TOTAL, TOP, MIDDLE, BOTTOM
     }
 
-    public  static class SimilarityConst
+    public static class SimilarityConst
     {
         // all names of sticks existing in avatar
-        public static List<string> StickNames 
-        { get {
+        public static List<string> StickNames
+        {
+            get
+            {
                 return new List<string>(new string[] {
                     "LeftLowerLeg",
                     "RightLowerLeg",
@@ -49,7 +49,8 @@ namespace PoseTeacher
                     "LeftAnkleStick",
                     "RightAnkleStick"
                     });
-        } }
+            }
+        }
 
         public const int StickNumber = 30;
 
@@ -210,7 +211,7 @@ namespace PoseTeacher
 
             // initialize
             ///////////////////////////////////////////////////////////////////////////////////
-            
+
             // define all stick names (should be actually moved to a parameter file)
             //stickNames = SimilarityConst.StickNames;
             stickNumber = SimilarityConst.StickNumber;
@@ -258,10 +259,8 @@ namespace PoseTeacher
             stickWeightTotal = 0.0;
             for (int i = 0; i < stickNumber; i++)
             {
-                // get position and orientation of relevant game objects
-                //Vector3 selfPosition = self.stickContainer.StickList[i].transform.position;
+                // get orientation of relevant game objects
                 Quaternion selfRotation = self.stickContainer.StickList[i].gameObject.transform.rotation;
-                //Vector3 teacherPosition = teacher.stickContainer.StickList[i].gameObject.transform.position;
                 Quaternion teacherRotation = teacher.stickContainer.StickList[i].gameObject.transform.rotation;
 
                 // get cosine similarity from quaternion 
@@ -275,7 +274,7 @@ namespace PoseTeacher
                 if (activateKalman)
                 {
                     similarityStick[i] = kalmanFilter[i].Update(similarityStick[i]);
-                    if(similarityStick[i] > 1.0)
+                    if (similarityStick[i] > 1.0)
                     {
                         similarityStick[i] = 1.0;
                     }
@@ -289,7 +288,7 @@ namespace PoseTeacher
                 similarityTotal += similarityStick[i] * stickWeightBody[i];
 
                 // penalty
-                stickWeightPenalty = 1.0/(Math.Pow(similarityStick[i], penalty));
+                stickWeightPenalty = 1.0 / (Math.Pow(similarityStick[i], penalty));
 
                 // weight
                 stickWeight[i] = stickWeightBody[i] * stickWeightAdapt[i] * stickWeightPenalty;
@@ -300,7 +299,6 @@ namespace PoseTeacher
             similarityBodypart = similarityTotal / stickWeightTotal;
             // timewise total score
             totalScore += similarityBodypart;
-
         }
 
         public void ResetTotalScore()

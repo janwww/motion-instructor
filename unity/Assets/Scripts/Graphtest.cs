@@ -1,31 +1,20 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using TMPro;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
-using Microsoft.Azure.Kinect.Sensor;
-using Microsoft.Azure.Kinect.BodyTracking;
-using System.IO;
-using NativeWebSocket;
-using System.Security.Permissions;
 
 
 namespace PoseTeacher
 {
+    //Class for visualisation of similarity score development over time
     public class Graph
-    //The class for visualisation of similarity score development over time
     {
         public GameObject gobject;
         public GameObject graphContainer;
         public Text coord; //object for the axis labels
         public int vectorElementsN = 200;
-        LineRenderer lineRenderer, lineRenderer_coordx, lineRenderer_coordy;
-        Vector3[] values, valuesDynamic, values_x, values_y, start_axis_x, start_axis_y, end_axis_x, end_axis_y, coordx, coordy;
+        LineRenderer lineRenderer;
+        Vector3[] valuesDynamic;
         float begin_x, begin_y, end_x, end_y, step_x, step_y;
         float similarityScore;
-
-        // Start is called before the first frame update
 
         public Graph(float similarityScoreExtern)
         {
@@ -37,6 +26,7 @@ namespace PoseTeacher
             Start_plot(similarityScore);
 
         }
+
         public void Start_plot(float similarityScoreExtern)
         {
             //draws the grid and visualises time dependence of the score similarity
@@ -100,6 +90,7 @@ namespace PoseTeacher
                 valuesDynamic[i] = new Vector3((float)i / vectorElementsN, (float)similarityScoreExtern, 0.0f);
             }
         }
+
         public void Update_plot(double similarityScoreExtern)
         {
             //updates the line of similarity score versus time
@@ -121,6 +112,5 @@ namespace PoseTeacher
                 lineRenderer.endColor = color_plot_line;
             }
         }
-
     }
 }
