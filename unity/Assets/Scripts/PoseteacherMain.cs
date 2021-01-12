@@ -8,6 +8,7 @@ using System.IO;
 using System.Collections;
 using NativeWebSocket;
 using System.Security.Permissions;
+using Microsoft.MixedReality.Toolkit.UI;
 
 namespace PoseTeacher
 {
@@ -29,15 +30,27 @@ namespace PoseTeacher
         PoseInputGetter RecordedPoseInputGetter;
 
         // Used for displaying RGB Kinect video
-        GameObject streamCanvas;
-        GameObject videoCube;
+        //public GameObject streamCanvas;
+        public GameObject videoCube;
 
         // Refrences to containers in scene
+        public GameObject avatarContainer; // Only used to get reference from editor Inspector
+        public GameObject avatarContainerT; // Only used to get reference from editor Inspector
         List<AvatarContainer> avatarListSelf;
         List<AvatarContainer> avatarListTeacher;
         public AvatarContainer recordedAvatar;
         public GameObject avatarPrefab;
         public GameObject avatarTPrefab;
+
+        // Refrences to other objects in scene
+        GameObject scoreIndicator;
+        GameObject pulseObject;
+        GameObject progressIndicator;
+        public GameObject trainingElements; // Only used to get reference from editor Inspector
+        GameObject handMenuContent;
+        public GameObject EndCoreoScreen;
+        public GameObject CourseHelper;
+
 
         // State of Main
         //public int recording_mode = 0; // 0: not recording, 1: recording, 2: playback, 3: load_file, 4: reset_recording
@@ -57,7 +70,7 @@ namespace PoseTeacher
         // "jsondata/2020_05_26-21_23_28.txt"  "jsondata/2020_05_26-22_55_32.txt"  "jsondata/2020_05_27-00_01_59.txt"
         private readonly string fake_file = "jsondata/2020_05_27-00_01_59.txt";
         public PoseInputSource SelfPoseInputSource = PoseInputSource.KINECT;
-        public bool mirroring = true; // can probably be changed to private (if no UI elements use it)
+        public bool mirroring = false; // can probably be changed to private (if no UI elements use it)
 
 
         // Used for pose similarity calculation
@@ -76,9 +89,7 @@ namespace PoseTeacher
 
         // Used for showing similarity
         VisualisationSimilarity avatarVisualisationSimilarity;
-        Graph graphtest;
-        public static double similarityScoreExtern = 0.0; // similarity value between 0 and 1 for defined body part (extern global variable for plot)
-        public static double similarityTotalScoreExtern = 0.0; // Total score (extern global variable for plot)
+        Graph graph;
 
         // Duplicates for recording
         AvatarSimilarity recordedAvatarSimilarity;
@@ -121,10 +132,11 @@ namespace PoseTeacher
             {
             //    GameObject avatarContainer = GameObject.Find("AvatarContainer");
                 GameObject newAvatar = Instantiate(avatarPrefab);
-                AvatarContainer newAvatarCont = new AvatarContainer(newAvatar);
+                AvatarContainer newAvatarCont = new AvatarContainer(newAvatar, mirroring);
                 avatarListSelf.Add(newAvatarCont);
                 newAvatar.SetActive(true);
                 newAvatarCont.ChangeActiveType(avatarListSelf[0].activeType);
+                newAvatarCont.MovePerson(TeacherPoseInputGetter.CurrentPose);
                 //newAvatar.transform.position = avatarListSelf[avatarListSelf.Count - 1].avatarContainer.transform.position;
                 //newAvatar.transform.position = newAvatar.transform.position + new Vector3(1,0,0);
                 //newAvatar.transform.position = new Vector3(1, 0, 0);
@@ -132,10 +144,11 @@ namespace PoseTeacher
             {
             //    GameObject avatarContainer = GameObject.Find("AvatarContainerT");
                 GameObject newAvatar = Instantiate(avatarTPrefab);
-                AvatarContainer newAvatarCont = new AvatarContainer(newAvatar);
+                AvatarContainer newAvatarCont = new AvatarContainer(newAvatar, mirroring);
                 avatarListTeacher.Add(newAvatarCont);
                 newAvatar.SetActive(true);
                 newAvatarCont.ChangeActiveType(avatarListTeacher[0].activeType);
+                newAvatarCont.MovePerson(TeacherPoseInputGetter.CurrentPose);
             }
         }
         public void DeleteAvatar(bool self)
@@ -145,11 +158,13 @@ namespace PoseTeacher
                 AvatarContainer avatar = avatarListSelf[avatarListSelf.Count - 1];
                 avatar.avatarContainer.SetActive(false);
                 avatarListSelf.Remove(avatar);
+                Destroy(avatar.avatarContainer.gameObject);
             } else if (!self && avatarListTeacher.Count > 1)
             {
                 AvatarContainer avatar = avatarListTeacher[avatarListTeacher.Count - 1];
                 avatar.avatarContainer.SetActive(false);
                 avatarListTeacher.Remove(avatar);
+                Destroy(avatar.avatarContainer.gameObject);
             }
         }
         
@@ -176,7 +191,7 @@ namespace PoseTeacher
                 }
 
                 videoCube.transform.localScale = new Vector3(-1f, 0.6f, 0.1f);
-                streamCanvas.transform.localScale = new Vector3(32f, 16f, 1f);
+                //streamCanvas.transform.localScale = new Vector3(32f, 16f, 1f);
             }
             else
             {
@@ -191,7 +206,7 @@ namespace PoseTeacher
                 }
 
                 videoCube.transform.localScale = new Vector3(1f, 0.6f, 0.1f);
-                streamCanvas.transform.localScale = new Vector3(-32f, 16f, 1f);
+                //streamCanvas.transform.localScale = new Vector3(-32f, 16f, 1f);
             }
         }
 
@@ -237,13 +252,6 @@ namespace PoseTeacher
             playbackSpeed = s;
         }
 
-        // For setting in menu
-        // TODO maybe organize wrapper functions in separate class for menu?
-        public void SetAvatarTypesCube() => SetAvatarTypes(AvatarType.CUBE);
-        public void SetAvatarTypesStick() => SetAvatarTypes(AvatarType.STICK);
-        public void SetAvatarTypesRobot() => SetAvatarTypes(AvatarType.ROBOT);
-        public void SetAvatarTypesSMPL() => SetAvatarTypes(AvatarType.SMPL);
-
         // Set the avatar type for all AvatarGos
         public void SetAvatarTypes(AvatarType type)
         {
@@ -261,38 +269,20 @@ namespace PoseTeacher
         // Do once on scene startup
         private void Start()
         {
-            Debug.Log("OnEnable");
-
-            //StartWebsocket();
-
-            // Get refrences to objects used to show RGB video (Kinect)
-            streamCanvas = GameObject.Find("RawImage");
-            videoCube = GameObject.Find("VideoCube");
-
-            // Find avatar container objects, and initialize their respective AvatarContainer classes
-            GameObject avatarContainer = GameObject.Find("AvatarContainer");
-            GameObject avatarContainerT = GameObject.Find("AvatarContainerT");
-            GameObject avatarContainer2 = GameObject.Find("AvatarContainer2");
-            GameObject avatarContainerT2 = GameObject.Find("AvatarContainerT2");
-
+            // Initialize the respective AvatarContainer classes
             avatarListSelf = new List<AvatarContainer>();
             avatarListTeacher = new List<AvatarContainer>();
             avatarListSelf.Add(new AvatarContainer(avatarContainer));
-          //  avatarListSelf.Add(new AvatarContainer(avatarContainer2));
             avatarListTeacher.Add(new AvatarContainer(avatarContainerT));
-            //  avatarListTeacher.Add(new AvatarContainer(avatarContainerT2));
 
 
+            // Instantiate objects for showing recordings
             GameObject newAvatar = Instantiate(avatarTPrefab);
             recordedAvatar = new AvatarContainer(newAvatar);
             newAvatar.SetActive(false);
 
-            // Set unused containers to inactive
+            // Set teacher container to inactive at start
             avatarListTeacher[0].avatarContainer.gameObject.SetActive(false);
-            avatarContainer2.SetActive(false);
-            avatarContainerT2.SetActive(false);
-            // avatarListSelf[1].avatarContainer.gameObject.SetActive(false);
-            // avatarListTeacher[1].avatarContainer.gameObject.SetActive(false);
 
             SelfPoseInputGetter = new PoseInputGetter(SelfPoseInputSource) { ReadDataPath = fake_file };
             TeacherPoseInputGetter = new PoseInputGetter(PoseInputSource.FILE){ ReadDataPath = fake_file };
@@ -300,30 +290,37 @@ namespace PoseTeacher
             TeacherPoseInputGetter.loop = true;
             RecordedPoseInputGetter = new PoseInputGetter(PoseInputSource.FILE) { ReadDataPath = fake_file };
 
-            SelfPoseInputGetter.streamCanvas = streamCanvas;
+            //SelfPoseInputGetter.streamCanvas = streamCanvas;
             SelfPoseInputGetter.VideoCube = videoCube;
 
             // initialize similarity calculation instance and assign selected avatars
             avatarSimilarity = new AvatarSimilarity(avatarListSelf[similaritySelfNr], avatarListTeacher[similarityTeacherNr], similarityBodyNr, similarityPenalty, similarityActivateKalman, similarityKalmanQ, similarityKalmanR);
             avatarVisualisationSimilarity = new VisualisationSimilarity(avatarListSelf[similaritySelfNr]);
-            graphtest = new Graph((float)similarityScoreExtern);
+            graph = new Graph((float)similarityScore);
 
             recordedAvatarSimilarity = new AvatarSimilarity(recordedAvatar, avatarListTeacher[similarityTeacherNr], similarityBodyNr, similarityPenalty, similarityActivateKalman, similarityKalmanQ, similarityKalmanR);
             recordedAvatarVisualisationSimilarity = new VisualisationSimilarity(recordedAvatar);
+
+            // Find attached objects in scene
+            scoreIndicator = avatarContainer.transform.Find("ScoreIndicator").gameObject;
+            pulseObject = avatarContainer.transform.Find("PulsingCube").gameObject;
+            progressIndicator = avatarContainerT.transform.Find("ProgressIndicator").gameObject;
+            handMenuContent = trainingElements.transform.Find("HandMenu_Training_HideOnHandDrop").Find("MenuContent").gameObject;
+
+            // Default is to have a mirrored view
+            do_mirror();
 
         }
 
         // Done at each application update
         void Update()
         {
+            checkKeyInput();
 
             if (isChoreography && TeacherPoseInputGetter.CurrentFilePoseNumber >= TeacherPoseInputGetter.TotalFilePoseNumber)
             {
                 CoreoEnded();
             }
-                
-
-            checkKeyInput();
 
             if (!pauseSelf)
             {
@@ -362,14 +359,9 @@ namespace PoseTeacher
                 {
                     similarityTotalScore = avatarSimilarity.totalScore; 
                 }
-                
-
-                // TODO: replace by usng direct values above
-                similarityScoreExtern = similarityScore; // global
-                similarityTotalScoreExtern = similarityTotalScore; // global
 
                 avatarVisualisationSimilarity.UpdatePart(similarityBodyNr, similarityScoreRaw);
-                graphtest.Update_plot(similarityScoreExtern);
+                graph.Update_plot(similarityScore);
             }
 
             if (!pauseRecordingAnimation)
@@ -389,139 +381,65 @@ namespace PoseTeacher
             UpdateIndicators();
         }
 
-
-        // Scale score linearly, only for testing
-        private float scaleScore(float score)
-        {
-            float min = 0.5F;
-
-            float scaled_score = (float)(score - min) /(1-min);
-            scaled_score = scaled_score < 0 ? 0 : scaled_score;
-            scaled_score = scaled_score > 1 ? 1 : scaled_score;
-            return scaled_score;
-        }
-
         public void ActivateIndicators()
         {
+            if (scoreIndicator != null)
+                scoreIndicator.SetActive(true);
+
+            if (pulseObject != null)
+                pulseObject.SetActive(true);
+
+            if (progressIndicator != null)
+                progressIndicator.SetActive(true);
+
             foreach (AvatarContainer avatar in avatarListSelf)
             {
-                Transform scoreIndicatorTr = avatar.avatarContainer.transform.Find("ScoreIndicator");
-                if (scoreIndicatorTr != null)
-                {
-                    GameObject scoreIndicator = scoreIndicatorTr.gameObject;
-                    scoreIndicator.SetActive(true);
-                    
-                }
-
-                Transform pulsingObjectTr = avatar.avatarContainer.transform.Find("PulsingCube");
-                if (pulsingObjectTr != null)
-                {
-                    GameObject pulseObject = pulsingObjectTr.gameObject;
-                    pulseObject.SetActive(true);
-                }
-
-                
-
+                avatar.MoveIndicators(true);
             }
             foreach (AvatarContainer avatar in avatarListTeacher)
             {
-                Transform progressIndicatorTr = avatar.avatarContainer.transform.Find("ProgressIndicator");
-                if (progressIndicatorTr != null)
-                {
-                    GameObject progressIndicator = progressIndicatorTr.gameObject;
-                    progressIndicator.SetActive(true);
-                }
-
+                avatar.MoveIndicators(true);
             }
         }
 
         public void DeActivateIndicators()
         {
-            foreach (AvatarContainer avatar in avatarListSelf)
-            {
-                Transform scoreIndicatorTr = avatar.avatarContainer.transform.Find("ScoreIndicator");
-                if (scoreIndicatorTr != null)
-                {
-                    GameObject scoreIndicator = scoreIndicatorTr.gameObject;
-                    scoreIndicator.SetActive(false);
+            if (scoreIndicator != null)
+                scoreIndicator.SetActive(false);
 
-                }
+            if (pulseObject != null)
+                pulseObject.SetActive(false);
 
-                Transform pulsingObjectTr = avatar.avatarContainer.transform.Find("PulsingCube");
-                if (pulsingObjectTr != null)
-                {
-                    GameObject pulseObject = pulsingObjectTr.gameObject;
-                    pulseObject.SetActive(false);
-                }
-
-            }
-            foreach (AvatarContainer avatar in avatarListTeacher)
-            {
-                Transform progressIndicatorTr = avatar.avatarContainer.transform.Find("ProgressIndicator");
-                if (progressIndicatorTr != null)
-                {
-                    GameObject progressIndicator = progressIndicatorTr.gameObject;
-                    progressIndicator.SetActive(false);
-                }
-
-            }
+            if (progressIndicator != null)
+                progressIndicator.SetActive(false);
         }
 
         private void UpdateIndicators()
         {
-            foreach (AvatarContainer avatar in avatarListSelf)
+            if (scoreIndicator.activeSelf)
             {
-                Transform scoreIndicatorTr = avatar.avatarContainer.transform.Find("ScoreIndicator");
-                if (scoreIndicatorTr != null)
+                if (isChoreography)
                 {
-                    GameObject scoreIndicator = scoreIndicatorTr.gameObject;
-                    if (scoreIndicator.activeSelf)
-                    {
-                        if (isChoreography)
-                        {
-                            scoreIndicator.GetComponent<ProgressIndicator>().pTotal.SetActive(true);
-                            float progress = (float)similarityTotalScore / TeacherPoseInputGetter.TotalFilePoseNumber;
-                            scoreIndicator.GetComponent<ProgressIndicator>().SetProgress(progress);
-                            scoreIndicator.GetComponent<ProgressIndicator>().SetTotalScore((int)similarityTotalScore, TeacherPoseInputGetter.TotalFilePoseNumber);
-                        }
-                        else
-                        {
-                            scoreIndicator.GetComponent<ProgressIndicator>().pTotal.SetActive(false);
-                            scoreIndicator.GetComponent<ProgressIndicator>().SetProgress((float)similarityScore);
-                        }
-                            
-
-                    }
+                    scoreIndicator.GetComponent<ProgressIndicator>().pTotal.SetActive(true);
+                    float progress = (float)similarityTotalScore / TeacherPoseInputGetter.TotalFilePoseNumber;
+                    scoreIndicator.GetComponent<ProgressIndicator>().SetProgress(progress);
+                    scoreIndicator.GetComponent<ProgressIndicator>().SetTotalScore((int)similarityTotalScore, TeacherPoseInputGetter.TotalFilePoseNumber);
                 }
-
-                Transform pulsingObjectTr = avatar.avatarContainer.transform.Find("PulsingCube");
-                if (pulsingObjectTr != null)
+                else
                 {
-                    GameObject pulseObject = pulsingObjectTr.gameObject;
-                    if (pulseObject.activeSelf)
-                    {
-                        // TODO make cube pulse depending on frames and stuff...
-                    }
+                    scoreIndicator.GetComponent<ProgressIndicator>().pTotal.SetActive(false);
+                    scoreIndicator.GetComponent<ProgressIndicator>().SetProgress((float)similarityScore);
                 }
-
             }
-            foreach (AvatarContainer avatar in avatarListTeacher)
+            if (pulseObject.activeSelf)
             {
-                Transform progressIndicatorTr = avatar.avatarContainer.transform.Find("ProgressIndicator");
-                if (progressIndicatorTr != null)
-                {
-                    GameObject progressIndicator = progressIndicatorTr.gameObject;
-                    if (progressIndicator.activeSelf)
-                    {
-                        // TODO use correct progress...
-                        float progress = (float)TeacherPoseInputGetter.CurrentFilePoseNumber / TeacherPoseInputGetter.TotalFilePoseNumber;
-                        progressIndicator.GetComponent<ProgressIndicator>().SetProgress(progress);
-                    }
-                }
-
+                // TODO make cube pulse depending on parameters of dance
             }
-            
-            // TODO update other indicators too
+            if (progressIndicator.activeSelf)
+            {
+                float progress = (float)TeacherPoseInputGetter.CurrentFilePoseNumber / TeacherPoseInputGetter.TotalFilePoseNumber;
+                progressIndicator.GetComponent<ProgressIndicator>().SetProgress(progress);
+            }
         }
 
         // Actions to do before quitting application
@@ -536,27 +454,49 @@ namespace PoseTeacher
         // Change recording mode via keyboard input for debugging and to not need menu
         void checkKeyInput()
         {
-            if (Input.GetKey(KeyCode.X))
+            if (Input.GetKeyDown(KeyCode.H))
+            {
+                // Toggle hand menu (in training/choreography)
+                if(handMenuContent != null && pulseObject != null)
+                {
+                    ScorePulse sp = pulseObject.GetComponent<ScorePulse>();
+                    if (!handMenuContent.activeSelf)
+                    {
+                        Debug.Log("H - Toggle Hand Menu to active");
+                        handMenuContent.SetActive(true);
+                        set_recording_mode(0);
+                        sp.SetPause(true);
+                    }
+                    else
+                    {
+                        Debug.Log("H - Toggle Hand Menu to inactive");
+                        handMenuContent.SetActive(false);
+                        set_recording_mode(2);
+                        sp.SetPause(false);
+                    }
+                }
+            }
+            else if (Input.GetKeyDown(KeyCode.X))
             {
                 Debug.Log("X - set recording_mode to 0 (not recording)");
                 //recording_mode = 0;
             }
-            else if (Input.GetKey(KeyCode.Y))
+            else if (Input.GetKeyDown(KeyCode.Y))
             {
                 Debug.Log("Y - set recording_mode to 1 (recording)");
                 //recording_mode = 1;
             }
-            else if (Input.GetKey(KeyCode.Z))
+            else if (Input.GetKeyDown(KeyCode.Z))
             {
                 Debug.Log("Z - set recording_mode to 2 (playback)");
                 //recording_mode = 2;
             }
-            else if (Input.GetKey(KeyCode.L))
+            else if (Input.GetKeyDown(KeyCode.L))
             {
                 Debug.Log("L - set recording_mode to 3 (load_file)");
                 //recording_mode = 3;
             }
-            else if (Input.GetKey(KeyCode.R))
+            else if (Input.GetKeyDown(KeyCode.R))
             {
                 Debug.Log("R - set recording_mode to 4 (reset_recording)");
                 //recording_mode = 4;
@@ -604,8 +544,7 @@ namespace PoseTeacher
                 TeacherPoseInputGetter.loop = false;
 
                 // Mute cube
-                Transform pulsingObjectTr = avatarListSelf[0].avatarContainer.transform.Find("PulsingCube");
-                ScorePulse sp  = pulsingObjectTr.GetComponent<ScorePulse>();
+                ScorePulse sp  = pulseObject.GetComponent<ScorePulse>();
                 sp.isMuted = true;
             }
             else
@@ -614,13 +553,10 @@ namespace PoseTeacher
                 TeacherPoseInputGetter.loop = true;
 
                 // Unmute cube
-                Transform pulsingObjectTr = avatarListSelf[0].avatarContainer.transform.Find("PulsingCube");
-                ScorePulse sp = pulsingObjectTr.GetComponent<ScorePulse>();
+                ScorePulse sp = pulseObject.GetComponent<ScorePulse>();
                 sp.isMuted = false;
             }
         }
-
-        
         
         public void StartRecordingMode(bool temporary)
         {
@@ -712,10 +648,9 @@ namespace PoseTeacher
         public void ChangeGraphVisibilityAllowed()
         {
             graphAllowed = !graphAllowed;
-            if (graphtest != null)
-                graphtest.graphContainer.SetActive(graphAllowed);
+            if (graph != null)
+                graph.graphContainer.SetActive(graphAllowed);
         }
-
 
         private bool videoCubeAllowed = true;
         public void ChangeVideoCubeVisibilityAllowed()
@@ -724,9 +659,6 @@ namespace PoseTeacher
             if (videoCube != null)
                 videoCube.SetActive(videoCubeAllowed);
         }
-
-        public GameObject EndCoreoScreen;
-        public GameObject CourseHelper;
 
         public void CoreoEnded()
         {
@@ -743,10 +675,9 @@ namespace PoseTeacher
         public void RestartCoreo()
         {
             ResetTotalScore();
-            // it should be RestartRecording instead of Reset...
+            // RestartRecording instead of Reset...
             TeacherPoseInputGetter.RestartFile();
             RestartShowRecording(); // We might will have a naming error, consider using GenNewFilename for "temporary" recordings too...
-            //pauseTeacher = false;
         }
 
         public void LoopStepMovement()
