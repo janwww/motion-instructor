@@ -74,7 +74,7 @@ namespace PoseTeacher
 
 
         // Used for pose similarity calculation
-        public String similarityBodyNr = "total"; // "total", "top", "middle", "bottom"
+        public BodyWeightsType similarityBodyNr = BodyWeightsType.TOTAL;
         public int similaritySelfNr = 0; // self list element to compare
         public int similarityTeacherNr = 0; // teacher list element to compare
         public double similarityScore = 0; // similarity output value between 0 and 1 for defined body part

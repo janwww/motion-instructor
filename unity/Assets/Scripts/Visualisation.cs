@@ -10,64 +10,19 @@ using System.Globalization;
 
 namespace PoseTeacher
 {
-    class VisualisationSimilarity //: MonoBehaviour
+    class VisualisationSimilarity
     {   //Class for the visualisation of score similarity
-        public AvatarContainer self;
-        public List<string> stickNames;
+        public AvatarContainer selfAvatarContainer;
         public List<GameObject> stickparts;
-        public List<double> weightsTop;
-        public List<double> weightsMiddle;
-        public List<double> weightsBottom;
-        public List<double> weightsTotal;
-        public int stickNumber; // number of sticks existing in avatar
-        public GameObject bodypart;
-        public Color tempcolor; //variable for body visualisation color
-        int index;
-        double weight;
-        public string file_weights; //file of binary weights for body parts
-        public Dictionary<string, List<double>> weights_dictionary;
-        // AvatarSimilarity avatarSimilarity;
+        private Dictionary<string, List<double>> weights_dictionary;
 
         public VisualisationSimilarity(AvatarContainer selfIn)
         {
-            string file_weights = "jsondata/joints.csv";
-            weights_dictionary = set_weights(file_weights);
-            self = selfIn;
-            stickparts = new List<GameObject>(new GameObject[]
-            {   //list of body joints
-                self.stickContainer.LeftLowerLeg,
-                self.stickContainer.RightLowerLeg,
-                self.stickContainer.LeftUpperArm,
-                self.stickContainer.RightUpperArm,
-                self.stickContainer.LeftUpperLeg,
-                self.stickContainer.RightUpperLeg,
-                self.stickContainer.TorsoLeft,
-                self.stickContainer.TorsoRight,
-                self.stickContainer.HipStick,
-                self.stickContainer.LeftLowerArm,
-                self.stickContainer.RightLowerArm,
-                self.stickContainer.LeftEye,
-                self.stickContainer.RightEye,
-                self.stickContainer.Shoulders,
-                self.stickContainer.MouthStick,
-                self.stickContainer.NoseStick,
-                self.stickContainer.LeftEar,
-                self.stickContainer.RightEar,
-                self.stickContainer.LeftShoulderStick,
-                self.stickContainer.RightShoulderStick,
-                self.stickContainer.LeftHipStick,
-                self.stickContainer.RightHipStick,
-                self.stickContainer.LeftElbowStick,
-                self.stickContainer.RightElbowStick,
-                self.stickContainer.LeftWristStick,
-                self.stickContainer.RightWristStick,
-                self.stickContainer.LeftKneeStick,
-                self.stickContainer.RightKneeStick,
-                self.stickContainer.LeftAnkleStick,
-                self.stickContainer.RightAnkleStick
-        });
-     
-            setColor(self);
+            //string file_weights = "jsondata/joints.csv";
+            //weights_dictionary = set_weights(file_weights);
+            selfAvatarContainer = selfIn;
+            stickparts = selfAvatarContainer.stickContainer.StickList;
+            SetColor();
         }
          
 
@@ -81,15 +36,17 @@ namespace PoseTeacher
                 index++;
             }
         }
-        public void UpdatePart(string bodyNrIn, List<double> weights_score)
+        public void UpdatePart(BodyWeightsType bodyNrIn, List<double> weights_score)
         {
             // update a color for a specific body part bodyNrIn. Sets grad color to "1" and blue to "0"
-            List<double> weights = get_weights(bodyNrIn);
+            //List<double> weights = get_weights(bodyNrIn);
+            List<double> weights = SimilarityConst.GetStickWeights(bodyNrIn);
+
             for (var i = 0; i < weights.Count; i++)
             {
                 if (weights[i] == 0)
                 {
-                    set_color(stickparts[i], Color.blue);
+                    SetColor(stickparts[i], Color.blue);
                 }
                 if (weights[i] == 1)
                 {
@@ -98,7 +55,7 @@ namespace PoseTeacher
             }
         }
 
-        public void setColor(AvatarContainer selfin)
+        public void SetColor()
         {   
             //set permanent color to all body parts
            
@@ -112,7 +69,7 @@ namespace PoseTeacher
         public void set_grad_color(GameObject body, Color begin, Color end, double weight)
         {
             //set a color as liner interpolation between colors begin and end.
-            tempcolor = body.GetComponent<Renderer>().material.color;
+            Color tempcolor = body.GetComponent<Renderer>().material.color;
             tempcolor.r = (float)(begin.r + (end.r - begin.r) * weight);
             tempcolor.g = (float)(begin.g + (end.g - begin.g) * weight);
             tempcolor.b = (float)(begin.b + (end.b - begin.b) * weight);
@@ -120,7 +77,7 @@ namespace PoseTeacher
             body.GetComponent<Renderer>().material.color = tempcolor;
         }
 
-        public void set_color(GameObject body, Color c)
+        public void SetColor(GameObject body, Color c)
         {
             //set a permanent color c to the body part body
             body.GetComponent<Renderer>().material.color = c;
@@ -181,7 +138,7 @@ namespace PoseTeacher
                     
                     for (int index = 0; index < splits.Count(); index++)
                     {
-                        weight = Double.Parse(splits[index]);
+                        double weight = Double.Parse(splits[index]);
                         if (weights_d.ContainsKey(names[index]))
                         {
                             weights_d[names[index]].Add(weight);
