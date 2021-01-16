@@ -176,7 +176,7 @@ namespace PoseTeacher
         //      Do we really need this function, or we will just set this one-by-one?
         public void do_mirror()
         {
-
+            
             if (mirroring == true)
             {
                 mirroring = false;
@@ -208,6 +208,7 @@ namespace PoseTeacher
                 videoCube.transform.localScale = new Vector3(1f, 0.6f, 0.1f);
                 //streamCanvas.transform.localScale = new Vector3(-32f, 16f, 1f);
             }
+            recordedAvatar.Mirror(mirroring);
         }
 
         // Setters used in UI, configured in Inspector tab of respective buttons
@@ -664,12 +665,13 @@ namespace PoseTeacher
         {
             // Show CoreoEndScreen with proper data
             StopRecordingMode();
-            
+
+            EndCoreoScreen.SetActive(true);
             CoreoEndScreen endScreenHelper = EndCoreoScreen.GetComponent<CoreoEndScreen>();
             CourseMenuHelper courseHelper = CourseHelper.GetComponent<CourseMenuHelper>();
             endScreenHelper.SetCoreoName(courseHelper.CurrentStepName());
             endScreenHelper.SetScore((int)similarityTotalScore, TeacherPoseInputGetter.TotalFilePoseNumber);
-            EndCoreoScreen.SetActive(true);
+            
         }
 
         public void RestartCoreo()

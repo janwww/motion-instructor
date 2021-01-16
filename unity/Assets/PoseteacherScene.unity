@@ -12376,8 +12376,8 @@ GameObject:
   - component: {fileID: 1380732516}
   - component: {fileID: 1380732515}
   - component: {fileID: 1380732514}
-  - component: {fileID: 1380732518}
   - component: {fileID: 1380732517}
+  - component: {fileID: 1380732518}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -13653,13 +13653,15 @@ MonoBehaviour:
   avatarTPrefab: {fileID: 8558158226385229007, guid: 1e91ca8dafde2714db0b68a8737b04de,
     type: 3}
   trainingElements: {fileID: 1585359968}
+  EndCoreoScreen: {fileID: 2055434586}
+  CourseHelper: {fileID: 51247927}
   pauseSelf: 0
   pauseTeacher: 1
   isChoreography: 0
   playbackSpeed: 0
   SelfPoseInputSource: 2
   mirroring: 0
-  similarityBodyNr: total
+  similarityBodyNr: 0
   similaritySelfNr: 0
   similarityTeacherNr: 0
   similarityScore: 0
@@ -13671,8 +13673,6 @@ MonoBehaviour:
   similarityScoreRaw: []
   similarityWeightRaw: []
   difficulty: 0
-  EndCoreoScreen: {fileID: 2055434586}
-  CourseHelper: {fileID: 51247927}
 --- !u!224 &1630789625
 RectTransform:
   m_ObjectHideFlags: 0
@@ -19516,6 +19516,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: EndCoreoScreen
+      objectReference: {fileID: 0}
+    - target: {fileID: 9050449464387764111, guid: 97375dd3e6ebe4a41a1e50432fa96840,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 9050449464387764149, guid: 97375dd3e6ebe4a41a1e50432fa96840,
         type: 3}
