@@ -50,6 +50,7 @@ namespace PoseTeacher
         GameObject handMenuContent;
         public GameObject EndCoreoScreen;
         public GameObject CourseHelper;
+        public GameObject GraphContainer;
 
 
         // State of Main
@@ -254,17 +255,18 @@ namespace PoseTeacher
         }
 
         // Set the avatar type for all AvatarGos
-        public void SetAvatarTypes(AvatarType type)
+        public void SetAvatarTypes(AvatarType avatarType)
         {
             foreach (AvatarContainer avatar in avatarListSelf)
             {
-                avatar.ChangeActiveType(type);
+                avatar.ChangeActiveType(avatarType);
             }
 
             foreach (AvatarContainer avatar in avatarListTeacher)
             {
-                avatar.ChangeActiveType(type);
+                avatar.ChangeActiveType(avatarType);
             }
+            recordedAvatar.ChangeActiveType(avatarType);
         }
 
         // Do once on scene startup
@@ -297,7 +299,7 @@ namespace PoseTeacher
             // initialize similarity calculation instance and assign selected avatars
             avatarSimilarity = new AvatarSimilarity(avatarListSelf[similaritySelfNr], avatarListTeacher[similarityTeacherNr], similarityBodyNr, similarityPenalty, similarityActivateKalman, similarityKalmanQ, similarityKalmanR);
             avatarVisualisationSimilarity = new VisualisationSimilarity(avatarListSelf[similaritySelfNr]);
-            graph = new Graph((float)similarityScore);
+            graph = new Graph(GraphContainer, 0.0F);
 
             recordedAvatarSimilarity = new AvatarSimilarity(recordedAvatar, avatarListTeacher[similarityTeacherNr], similarityBodyNr, similarityPenalty, similarityActivateKalman, similarityKalmanQ, similarityKalmanR);
             recordedAvatarVisualisationSimilarity = new VisualisationSimilarity(recordedAvatar);

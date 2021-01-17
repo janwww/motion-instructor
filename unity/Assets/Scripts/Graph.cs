@@ -7,23 +7,24 @@ namespace PoseTeacher
     //Class for visualisation of similarity score development over time
     public class Graph
     {
-        public GameObject gobject;
+        public GameObject dataLine;
         public GameObject graphContainer;
         public Text coord; //object for the axis labels
         public int vectorElementsN = 200;
         LineRenderer lineRenderer;
         Vector3[] valuesDynamic;
         float begin_x, begin_y, end_x, end_y, step_x, step_y;
-        float similarityScore;
+        //float similarityScore;
 
-        public Graph(float similarityScoreExtern)
+        public Graph(GameObject graphContainerIn, float similarityScoreIn = 0.0F)
         {
             //constructor. Initialise objects for the plot visualisation
-            gobject = GameObject.Find("Dataline");
-            graphContainer = GameObject.Find("GraphTestContainer");
-            similarityScore = similarityScoreExtern;
-            lineRenderer = gobject.GetComponent<LineRenderer>();
-            Start_plot(similarityScore);
+            graphContainer = graphContainerIn;
+            dataLine = graphContainer.transform.Find("Dataline").gameObject;
+            
+            //similarityScore = similarityScoreIn;
+            lineRenderer = dataLine.GetComponent<LineRenderer>();
+            Start_plot(similarityScoreIn);
 
         }
 
@@ -43,7 +44,7 @@ namespace PoseTeacher
             for (int i = 0; i < 11; i++)
             {
                 //vertical lines of the grid
-                GameObject vert = GameObject.Instantiate(gobject);
+                GameObject vert = GameObject.Instantiate(dataLine);
                 vert.transform.parent = graphContainer.transform;
                 vert.GetComponent<Renderer>().material.color = color_grid_line;
                 LineRenderer lineRenderer_vert = vert.GetComponent<LineRenderer>();
@@ -55,7 +56,7 @@ namespace PoseTeacher
                 lineRenderer_vert.SetPosition(1, new Vector3(begin_x + i * step_x, end_y, 8.45f));
 
                 //horisontal lines of the grid
-                GameObject hor = GameObject.Instantiate(gobject);
+                GameObject hor = GameObject.Instantiate(dataLine);
                 hor.transform.parent = graphContainer.transform;
                 if (i == 0 || i == 10)
                 {
