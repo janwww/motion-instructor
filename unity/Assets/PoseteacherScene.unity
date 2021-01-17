@@ -13658,6 +13658,7 @@ MonoBehaviour:
   avatarTPrefab: {fileID: 8558158226385229007, guid: 1e91ca8dafde2714db0b68a8737b04de,
     type: 3}
   trainingElements: {fileID: 1585359968}
+  choreographyElements: {fileID: 536618239}
   EndCoreoScreen: {fileID: 2055434586}
   CourseHelper: {fileID: 51247927}
   GraphContainer: {fileID: 1761938895}
@@ -19115,6 +19116,16 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Mesh
       value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 2527149606794768481, guid: e5038f103da448644ba3d16936730a2c,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2527149606794768481, guid: e5038f103da448644ba3d16936730a2c,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4922774831844136995, guid: e5038f103da448644ba3d16936730a2c,
         type: 3}

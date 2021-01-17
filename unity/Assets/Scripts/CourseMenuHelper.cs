@@ -321,7 +321,7 @@ namespace PoseTeacher
             
             UnityEngine.UI.Text DescriptionText = CourseDescription.GetComponent<UnityEngine.UI.Text>();
             CourseInfoHolder info = courses.Courses[courseID]; 
-            Debug.Log("<size=30>" + info.CourseTitle + "</size>\n<size=20>" + info.CourseDescription + "</size>");
+            Debug.Log(info.CourseTitle + "\n"+ info.CourseDescription);
             DescriptionText.text = "<size=30>" + info.CourseTitle + "</size>\n<size=20>" + info.CourseDescription + "</size>";
         }
 

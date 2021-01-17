@@ -46,8 +46,10 @@ namespace PoseTeacher
         GameObject scoreIndicator;
         GameObject pulseObject;
         GameObject progressIndicator;
-        public GameObject trainingElements; // Only used to get reference from editor Inspector
-        GameObject handMenuContent;
+        public GameObject trainingElements;
+        GameObject trainHandMenuContent;
+        public GameObject choreographyElements;
+        GameObject choreoHandMenuContent;
         public GameObject EndCoreoScreen;
         public GameObject CourseHelper;
         public GameObject GraphContainer;
@@ -308,7 +310,8 @@ namespace PoseTeacher
             scoreIndicator = avatarContainer.transform.Find("ScoreIndicator").gameObject;
             pulseObject = avatarContainer.transform.Find("PulsingCube").gameObject;
             progressIndicator = avatarContainerT.transform.Find("ProgressIndicator").gameObject;
-            handMenuContent = trainingElements.transform.Find("HandMenu_Training_HideOnHandDrop").Find("MenuContent").gameObject;
+            trainHandMenuContent = trainingElements.transform.Find("HandMenu_Training_HideOnHandDrop").Find("MenuContent").gameObject;
+            choreoHandMenuContent = choreographyElements.transform.Find("HandMenu_Coreo_HideOnHandDrop").Find("MenuContent").gameObject;
 
             // Default is to have a mirrored view
             do_mirror();
@@ -460,20 +463,28 @@ namespace PoseTeacher
             if (Input.GetKeyDown(KeyCode.H))
             {
                 // Toggle hand menu (in training/choreography)
-                if(handMenuContent != null && pulseObject != null)
+                if(pulseObject != null)
                 {
+                    GameObject toggleObject = null;
+                    if(trainingElements.activeSelf)
+                        toggleObject = trainHandMenuContent;
+                    if(choreographyElements.activeSelf)
+                        toggleObject = choreoHandMenuContent;
+                    if (toggleObject == null)
+                        return;
+
                     ScorePulse sp = pulseObject.GetComponent<ScorePulse>();
-                    if (!handMenuContent.activeSelf)
+                    if (!toggleObject.activeSelf)
                     {
                         Debug.Log("H - Toggle Hand Menu to active");
-                        handMenuContent.SetActive(true);
+                        toggleObject.SetActive(true);
                         set_recording_mode(0);
                         sp.SetPause(true);
                     }
                     else
                     {
                         Debug.Log("H - Toggle Hand Menu to inactive");
-                        handMenuContent.SetActive(false);
+                        toggleObject.SetActive(false);
                         set_recording_mode(2);
                         sp.SetPause(false);
                     }
