@@ -494,7 +494,7 @@ namespace PoseTeacher
             }
         }
 
-        private void DeactivateDetails(bool forcezero = false)
+        public void DeactivateDetails(bool forcezero = false)
         {
             activeFocuses--;
             if (forcezero) activeFocuses = 0;

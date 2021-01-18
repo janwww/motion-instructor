@@ -90,6 +90,9 @@ namespace PoseTeacher
         public List<double> similarityWeightRaw; // weight value for all body sticks
         AvatarSimilarity avatarSimilarity;
 
+        // Debugging and testing variables
+        private bool forceSimilarityUpdate = false;
+
         // Used for showing similarity
         VisualisationSimilarity avatarVisualisationSimilarity;
         Graph graph;
@@ -369,6 +372,17 @@ namespace PoseTeacher
                 avatarVisualisationSimilarity.UpdatePart(similarityBodyNr, similarityScoreRaw);
                 graph.Update_plot(similarityScore);
             }
+            else if (forceSimilarityUpdate)
+            {
+                // Used only when testing in editor
+                // Force score and visualisation update, even if teacher did not move
+                avatarSimilarity.Update(); // update similarity calculation with each update loop step
+                similarityScore = avatarSimilarity.similarityBodypart; // get single similarity score for selected body part
+                similarityScoreRaw = avatarSimilarity.similarityStick; // get similarity score for each stick element
+                similarityWeightRaw = avatarSimilarity.stickWeight; // get similarity score for each stick element
+                avatarVisualisationSimilarity.UpdatePart(similarityBodyNr, similarityScoreRaw);
+                graph.Update_plot(similarityScore);
+            }
 
             if (!pauseRecordingAnimation)
             {
@@ -490,31 +504,23 @@ namespace PoseTeacher
                     }
                 }
             }
-            else if (Input.GetKeyDown(KeyCode.X))
+            else if (Input.GetKeyDown(KeyCode.T))
             {
-                Debug.Log("X - set recording_mode to 0 (not recording)");
-                //recording_mode = 0;
+                Debug.Log("T - toggle teacher pause");
+                pauseTeacher = !pauseTeacher;
             }
-            else if (Input.GetKeyDown(KeyCode.Y))
+            else if (Input.GetKeyDown(KeyCode.P))
             {
-                Debug.Log("Y - set recording_mode to 1 (recording)");
-                //recording_mode = 1;
+                Debug.Log("P - toggle self pause");
+                pauseSelf = !pauseSelf;
             }
-            else if (Input.GetKeyDown(KeyCode.Z))
+            else if (Input.GetKeyDown(KeyCode.U))
             {
-                Debug.Log("Z - set recording_mode to 2 (playback)");
-                //recording_mode = 2;
+                Debug.Log("U - toggle force similarity update");
+                forceSimilarityUpdate = !forceSimilarityUpdate;
             }
-            else if (Input.GetKeyDown(KeyCode.L))
-            {
-                Debug.Log("L - set recording_mode to 3 (load_file)");
-                //recording_mode = 3;
-            }
-            else if (Input.GetKeyDown(KeyCode.R))
-            {
-                Debug.Log("R - set recording_mode to 4 (reset_recording)");
-                //recording_mode = 4;
-            }
+
+            
         }
 
 
