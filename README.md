@@ -53,13 +53,11 @@ As of December 10, 2020, this repository has been tested under the following env
 
 ## How to use
 - It is recommended to use the UI to navigate in the application.
-- For debugging we added the following keyboard shortcuts: (some currently unavailable)
+- For debugging we added the following keyboard shortcuts:
    - H for toggling Hand menu in traing/choreography (for use in editor testing)
-   - ~~X for normal operation~~
-   - ~~Y for recording~~
-   - ~~Z for playback~~
-   - ~~L to load playback~~
-   - ~~R to reset/delete saved playback~~
+   - T for toggling pause of teacher avatar updates
+   - P for toggling pause of self avatar updates
+   - U for toggling force similarity update (even if teacher updates are paused)
 
 ## Alternative pose estimation (experimental)
 

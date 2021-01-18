@@ -97,6 +97,10 @@ namespace PoseTeacher
         public GameObject LeftShoulderStick, RightShoulderStick, LeftHipStick, RightHipStick, LeftElbowStick, RightElbowStick, LeftWristStick, RightWristStick,
             LeftKneeStick, RightKneeStick, LeftAnkleStick, RightAnkleStick;
 
+        // List of all references
+        public List<GameObject> StickList;
+
+
         public StickContainer(GameObject container)
         {
             SubContainerObject = container;
@@ -134,6 +138,14 @@ namespace PoseTeacher
             RightKneeStick = stick.transform.Find("RightKneeStick").gameObject;
             LeftAnkleStick = stick.transform.Find("LeftAnkleStick").gameObject;
             RightAnkleStick = stick.transform.Find("RightAnkleStick").gameObject;
+
+            StickList = new List<GameObject>(new GameObject[]
+                {   //list of body joints
+                    LeftLowerLeg, RightLowerLeg, LeftUpperArm, RightUpperArm, LeftUpperLeg, RightUpperLeg, TorsoLeft,
+                    TorsoRight, HipStick, LeftLowerArm, RightLowerArm, LeftEye, RightEye, Shoulders, MouthStick, NoseStick, LeftEar, RightEar,
+                    LeftShoulderStick, RightShoulderStick, LeftHipStick, RightHipStick, LeftElbowStick, RightElbowStick, LeftWristStick, RightWristStick,
+                    LeftKneeStick, RightKneeStick, LeftAnkleStick, RightAnkleStick
+                });
         }
 
         public void MovePerson(PoseData joint_data_list)

@@ -13,7 +13,16 @@ namespace PoseTeacher {
 
         // The EndCoreoScreen GameObject
         public GameObject EndCoreoScreen;
-        private GameObject CoreoScoreDescription;
+        private GameObject _CoreoScoreDescription;
+        private GameObject CoreoScoreDescription 
+        {
+            get 
+            { 
+                if (_CoreoScoreDescription == null)
+                    _CoreoScoreDescription = EndCoreoScreen.transform.Find("TextContent").Find("CoreoScoreDescription").gameObject;
+                return _CoreoScoreDescription;
+            }
+        }
         // The CourseMenuHelper GameObject in Menu new
         public GameObject CourseHelper;
         // The Main GameObject
@@ -22,8 +31,7 @@ namespace PoseTeacher {
         // Start is called before the first frame update
         void Start()
         {
-            CoreoScoreDescription = EndCoreoScreen.transform.Find("TextContent").Find("CoreoScoreDescription").gameObject;
-            EndCoreoScreen.SetActive(false);
+
         }
 
         // Code that runs when the Show Recording button is pressed on the Coreo End Screen.

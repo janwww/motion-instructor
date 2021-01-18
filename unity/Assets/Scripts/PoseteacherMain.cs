@@ -46,10 +46,13 @@ namespace PoseTeacher
         GameObject scoreIndicator;
         GameObject pulseObject;
         GameObject progressIndicator;
-        public GameObject trainingElements; // Only used to get reference from editor Inspector
-        GameObject handMenuContent;
+        public GameObject trainingElements;
+        GameObject trainHandMenuContent;
+        public GameObject choreographyElements;
+        GameObject choreoHandMenuContent;
         public GameObject EndCoreoScreen;
         public GameObject CourseHelper;
+        public GameObject GraphContainer;
 
 
         // State of Main
@@ -74,7 +77,7 @@ namespace PoseTeacher
 
 
         // Used for pose similarity calculation
-        public String similarityBodyNr = "total"; // "total", "top", "middle", "bottom"
+        public BodyWeightsType similarityBodyNr = BodyWeightsType.TOTAL;
         public int similaritySelfNr = 0; // self list element to compare
         public int similarityTeacherNr = 0; // teacher list element to compare
         public double similarityScore = 0; // similarity output value between 0 and 1 for defined body part
@@ -86,6 +89,9 @@ namespace PoseTeacher
         public List<double> similarityScoreRaw; // similarity value for all body sticks
         public List<double> similarityWeightRaw; // weight value for all body sticks
         AvatarSimilarity avatarSimilarity;
+
+        // Debugging and testing variables
+        private bool forceSimilarityUpdate = false;
 
         // Used for showing similarity
         VisualisationSimilarity avatarVisualisationSimilarity;
@@ -176,7 +182,7 @@ namespace PoseTeacher
         //      Do we really need this function, or we will just set this one-by-one?
         public void do_mirror()
         {
-
+            
             if (mirroring == true)
             {
                 mirroring = false;
@@ -208,6 +214,7 @@ namespace PoseTeacher
                 videoCube.transform.localScale = new Vector3(1f, 0.6f, 0.1f);
                 //streamCanvas.transform.localScale = new Vector3(-32f, 16f, 1f);
             }
+            recordedAvatar.Mirror(mirroring);
         }
 
         // Setters used in UI, configured in Inspector tab of respective buttons
@@ -253,17 +260,18 @@ namespace PoseTeacher
         }
 
         // Set the avatar type for all AvatarGos
-        public void SetAvatarTypes(AvatarType type)
+        public void SetAvatarTypes(AvatarType avatarType)
         {
             foreach (AvatarContainer avatar in avatarListSelf)
             {
-                avatar.ChangeActiveType(type);
+                avatar.ChangeActiveType(avatarType);
             }
 
             foreach (AvatarContainer avatar in avatarListTeacher)
             {
-                avatar.ChangeActiveType(type);
+                avatar.ChangeActiveType(avatarType);
             }
+            recordedAvatar.ChangeActiveType(avatarType);
         }
 
         // Do once on scene startup
@@ -296,7 +304,7 @@ namespace PoseTeacher
             // initialize similarity calculation instance and assign selected avatars
             avatarSimilarity = new AvatarSimilarity(avatarListSelf[similaritySelfNr], avatarListTeacher[similarityTeacherNr], similarityBodyNr, similarityPenalty, similarityActivateKalman, similarityKalmanQ, similarityKalmanR);
             avatarVisualisationSimilarity = new VisualisationSimilarity(avatarListSelf[similaritySelfNr]);
-            graph = new Graph((float)similarityScore);
+            graph = new Graph(GraphContainer, 0.0F);
 
             recordedAvatarSimilarity = new AvatarSimilarity(recordedAvatar, avatarListTeacher[similarityTeacherNr], similarityBodyNr, similarityPenalty, similarityActivateKalman, similarityKalmanQ, similarityKalmanR);
             recordedAvatarVisualisationSimilarity = new VisualisationSimilarity(recordedAvatar);
@@ -305,7 +313,8 @@ namespace PoseTeacher
             scoreIndicator = avatarContainer.transform.Find("ScoreIndicator").gameObject;
             pulseObject = avatarContainer.transform.Find("PulsingCube").gameObject;
             progressIndicator = avatarContainerT.transform.Find("ProgressIndicator").gameObject;
-            handMenuContent = trainingElements.transform.Find("HandMenu_Training_HideOnHandDrop").Find("MenuContent").gameObject;
+            trainHandMenuContent = trainingElements.transform.Find("HandMenu_Training_HideOnHandDrop").Find("MenuContent").gameObject;
+            choreoHandMenuContent = choreographyElements.transform.Find("HandMenu_Coreo_HideOnHandDrop").Find("MenuContent").gameObject;
 
             // Default is to have a mirrored view
             do_mirror();
@@ -360,6 +369,17 @@ namespace PoseTeacher
                     similarityTotalScore = avatarSimilarity.totalScore; 
                 }
 
+                avatarVisualisationSimilarity.UpdatePart(similarityBodyNr, similarityScoreRaw);
+                graph.Update_plot(similarityScore);
+            }
+            else if (forceSimilarityUpdate)
+            {
+                // Used only when testing in editor
+                // Force score and visualisation update, even if teacher did not move
+                avatarSimilarity.Update(); // update similarity calculation with each update loop step
+                similarityScore = avatarSimilarity.similarityBodypart; // get single similarity score for selected body part
+                similarityScoreRaw = avatarSimilarity.similarityStick; // get similarity score for each stick element
+                similarityWeightRaw = avatarSimilarity.stickWeight; // get similarity score for each stick element
                 avatarVisualisationSimilarity.UpdatePart(similarityBodyNr, similarityScoreRaw);
                 graph.Update_plot(similarityScore);
             }
@@ -457,50 +477,50 @@ namespace PoseTeacher
             if (Input.GetKeyDown(KeyCode.H))
             {
                 // Toggle hand menu (in training/choreography)
-                if(handMenuContent != null && pulseObject != null)
+                if(pulseObject != null)
                 {
+                    GameObject toggleObject = null;
+                    if(trainingElements.activeSelf)
+                        toggleObject = trainHandMenuContent;
+                    if(choreographyElements.activeSelf)
+                        toggleObject = choreoHandMenuContent;
+                    if (toggleObject == null)
+                        return;
+
                     ScorePulse sp = pulseObject.GetComponent<ScorePulse>();
-                    if (!handMenuContent.activeSelf)
+                    if (!toggleObject.activeSelf)
                     {
                         Debug.Log("H - Toggle Hand Menu to active");
-                        handMenuContent.SetActive(true);
+                        toggleObject.SetActive(true);
                         set_recording_mode(0);
                         sp.SetPause(true);
                     }
                     else
                     {
                         Debug.Log("H - Toggle Hand Menu to inactive");
-                        handMenuContent.SetActive(false);
+                        toggleObject.SetActive(false);
                         set_recording_mode(2);
                         sp.SetPause(false);
                     }
                 }
             }
-            else if (Input.GetKeyDown(KeyCode.X))
+            else if (Input.GetKeyDown(KeyCode.T))
             {
-                Debug.Log("X - set recording_mode to 0 (not recording)");
-                //recording_mode = 0;
+                Debug.Log("T - toggle teacher pause");
+                pauseTeacher = !pauseTeacher;
             }
-            else if (Input.GetKeyDown(KeyCode.Y))
+            else if (Input.GetKeyDown(KeyCode.P))
             {
-                Debug.Log("Y - set recording_mode to 1 (recording)");
-                //recording_mode = 1;
+                Debug.Log("P - toggle self pause");
+                pauseSelf = !pauseSelf;
             }
-            else if (Input.GetKeyDown(KeyCode.Z))
+            else if (Input.GetKeyDown(KeyCode.U))
             {
-                Debug.Log("Z - set recording_mode to 2 (playback)");
-                //recording_mode = 2;
+                Debug.Log("U - toggle force similarity update");
+                forceSimilarityUpdate = !forceSimilarityUpdate;
             }
-            else if (Input.GetKeyDown(KeyCode.L))
-            {
-                Debug.Log("L - set recording_mode to 3 (load_file)");
-                //recording_mode = 3;
-            }
-            else if (Input.GetKeyDown(KeyCode.R))
-            {
-                Debug.Log("R - set recording_mode to 4 (reset_recording)");
-                //recording_mode = 4;
-            }
+
+            
         }
 
 
@@ -664,12 +684,13 @@ namespace PoseTeacher
         {
             // Show CoreoEndScreen with proper data
             StopRecordingMode();
-            
+
+            EndCoreoScreen.SetActive(true);
             CoreoEndScreen endScreenHelper = EndCoreoScreen.GetComponent<CoreoEndScreen>();
             CourseMenuHelper courseHelper = CourseHelper.GetComponent<CourseMenuHelper>();
             endScreenHelper.SetCoreoName(courseHelper.CurrentStepName());
             endScreenHelper.SetScore((int)similarityTotalScore, TeacherPoseInputGetter.TotalFilePoseNumber);
-            EndCoreoScreen.SetActive(true);
+            
         }
 
         public void RestartCoreo()

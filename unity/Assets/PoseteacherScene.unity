@@ -7794,7 +7794,12 @@ PrefabInstance:
     - target: {fileID: 7560376345337439866, guid: 3b03ccae5e882a349968c96227fc00fe,
         type: 3}
       propertyPath: m_Name
-      value: GraphTestContainer
+      value: GraphContainer
+      objectReference: {fileID: 0}
+    - target: {fileID: 7560376345337439866, guid: 3b03ccae5e882a349968c96227fc00fe,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7560376345536517071, guid: 3b03ccae5e882a349968c96227fc00fe,
         type: 3}
@@ -12376,8 +12381,8 @@ GameObject:
   - component: {fileID: 1380732516}
   - component: {fileID: 1380732515}
   - component: {fileID: 1380732514}
-  - component: {fileID: 1380732518}
   - component: {fileID: 1380732517}
+  - component: {fileID: 1380732518}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -13653,13 +13658,17 @@ MonoBehaviour:
   avatarTPrefab: {fileID: 8558158226385229007, guid: 1e91ca8dafde2714db0b68a8737b04de,
     type: 3}
   trainingElements: {fileID: 1585359968}
+  choreographyElements: {fileID: 536618239}
+  EndCoreoScreen: {fileID: 2055434586}
+  CourseHelper: {fileID: 51247927}
+  GraphContainer: {fileID: 1761938895}
   pauseSelf: 0
   pauseTeacher: 1
   isChoreography: 0
   playbackSpeed: 0
   SelfPoseInputSource: 2
   mirroring: 0
-  similarityBodyNr: total
+  similarityBodyNr: 0
   similaritySelfNr: 0
   similarityTeacherNr: 0
   similarityScore: 0
@@ -13671,8 +13680,6 @@ MonoBehaviour:
   similarityScoreRaw: []
   similarityWeightRaw: []
   difficulty: 0
-  EndCoreoScreen: {fileID: 2055434586}
-  CourseHelper: {fileID: 51247927}
 --- !u!224 &1630789625
 RectTransform:
   m_ObjectHideFlags: 0
@@ -14281,6 +14288,12 @@ MonoBehaviour:
     type: 3}
   showScaleHandles: 1
   scaleBehavior: 0
+--- !u!1 &1761938895 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7560376345337439866, guid: 3b03ccae5e882a349968c96227fc00fe,
+    type: 3}
+  m_PrefabInstance: {fileID: 762181361}
+  m_PrefabAsset: {fileID: 0}
 --- !u!114 &1781227964 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 684655732380974155, guid: 6706340894601014f913e0cea24155c8,
@@ -17028,6 +17041,16 @@ PrefabInstance:
       propertyPath: Events.Array.data[2].Settings.Array.data[1].Options.Array.data[2]
       value: Far Only
       objectReference: {fileID: 0}
+    - target: {fileID: 2462730897325319230, guid: fb7db092bc9295e41a21e9d530aac22e,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2657796016546666115, guid: fb7db092bc9295e41a21e9d530aac22e,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2960495385122004057, guid: fb7db092bc9295e41a21e9d530aac22e,
         type: 3}
       propertyPath: m_RootOrder
@@ -19094,6 +19117,16 @@ PrefabInstance:
       propertyPath: m_Mesh
       value: 
       objectReference: {fileID: 0}
+    - target: {fileID: 2527149606794768481, guid: e5038f103da448644ba3d16936730a2c,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2527149606794768481, guid: e5038f103da448644ba3d16936730a2c,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4922774831844136995, guid: e5038f103da448644ba3d16936730a2c,
         type: 3}
       propertyPath: OnClick.m_PersistentCalls.m_Calls.Array.size
@@ -19516,6 +19549,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: EndCoreoScreen
+      objectReference: {fileID: 0}
+    - target: {fileID: 9050449464387764111, guid: 97375dd3e6ebe4a41a1e50432fa96840,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 9050449464387764149, guid: 97375dd3e6ebe4a41a1e50432fa96840,
         type: 3}

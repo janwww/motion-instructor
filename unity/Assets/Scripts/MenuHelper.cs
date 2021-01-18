@@ -152,7 +152,8 @@ namespace PoseTeacher
                 // Set Title Menu to Active
                 CurrentMenu = Menus.TITLE;
                 DeactivateTeachers();
-                menus[CurrentMenu].SetActive(true); 
+                menus[CurrentMenu].SetActive(true);
+                courseMenuHelper.DeactivateDetails(true);
             }
 
             SetTitleBarText();
