@@ -12,172 +12,6 @@ namespace PoseTeacher
         CUBE, STICK, ROBOT, SMPL
     }
 
-    public static class RiggingUtil
-    {
-        public static Dictionary<JointId, Quaternion> basisJointMap;
-        static Quaternion Y_180_FLIP = new Quaternion(0.0f, 1.0f, 0.0f, 0.0f);
-
-        static RiggingUtil()
-        {
-            Vector3 zpositive = Vector3.forward;
-            Vector3 xpositive = Vector3.right;
-            Vector3 ypositive = Vector3.up;
-            // spine and left hip are the same
-            Quaternion leftHipBasis = Quaternion.LookRotation(xpositive, -zpositive);
-            Quaternion spineHipBasis = Quaternion.LookRotation(xpositive, -zpositive);
-            Quaternion rightHipBasis = Quaternion.LookRotation(xpositive, zpositive);
-            // arms and thumbs share the same basis
-            Quaternion leftArmBasis = Quaternion.LookRotation(ypositive, -zpositive);
-            Quaternion rightArmBasis = Quaternion.LookRotation(-ypositive, zpositive);
-            Quaternion leftHandBasis = Quaternion.LookRotation(-zpositive, -ypositive);
-            Quaternion rightHandBasis = Quaternion.identity;
-            Quaternion leftFootBasis = Quaternion.LookRotation(xpositive, ypositive);
-            Quaternion rightFootBasis = Quaternion.LookRotation(xpositive, -ypositive);
-
-            basisJointMap = new Dictionary<JointId, Quaternion>();
-
-            // pelvis has no parent so set to count
-            basisJointMap[JointId.Pelvis] = spineHipBasis;
-            basisJointMap[JointId.SpineNavel] = spineHipBasis;
-            basisJointMap[JointId.SpineChest] = spineHipBasis;
-            basisJointMap[JointId.Neck] = spineHipBasis;
-            basisJointMap[JointId.ClavicleLeft] = leftArmBasis;
-            basisJointMap[JointId.ShoulderLeft] = leftArmBasis;
-            basisJointMap[JointId.ElbowLeft] = leftArmBasis;
-            basisJointMap[JointId.WristLeft] = leftHandBasis;
-            basisJointMap[JointId.HandLeft] = leftHandBasis;
-            basisJointMap[JointId.HandTipLeft] = leftHandBasis;
-            basisJointMap[JointId.ThumbLeft] = leftArmBasis;
-            basisJointMap[JointId.ClavicleRight] = rightArmBasis;
-            basisJointMap[JointId.ShoulderRight] = rightArmBasis;
-            basisJointMap[JointId.ElbowRight] = rightArmBasis;
-            basisJointMap[JointId.WristRight] = rightHandBasis;
-            basisJointMap[JointId.HandRight] = rightHandBasis;
-            basisJointMap[JointId.HandTipRight] = rightHandBasis;
-            basisJointMap[JointId.ThumbRight] = rightArmBasis;
-            basisJointMap[JointId.HipLeft] = leftHipBasis;
-            basisJointMap[JointId.KneeLeft] = leftHipBasis;
-            basisJointMap[JointId.AnkleLeft] = leftHipBasis;
-            basisJointMap[JointId.FootLeft] = leftFootBasis;
-            basisJointMap[JointId.HipRight] = rightHipBasis;
-            basisJointMap[JointId.KneeRight] = rightHipBasis;
-            basisJointMap[JointId.AnkleRight] = rightHipBasis;
-            basisJointMap[JointId.FootRight] = rightFootBasis;
-            basisJointMap[JointId.Head] = spineHipBasis;
-            basisJointMap[JointId.Nose] = spineHipBasis;
-            basisJointMap[JointId.EyeLeft] = spineHipBasis;
-            basisJointMap[JointId.EarLeft] = spineHipBasis;
-            basisJointMap[JointId.EyeRight] = spineHipBasis;
-            basisJointMap[JointId.EarRight] = spineHipBasis;
-        }
-
-        
-
-        public static HumanBodyBones MapKinectJoint(JointId joint)
-        {
-            // https://docs.microsoft.com/en-us/azure/Kinect-dk/body-joints
-            switch (joint)
-            {
-                case JointId.Pelvis: return HumanBodyBones.Hips;
-                case JointId.SpineNavel: return HumanBodyBones.Spine;
-                case JointId.SpineChest: return HumanBodyBones.Chest;
-                case JointId.Neck: return HumanBodyBones.Neck;
-                case JointId.Head: return HumanBodyBones.Head;
-                case JointId.HipLeft: return HumanBodyBones.LeftUpperLeg;
-                case JointId.KneeLeft: return HumanBodyBones.LeftLowerLeg;
-                case JointId.AnkleLeft: return HumanBodyBones.LeftFoot;
-                case JointId.FootLeft: return HumanBodyBones.LeftToes;
-                case JointId.HipRight: return HumanBodyBones.RightUpperLeg;
-                case JointId.KneeRight: return HumanBodyBones.RightLowerLeg;
-                case JointId.AnkleRight: return HumanBodyBones.RightFoot;
-                case JointId.FootRight: return HumanBodyBones.RightToes;
-                case JointId.ClavicleLeft: return HumanBodyBones.LeftShoulder;
-                case JointId.ShoulderLeft: return HumanBodyBones.LeftUpperArm;
-                case JointId.ElbowLeft: return HumanBodyBones.LeftLowerArm;
-                case JointId.WristLeft: return HumanBodyBones.LeftHand;
-                case JointId.ClavicleRight: return HumanBodyBones.RightShoulder;
-                case JointId.ShoulderRight: return HumanBodyBones.RightUpperArm;
-                case JointId.ElbowRight: return HumanBodyBones.RightLowerArm;
-                case JointId.WristRight: return HumanBodyBones.RightHand;
-                default: return HumanBodyBones.LastBone;
-            }
-        }
-
-        public static SkeletonBone GetSkeletonBone(Animator animator, string boneName)
-        {
-            int count = 0;
-            StringBuilder cloneName = new StringBuilder(boneName);
-            cloneName.Append("(Clone)");
-            foreach (SkeletonBone sb in animator.avatar.humanDescription.skeleton)
-            {
-                if (sb.name == boneName || sb.name == cloneName.ToString())
-                {
-                    return animator.avatar.humanDescription.skeleton[count];
-                }
-                count++;
-            }
-            return new SkeletonBone();
-        }
-
-        public static Quaternion absoluteJointRotations(Quaternion jointRot, JointId jointId)
-        {
-
-            return Y_180_FLIP * jointRot * Quaternion.Inverse(RiggingUtil.basisJointMap[jointId]);
-        }
-
-        public static void MoveRiggedAvatar(Animator animator, Dictionary<JointId, Quaternion> absoluteOffsetMap, PoseData poseData, Transform CharacterRootTransform, float OffsetY, float OffsetZ, float scale = 0.001f)
-        {
-            for (int j = 0; j < (int)JointId.Count; j++)
-            {
-                if (MapKinectJoint((JointId)j) != HumanBodyBones.LastBone && absoluteOffsetMap.ContainsKey((JointId)j))
-                {
-                    // get the absolute offset
-                    Quaternion absOffset = absoluteOffsetMap[(JointId)j];
-                    Transform finalJoint = animator.GetBoneTransform(MapKinectJoint((JointId)j));
-                    
-                    Quaternion jointRot = absoluteJointRotations(poseData.data[j].Orientation, (JointId)j);
-
-                    finalJoint.rotation = absOffset * Quaternion.Inverse(absOffset) * jointRot * absOffset;
-                    if (j == 0)
-                    {
-                        // character root plus translation reading from the kinect, plus the offset from the script public variables
-                        Vector3 root_data_pos = poseData.data[j].Position * scale;
-                        finalJoint.position = CharacterRootTransform.position + new Vector3(root_data_pos.x, root_data_pos.y + OffsetY, root_data_pos.z - OffsetZ);
-                    }
-                }
-            }
-        }
-
-        public static Dictionary<JointId, Quaternion> CreateOffsetMap(Animator animator, Transform rootJointTransform)
-        {
-            Dictionary<JointId, Quaternion>  absoluteOffsetMap = new Dictionary<JointId, Quaternion>();
-            for (int i = 0; i < (int)JointId.Count; i++)
-            {
-                HumanBodyBones hbb = MapKinectJoint((JointId)i);
-                if (hbb != HumanBodyBones.LastBone)
-                {
-                    Transform transform = animator.GetBoneTransform(hbb);
-                    if (transform == null)
-                    {
-                        Debug.Log("Skipped: " + hbb);
-                        continue;
-                    }
-
-                    Quaternion absOffset = GetSkeletonBone(animator, transform.name).rotation;
-                    // find the absolute offset for the tpose
-                    while (!ReferenceEquals(transform, rootJointTransform))
-                    {
-                        transform = transform.parent;
-                        absOffset = GetSkeletonBone(animator, transform.name).rotation * absOffset;
-                    }
-                    absoluteOffsetMap[(JointId)i] = absOffset;
-                }
-            }
-            return absoluteOffsetMap;
-        }
-
-    }
-
     // Base interface for different type of containers (cube, stick etc.)
     public interface IAvatarSubContainer
     {
@@ -676,11 +510,11 @@ namespace PoseTeacher
 
         // CONSIDER references to parts ( ?= stick person parts)
 
-        Animator PuppetAnimator;
+        Animator animator;
         public Transform CharacterRootTransform;
         Dictionary<JointId, Quaternion> absoluteOffsetMap;
-        public float OffsetY = 3.0f;
-        public float OffsetZ = -44.0f;
+        public float OffsetY = 0.2f;
+        public float OffsetZ = -3.0f;
 
         public RobotContainer(GameObject container, StickContainer stickSkeleton)
         {
@@ -688,33 +522,29 @@ namespace PoseTeacher
             stickContainer = stickSkeleton;
 
             GameObject robotKyle = SubContainerObject.transform.Find("Robot Kyle").gameObject;
-            //CharacterRootTransform = robotKyle.transform.Find("Root").gameObject.transform;
             CharacterRootTransform = robotKyle.transform;
+            animator = robotKyle.GetComponent<Animator>();
 
-            PuppetAnimator = robotKyle.GetComponent<Animator>();
-
-            absoluteOffsetMap = RiggingUtil.CreateOffsetMap(PuppetAnimator, CharacterRootTransform);
+            absoluteOffsetMap = RiggingUtils.CreateOffsetMap(animator, CharacterRootTransform);
         }
 
         public void MovePerson(PoseData joint_data_list)
         {
+            // Remove mirroring before applying pose and readd it afterwards
+            // Necesary because MoveRiggedAvatar function works in global coordinates
             Vector3 prevScale = SubContainerObject.transform.localScale;
-
             SubContainerObject.transform.localScale = new Vector3(Math.Abs(prevScale.x), prevScale.y, prevScale.z);
 
-            RiggingUtil.MoveRiggedAvatar(PuppetAnimator, absoluteOffsetMap, joint_data_list, CharacterRootTransform, OffsetY, OffsetZ, 0.001f);
+            RiggingUtils.MoveRiggedAvatar(animator, absoluteOffsetMap, joint_data_list, CharacterRootTransform, OffsetY, OffsetZ);
 
             SubContainerObject.transform.localScale = prevScale;
-
         }
 
         public Vector3 GetReferencePosition()
         {
-            GameObject robotKyle = SubContainerObject.transform.Find("Robot Kyle").gameObject;
-            GameObject robotRoot = robotKyle.transform.Find("Root").gameObject;
+            GameObject robotRoot = CharacterRootTransform.Find("Root").gameObject;
             GameObject hip = robotRoot.transform.Find("Hip").gameObject;
             return hip.transform.position + new Vector3(0,-0.1f,0);
-            //return stickContainer.HipStick.transform.position;
         }
 
         public void SetActive(bool active)
@@ -724,17 +554,16 @@ namespace PoseTeacher
     }
 
     // Class that contains information about the skinned multi-person linear body model contained in an AvatarContainer object
-    // TODO: add changer function for male/female
     public class SmplContainer : IAvatarSubContainer
     {
         // stick needed for Move calculations
         public StickContainer stickContainer;
         public GameObject SubContainerObject { get; set; }
 
-        Animator PuppetAnimator;
+        Animator animator;
         public Transform CharacterRootTransform;
         Dictionary<JointId, Quaternion> absoluteOffsetMap;
-        public float OffsetY = 1.0f;
+        public float OffsetY = 0.8f;
         public float OffsetZ = 1.0f;
 
         public SmplContainer(GameObject container, StickContainer stickSkeleton)
@@ -743,34 +572,27 @@ namespace PoseTeacher
             stickContainer = stickSkeleton;
 
             GameObject smpl_male = SubContainerObject.transform.Find("SMPL_m_unityDoubleBlends_lbs_10_scale5_207_v1.0.0").gameObject;
-
-            PuppetAnimator = smpl_male.GetComponent<Animator>();
-            
+            animator = smpl_male.GetComponent<Animator>();
             CharacterRootTransform = smpl_male.transform.Find("m_avg_root");
-            Transform _rootJointTransform = CharacterRootTransform;
 
-            absoluteOffsetMap = RiggingUtil.CreateOffsetMap(PuppetAnimator, _rootJointTransform);
+            absoluteOffsetMap = RiggingUtils.CreateOffsetMap(animator, CharacterRootTransform);
         }
-
-        
 
         public void MovePerson(PoseData joint_data_list)
         {
+            // Remove mirroring before applying pose and readd it afterwards
+            // Necesary because MoveRiggedAvatar function works in global coordinates
             Vector3 prevScale = SubContainerObject.transform.localScale;
-
             SubContainerObject.transform.localScale = new Vector3(Math.Abs(prevScale.x), prevScale.y, prevScale.z);
 
-            RiggingUtil.MoveRiggedAvatar(PuppetAnimator, absoluteOffsetMap, joint_data_list, CharacterRootTransform, OffsetY, OffsetZ);
+            RiggingUtils.MoveRiggedAvatar(animator, absoluteOffsetMap, joint_data_list, CharacterRootTransform, OffsetY, OffsetZ);
 
             SubContainerObject.transform.localScale = prevScale;
-
         }
 
         public Vector3 GetReferencePosition()
         {
-            GameObject smpl_male = SubContainerObject.transform.Find("SMPL_m_unityDoubleBlends_lbs_10_scale5_207_v1.0.0").gameObject;
-            GameObject SMPLRoot = smpl_male.transform.Find("m_avg_root").gameObject;
-            GameObject pelvis = SMPLRoot.transform.Find("m_avg_Pelvis").gameObject;
+            GameObject pelvis = CharacterRootTransform.Find("m_avg_Pelvis").gameObject;
             GameObject Spine1 = pelvis.transform.Find("m_avg_Spine1").gameObject;
             return Spine1.transform.position + new Vector3(0,0.1f,0);
             //return stickContainer.HipStick.transform.position;
@@ -784,9 +606,6 @@ namespace PoseTeacher
 
 
     // Class that keeps references to sub-objects in the scene of a avatar container
-    // Probably use this when refactoring as the base class for the script attached to avatar containers
-    // TODO: 
-    //   !  rename class (include comments, use VS rename function!)
     public class AvatarContainer
     {
 
@@ -840,6 +659,7 @@ namespace PoseTeacher
         // Move active avatar based on the input JointData
         public void MovePerson(PoseData live_data)
         {
+            // stickContainer needs to always be updated, because score calculation relies on it
             switch (activeType)
             {
                 case AvatarType.CUBE:
@@ -863,7 +683,6 @@ namespace PoseTeacher
             }
 
            MoveIndicators();
-
         }
 
         public void MoveIndicators(bool forceMove = false)
@@ -952,6 +771,7 @@ namespace PoseTeacher
         }
 
         // Sets the mirroring of the avatar, toggles mirror if default parameter
+        // Needs to mirror SubContainers, because negative scale in the main container interferes with moving object in MRTK
         public void Mirror(bool? mirror = null)
         {
             if(mirror == null)
@@ -967,7 +787,6 @@ namespace PoseTeacher
                     Vector3 prevScale = container.SubContainerObject.transform.localScale;
                     container.SubContainerObject.transform.localScale = new Vector3(Math.Abs(prevScale.x), prevScale.y, prevScale.z);
                 }
-                //avatarContainer.transform.localScale = new Vector3(1.0f, 1.0f, 1.0f);
             }
             else
             {
@@ -977,7 +796,6 @@ namespace PoseTeacher
                     Vector3 prevScale = container.SubContainerObject.transform.localScale;
                     container.SubContainerObject.transform.localScale = new Vector3(-Math.Abs(prevScale.x), prevScale.y, prevScale.z);
                 }
-                //avatarContainer.transform.localScale = new Vector3(-1.0f, 1.0f, 1.0f);
             }
         }
     }

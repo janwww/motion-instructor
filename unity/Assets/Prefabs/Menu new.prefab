@@ -3640,12 +3640,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8f64720372ece7143b66275bafa321e9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  VerticalGrid: {fileID: 5633894277460121595}
-  SelfAvatarButtonCollection: {fileID: 2549225907622897621}
-  TeacherAvatarButtonCollection: {fileID: 1238034619798220936}
   MainObject: {fileID: 0}
-  buttonPrefab: {fileID: 3457405007090921122}
-  RadioButtonContainer: {fileID: 5621731337223087269}
 --- !u!1 &529877804012904099
 GameObject:
   m_ObjectHideFlags: 0
