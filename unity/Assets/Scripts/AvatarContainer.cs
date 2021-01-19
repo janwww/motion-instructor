@@ -1,7 +1,8 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Microsoft.Azure.Kinect.BodyTracking;
+using System.Text;
 
 namespace PoseTeacher
 {
@@ -9,6 +10,172 @@ namespace PoseTeacher
     public enum AvatarType
     {
         CUBE, STICK, ROBOT, SMPL
+    }
+
+    public static class RiggingUtil
+    {
+        public static Dictionary<JointId, Quaternion> basisJointMap;
+        static Quaternion Y_180_FLIP = new Quaternion(0.0f, 1.0f, 0.0f, 0.0f);
+
+        static RiggingUtil()
+        {
+            Vector3 zpositive = Vector3.forward;
+            Vector3 xpositive = Vector3.right;
+            Vector3 ypositive = Vector3.up;
+            // spine and left hip are the same
+            Quaternion leftHipBasis = Quaternion.LookRotation(xpositive, -zpositive);
+            Quaternion spineHipBasis = Quaternion.LookRotation(xpositive, -zpositive);
+            Quaternion rightHipBasis = Quaternion.LookRotation(xpositive, zpositive);
+            // arms and thumbs share the same basis
+            Quaternion leftArmBasis = Quaternion.LookRotation(ypositive, -zpositive);
+            Quaternion rightArmBasis = Quaternion.LookRotation(-ypositive, zpositive);
+            Quaternion leftHandBasis = Quaternion.LookRotation(-zpositive, -ypositive);
+            Quaternion rightHandBasis = Quaternion.identity;
+            Quaternion leftFootBasis = Quaternion.LookRotation(xpositive, ypositive);
+            Quaternion rightFootBasis = Quaternion.LookRotation(xpositive, -ypositive);
+
+            basisJointMap = new Dictionary<JointId, Quaternion>();
+
+            // pelvis has no parent so set to count
+            basisJointMap[JointId.Pelvis] = spineHipBasis;
+            basisJointMap[JointId.SpineNavel] = spineHipBasis;
+            basisJointMap[JointId.SpineChest] = spineHipBasis;
+            basisJointMap[JointId.Neck] = spineHipBasis;
+            basisJointMap[JointId.ClavicleLeft] = leftArmBasis;
+            basisJointMap[JointId.ShoulderLeft] = leftArmBasis;
+            basisJointMap[JointId.ElbowLeft] = leftArmBasis;
+            basisJointMap[JointId.WristLeft] = leftHandBasis;
+            basisJointMap[JointId.HandLeft] = leftHandBasis;
+            basisJointMap[JointId.HandTipLeft] = leftHandBasis;
+            basisJointMap[JointId.ThumbLeft] = leftArmBasis;
+            basisJointMap[JointId.ClavicleRight] = rightArmBasis;
+            basisJointMap[JointId.ShoulderRight] = rightArmBasis;
+            basisJointMap[JointId.ElbowRight] = rightArmBasis;
+            basisJointMap[JointId.WristRight] = rightHandBasis;
+            basisJointMap[JointId.HandRight] = rightHandBasis;
+            basisJointMap[JointId.HandTipRight] = rightHandBasis;
+            basisJointMap[JointId.ThumbRight] = rightArmBasis;
+            basisJointMap[JointId.HipLeft] = leftHipBasis;
+            basisJointMap[JointId.KneeLeft] = leftHipBasis;
+            basisJointMap[JointId.AnkleLeft] = leftHipBasis;
+            basisJointMap[JointId.FootLeft] = leftFootBasis;
+            basisJointMap[JointId.HipRight] = rightHipBasis;
+            basisJointMap[JointId.KneeRight] = rightHipBasis;
+            basisJointMap[JointId.AnkleRight] = rightHipBasis;
+            basisJointMap[JointId.FootRight] = rightFootBasis;
+            basisJointMap[JointId.Head] = spineHipBasis;
+            basisJointMap[JointId.Nose] = spineHipBasis;
+            basisJointMap[JointId.EyeLeft] = spineHipBasis;
+            basisJointMap[JointId.EarLeft] = spineHipBasis;
+            basisJointMap[JointId.EyeRight] = spineHipBasis;
+            basisJointMap[JointId.EarRight] = spineHipBasis;
+        }
+
+        
+
+        public static HumanBodyBones MapKinectJoint(JointId joint)
+        {
+            // https://docs.microsoft.com/en-us/azure/Kinect-dk/body-joints
+            switch (joint)
+            {
+                case JointId.Pelvis: return HumanBodyBones.Hips;
+                case JointId.SpineNavel: return HumanBodyBones.Spine;
+                case JointId.SpineChest: return HumanBodyBones.Chest;
+                case JointId.Neck: return HumanBodyBones.Neck;
+                case JointId.Head: return HumanBodyBones.Head;
+                case JointId.HipLeft: return HumanBodyBones.LeftUpperLeg;
+                case JointId.KneeLeft: return HumanBodyBones.LeftLowerLeg;
+                case JointId.AnkleLeft: return HumanBodyBones.LeftFoot;
+                case JointId.FootLeft: return HumanBodyBones.LeftToes;
+                case JointId.HipRight: return HumanBodyBones.RightUpperLeg;
+                case JointId.KneeRight: return HumanBodyBones.RightLowerLeg;
+                case JointId.AnkleRight: return HumanBodyBones.RightFoot;
+                case JointId.FootRight: return HumanBodyBones.RightToes;
+                case JointId.ClavicleLeft: return HumanBodyBones.LeftShoulder;
+                case JointId.ShoulderLeft: return HumanBodyBones.LeftUpperArm;
+                case JointId.ElbowLeft: return HumanBodyBones.LeftLowerArm;
+                case JointId.WristLeft: return HumanBodyBones.LeftHand;
+                case JointId.ClavicleRight: return HumanBodyBones.RightShoulder;
+                case JointId.ShoulderRight: return HumanBodyBones.RightUpperArm;
+                case JointId.ElbowRight: return HumanBodyBones.RightLowerArm;
+                case JointId.WristRight: return HumanBodyBones.RightHand;
+                default: return HumanBodyBones.LastBone;
+            }
+        }
+
+        public static SkeletonBone GetSkeletonBone(Animator animator, string boneName)
+        {
+            int count = 0;
+            StringBuilder cloneName = new StringBuilder(boneName);
+            cloneName.Append("(Clone)");
+            foreach (SkeletonBone sb in animator.avatar.humanDescription.skeleton)
+            {
+                if (sb.name == boneName || sb.name == cloneName.ToString())
+                {
+                    return animator.avatar.humanDescription.skeleton[count];
+                }
+                count++;
+            }
+            return new SkeletonBone();
+        }
+
+        public static Quaternion absoluteJointRotations(Quaternion jointRot, JointId jointId)
+        {
+
+            return Y_180_FLIP * jointRot * Quaternion.Inverse(RiggingUtil.basisJointMap[jointId]);
+        }
+
+        public static void MoveRiggedAvatar(Animator animator, Dictionary<JointId, Quaternion> absoluteOffsetMap, PoseData poseData, Transform CharacterRootTransform, float OffsetY, float OffsetZ, float scale = 0.001f)
+        {
+            for (int j = 0; j < (int)JointId.Count; j++)
+            {
+                if (MapKinectJoint((JointId)j) != HumanBodyBones.LastBone && absoluteOffsetMap.ContainsKey((JointId)j))
+                {
+                    // get the absolute offset
+                    Quaternion absOffset = absoluteOffsetMap[(JointId)j];
+                    Transform finalJoint = animator.GetBoneTransform(MapKinectJoint((JointId)j));
+                    
+                    Quaternion jointRot = absoluteJointRotations(poseData.data[j].Orientation, (JointId)j);
+
+                    finalJoint.rotation = absOffset * Quaternion.Inverse(absOffset) * jointRot * absOffset;
+                    if (j == 0)
+                    {
+                        // character root plus translation reading from the kinect, plus the offset from the script public variables
+                        Vector3 root_data_pos = poseData.data[j].Position * scale;
+                        finalJoint.position = CharacterRootTransform.position + new Vector3(root_data_pos.x, root_data_pos.y + OffsetY, root_data_pos.z - OffsetZ);
+                    }
+                }
+            }
+        }
+
+        public static Dictionary<JointId, Quaternion> CreateOffsetMap(Animator animator, Transform rootJointTransform)
+        {
+            Dictionary<JointId, Quaternion>  absoluteOffsetMap = new Dictionary<JointId, Quaternion>();
+            for (int i = 0; i < (int)JointId.Count; i++)
+            {
+                HumanBodyBones hbb = MapKinectJoint((JointId)i);
+                if (hbb != HumanBodyBones.LastBone)
+                {
+                    Transform transform = animator.GetBoneTransform(hbb);
+                    if (transform == null)
+                    {
+                        Debug.Log("Skipped: " + hbb);
+                        continue;
+                    }
+
+                    Quaternion absOffset = GetSkeletonBone(animator, transform.name).rotation;
+                    // find the absolute offset for the tpose
+                    while (!ReferenceEquals(transform, rootJointTransform))
+                    {
+                        transform = transform.parent;
+                        absOffset = GetSkeletonBone(animator, transform.name).rotation * absOffset;
+                    }
+                    absoluteOffsetMap[(JointId)i] = absOffset;
+                }
+            }
+            return absoluteOffsetMap;
+        }
+
     }
 
     // Base interface for different type of containers (cube, stick etc.)
@@ -509,85 +676,36 @@ namespace PoseTeacher
 
         // CONSIDER references to parts ( ?= stick person parts)
 
+        Animator PuppetAnimator;
+        public Transform CharacterRootTransform;
+        Dictionary<JointId, Quaternion> absoluteOffsetMap;
+        public float OffsetY = 3.0f;
+        public float OffsetZ = -44.0f;
+
         public RobotContainer(GameObject container, StickContainer stickSkeleton)
         {
             SubContainerObject = container;
             stickContainer = stickSkeleton;
+
+            GameObject robotKyle = SubContainerObject.transform.Find("Robot Kyle").gameObject;
+            //CharacterRootTransform = robotKyle.transform.Find("Root").gameObject.transform;
+            CharacterRootTransform = robotKyle.transform;
+
+            PuppetAnimator = robotKyle.GetComponent<Animator>();
+
+            absoluteOffsetMap = RiggingUtil.CreateOffsetMap(PuppetAnimator, CharacterRootTransform);
         }
 
         public void MovePerson(PoseData joint_data_list)
         {
-            // CONSIDER: depending on how moving the various containers are invoked, this might be redundant
-            //      if joint_data shows delta movements, invoking this function redundantly breaks it 
-            //      (right now I think we are good)
+            Vector3 prevScale = SubContainerObject.transform.localScale;
 
-            // Below the orientation of the stick figure parts is applied to the robot avatar, with some additional calculations
-            // If way to apply pose to a humanoid rig is discovered, that would work directly and be simpler
+            SubContainerObject.transform.localScale = new Vector3(Math.Abs(prevScale.x), prevScale.y, prevScale.z);
 
+            RiggingUtil.MoveRiggedAvatar(PuppetAnimator, absoluteOffsetMap, joint_data_list, CharacterRootTransform, OffsetY, OffsetZ, 0.001f);
 
-            // Get Robot body parts references
-            GameObject robot = SubContainerObject;
-            GameObject right_shoulder_joint, right_upper_arm_joint, right_forearm_joint, left_upper_arm_joint, left_forearm_joint;
-            GameObject left_thigh_joint, left_knee_joint, right_thigh_joint, right_knee_joint;
-            GameObject robotKyle = robot.transform.Find("Robot Kyle").gameObject;
-            GameObject robotRoot = robotKyle.transform.Find("Root").gameObject;
-            GameObject hip = robotRoot.transform.Find("Hip").gameObject;
-            GameObject ribs = robotRoot.transform.Find("Ribs").gameObject;
-            GameObject left_shoulder_joint = ribs.transform.Find("Left_Shoulder_Joint_01").gameObject;
+            SubContainerObject.transform.localScale = prevScale;
 
-            right_shoulder_joint = ribs.transform.Find("Right_Shoulder_Joint_01").gameObject;
-            bool set = false;
-            if (right_shoulder_joint.transform.childCount == 1)
-            {
-                set = true;
-                right_upper_arm_joint = right_shoulder_joint.transform.Find("Right_Upper_Arm_Joint_01").gameObject;
-                left_upper_arm_joint = left_shoulder_joint.transform.Find("Left_Upper_Arm_Joint_01").gameObject;
-                right_thigh_joint = hip.transform.Find("Right_Thigh_Joint_01").gameObject;
-                left_thigh_joint = hip.transform.Find("Left_Thigh_Joint_01").gameObject;
-            }
-            else
-            {
-                right_upper_arm_joint = robot.transform.Find("Right_Upper_Arm_Joint_01").gameObject;
-                left_upper_arm_joint = robot.transform.Find("Left_Upper_Arm_Joint_01").gameObject;
-                right_thigh_joint = robot.transform.Find("Right_Thigh_Joint_01").gameObject;
-                left_thigh_joint = robot.transform.Find("Left_Thigh_Joint_01").gameObject;
-            }
-            right_forearm_joint = right_upper_arm_joint.transform.Find("Right_Forearm_Joint_01").gameObject;
-            left_forearm_joint = left_upper_arm_joint.transform.Find("Left_Forearm_Joint_01").gameObject;
-            right_knee_joint = right_thigh_joint.transform.Find("Right_Knee_Joint_01").gameObject;
-            left_knee_joint = left_thigh_joint.transform.Find("Left_Knee_Joint_01").gameObject;
-
-
-            // Change parents of body part to all be in global coordinates of avatar
-            if (set == true)
-            {
-                right_upper_arm_joint.transform.SetParent(robot.transform);
-                left_upper_arm_joint.transform.SetParent(robot.transform);
-                right_thigh_joint.transform.SetParent(robot.transform);
-                left_thigh_joint.transform.SetParent(robot.transform);
-            }
-
-            // Some manually tested rotations are applied after the calculated pose, as there are offsets
-            right_upper_arm_joint.transform.localRotation = stickContainer.RightUpperArm.transform.localRotation;
-            right_upper_arm_joint.transform.Rotate(0, 0, 90);
-
-            right_forearm_joint.transform.localRotation = Quaternion.Inverse(right_upper_arm_joint.transform.localRotation) * stickContainer.RightLowerArm.transform.localRotation;
-            right_forearm_joint.transform.Rotate(0, 0, 90);
-
-            left_upper_arm_joint.transform.localRotation = stickContainer.LeftUpperArm.transform.localRotation;
-            left_upper_arm_joint.transform.Rotate(180, 0, 90);
-            left_forearm_joint.transform.localRotation = Quaternion.Inverse(left_upper_arm_joint.transform.localRotation) * stickContainer.LeftLowerArm.transform.localRotation;
-            left_forearm_joint.transform.Rotate(180, 90, 45);
-
-            left_thigh_joint.transform.localRotation = stickContainer.LeftUpperLeg.transform.localRotation;
-            left_thigh_joint.transform.Rotate(0, 0, 90);
-            left_knee_joint.transform.localRotation = Quaternion.Inverse(left_thigh_joint.transform.localRotation) * stickContainer.LeftKneeStick.transform.localRotation;
-            left_knee_joint.transform.Rotate(0, 0, 170);
-
-            right_thigh_joint.transform.localRotation = stickContainer.RightUpperLeg.transform.localRotation;
-            right_thigh_joint.transform.Rotate(0, 0, -90);
-            right_knee_joint.transform.localRotation = Quaternion.Inverse(right_thigh_joint.transform.localRotation) * stickContainer.RightKneeStick.transform.localRotation;
-            right_knee_joint.transform.Rotate(180, 0, -170);
         }
 
         public Vector3 GetReferencePosition()
@@ -613,151 +731,39 @@ namespace PoseTeacher
         public StickContainer stickContainer;
         public GameObject SubContainerObject { get; set; }
 
-        // CONSIDER references to parts ( like stick person parts)
+        Animator PuppetAnimator;
+        public Transform CharacterRootTransform;
+        Dictionary<JointId, Quaternion> absoluteOffsetMap;
+        public float OffsetY = 1.0f;
+        public float OffsetZ = 1.0f;
 
         public SmplContainer(GameObject container, StickContainer stickSkeleton)
         {
             SubContainerObject = container;
             stickContainer = stickSkeleton;
+
+            GameObject smpl_male = SubContainerObject.transform.Find("SMPL_m_unityDoubleBlends_lbs_10_scale5_207_v1.0.0").gameObject;
+
+            PuppetAnimator = smpl_male.GetComponent<Animator>();
+            
+            CharacterRootTransform = smpl_male.transform.Find("m_avg_root");
+            Transform _rootJointTransform = CharacterRootTransform;
+
+            absoluteOffsetMap = RiggingUtil.CreateOffsetMap(PuppetAnimator, _rootJointTransform);
         }
+
+        
 
         public void MovePerson(PoseData joint_data_list)
         {
-            // CONSIDER: same changes as mentioned in RobotContainer
-            // Below the orientation of the stick figure parts is applied to the SMPL avatar, ith some additional calculations
+            Vector3 prevScale = SubContainerObject.transform.localScale;
 
-            // get SMPL body parts
-            GameObject smpl_body;
-            GameObject smpl_male = SubContainerObject.transform.Find("SMPL_m_unityDoubleBlends_lbs_10_scale5_207_v1.0.0").gameObject;
-            GameObject smpl_female = SubContainerObject.transform.Find("SMPL_f_unityDoubleBlends_lbs_10_scale5_207_v1.0.0").gameObject;
-            GameObject L_hip, R_hip, L_Shoulder, R_Shoulder, R_Elbow, L_Elbow, L_Knee, R_Knee;
-            bool set = false;
-            if (smpl_male.activeSelf == true)
-            {
-                smpl_body = smpl_male;
-                //GameObject L_hip, R_hip, L_Shoulder, R_Shoulder;
-                GameObject SMPLRoot = smpl_body.transform.Find("m_avg_root").gameObject;
-                GameObject pelvis = SMPLRoot.transform.Find("m_avg_Pelvis").gameObject;
+            SubContainerObject.transform.localScale = new Vector3(Math.Abs(prevScale.x), prevScale.y, prevScale.z);
 
-                GameObject Spine1 = pelvis.transform.Find("m_avg_Spine1").gameObject;
-                GameObject Spine2 = Spine1.transform.Find("m_avg_Spine2").gameObject;
-                GameObject Spine3 = Spine2.transform.Find("m_avg_Spine3").gameObject;
+            RiggingUtil.MoveRiggedAvatar(PuppetAnimator, absoluteOffsetMap, joint_data_list, CharacterRootTransform, OffsetY, OffsetZ);
 
-                // we don't need the spine
-                GameObject L_Collar = Spine3.transform.Find("m_avg_L_Collar").gameObject;
+            SubContainerObject.transform.localScale = prevScale;
 
-                // we don't need the hand
-                GameObject R_Collar = Spine3.transform.Find("m_avg_R_Collar").gameObject;
-
-                GameObject Neck = Spine3.transform.Find("m_avg_Neck").gameObject;
-
-                if (L_Collar.transform.childCount == 1)
-                {
-                    set = true;
-                    L_Shoulder = L_Collar.transform.Find("m_avg_L_Shoulder").gameObject;
-                    R_Shoulder = R_Collar.transform.Find("m_avg_R_Shoulder").gameObject;
-                    L_hip = pelvis.transform.Find("m_avg_L_Hip").gameObject;
-                    R_hip = pelvis.transform.Find("m_avg_R_Hip").gameObject;
-                }
-                else
-                {
-                    L_Shoulder = SubContainerObject.transform.Find("m_avg_L_Shoulder").gameObject;
-                    R_Shoulder = SubContainerObject.transform.Find("m_avg_R_Shoulder").gameObject;
-                    L_hip = SubContainerObject.transform.Find("m_avg_L_Hip").gameObject;
-                    R_hip = SubContainerObject.transform.Find("m_avg_R_Hip").gameObject;
-                }
-
-                L_Knee = L_hip.transform.Find("m_avg_L_Knee").gameObject;
-                GameObject L_Ankle = L_Knee.transform.Find("m_avg_L_Ankle").gameObject;
-                // we don't need the foot and the ankle not much either
-
-                R_Knee = R_hip.transform.Find("m_avg_R_Knee").gameObject;
-                GameObject R_Ankle = R_Knee.transform.Find("m_avg_R_Ankle").gameObject;
-
-                L_Elbow = L_Shoulder.transform.Find("m_avg_L_Elbow").gameObject;
-                GameObject L_Wrist = L_Elbow.transform.Find("m_avg_L_Wrist").gameObject;
-                R_Elbow = R_Shoulder.transform.Find("m_avg_R_Elbow").gameObject;
-                GameObject R_Wrist = R_Elbow.transform.Find("m_avg_R_Wrist").gameObject;
-
-            }
-            else
-            {
-                smpl_body = smpl_female;
-                //GameObject L_hip, R_hip, L_Shoulder, R_Shoulder;
-                GameObject SMPLRoot = smpl_body.transform.Find("f_avg_root").gameObject;
-                GameObject pelvis = SMPLRoot.transform.Find("f_avg_Pelvis").gameObject;
-
-                GameObject Spine1 = pelvis.transform.Find("f_avg_Spine1").gameObject;
-                GameObject Spine2 = Spine1.transform.Find("f_avg_Spine2").gameObject;
-                GameObject Spine3 = Spine2.transform.Find("f_avg_Spine3").gameObject;
-
-                // we don't need the spine
-                GameObject L_Collar = Spine3.transform.Find("f_avg_L_Collar").gameObject;
-
-                // we don't need the hand
-                GameObject R_Collar = Spine3.transform.Find("f_avg_R_Collar").gameObject;
-
-                GameObject Neck = Spine3.transform.Find("f_avg_Neck").gameObject;
-
-                //right_shoulder_joint = ribs.transform.Find("Right_Shoulder_Joint_01").gameObject;
-                //bool set = false;
-                if (L_Collar.transform.childCount == 1)
-                {
-                    set = true;
-                    L_Shoulder = L_Collar.transform.Find("f_avg_L_Shoulder").gameObject;
-                    R_Shoulder = R_Collar.transform.Find("f_avg_R_Shoulder").gameObject;
-                    L_hip = pelvis.transform.Find("f_avg_L_Hip").gameObject;
-                    R_hip = pelvis.transform.Find("f_avg_R_Hip").gameObject;
-                }
-                else
-                {
-                    L_Shoulder = SubContainerObject.transform.Find("f_avg_L_Shoulder").gameObject;
-                    R_Shoulder = SubContainerObject.transform.Find("f_avg_R_Shoulder").gameObject;
-                    L_hip = SubContainerObject.transform.Find("f_avg_L_Hip").gameObject;
-                    R_hip = SubContainerObject.transform.Find("f_avg_R_Hip").gameObject;
-                }
-                L_Knee = L_hip.transform.Find("f_avg_L_Knee").gameObject;
-                GameObject L_Ankle = L_Knee.transform.Find("f_avg_L_Ankle").gameObject;
-                // we don't need the foot and the ankle not much either
-
-                R_Knee = R_hip.transform.Find("f_avg_R_Knee").gameObject;
-                GameObject R_Ankle = R_Knee.transform.Find("f_avg_R_Ankle").gameObject;
-
-                L_Elbow = L_Shoulder.transform.Find("f_avg_L_Elbow").gameObject;
-                GameObject L_Wrist = L_Elbow.transform.Find("f_avg_L_Wrist").gameObject;
-                R_Elbow = R_Shoulder.transform.Find("f_avg_R_Elbow").gameObject;
-                GameObject R_Wrist = R_Elbow.transform.Find("f_avg_R_Wrist").gameObject;
-            }
-
-
-            if (set == true)
-            {
-                L_Shoulder.transform.SetParent(SubContainerObject.transform);
-                R_Shoulder.transform.SetParent(SubContainerObject.transform);
-                L_hip.transform.SetParent(SubContainerObject.transform);
-                R_hip.transform.SetParent(SubContainerObject.transform);
-            }
-
-            // Some manually tested rotations are applied after the calculated pose, as there are offsets
-            R_Shoulder.transform.localRotation = stickContainer.RightUpperArm.transform.localRotation;
-            R_Shoulder.transform.Rotate(0, 180, 90);
-            R_Elbow.transform.localRotation = Quaternion.Inverse(R_Shoulder.transform.localRotation) * stickContainer.RightLowerArm.transform.localRotation;
-            R_Elbow.transform.Rotate(0, 180, 90);
-
-            L_Shoulder.transform.localRotation = stickContainer.LeftUpperArm.transform.localRotation;
-            L_Shoulder.transform.Rotate(180, 0, 90);
-            L_Elbow.transform.localRotation = Quaternion.Inverse(L_Shoulder.transform.localRotation) * stickContainer.LeftLowerArm.transform.localRotation;
-            L_Elbow.transform.Rotate(180, 0, 90);
-
-            L_hip.transform.localRotation = stickContainer.LeftUpperLeg.transform.localRotation;
-            L_hip.transform.Rotate(0, 90, 0);
-            L_Knee.transform.localRotation = Quaternion.Inverse(L_hip.transform.localRotation) * stickContainer.LeftKneeStick.transform.localRotation;
-            L_Knee.transform.Rotate(-90, 180, -90);
-
-            R_hip.transform.localRotation = stickContainer.RightUpperLeg.transform.localRotation;
-            R_hip.transform.Rotate(0, 90, 0);
-            R_Knee.transform.localRotation = Quaternion.Inverse(R_hip.transform.localRotation) * stickContainer.RightKneeStick.transform.localRotation;
-            R_Knee.transform.Rotate(90, 180, 90);
         }
 
         public Vector3 GetReferencePosition()
