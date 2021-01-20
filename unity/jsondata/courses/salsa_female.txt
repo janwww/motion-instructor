@@ -47,7 +47,7 @@
 		{
 			"Position":5,
 			"Name":"Guapea",
-			"Description":"placeholder...",
+			"Description":"The basic step of Cuban salsa.\nYou should master it now, and reduce its use later.",
 			"Blocks": [
 				{
 					"FileLocation":"jsondata/salsa_m/2020_12_14-16_16_55.txt"
@@ -57,7 +57,7 @@
 		{
 			"Position":6,
 			"Name":"Enchufla",
-			"Description":"placeholder...",
+			"Description":"The basic Cuban salsa turn.\nThe leader and follower changes place every step.",
 			"Blocks": [
 				{
 					"FileLocation":"jsondata/salsa_m/2020_12_14-16_21_06.txt"
@@ -69,7 +69,7 @@
 		{
 			"Position":4,
 			"Name":"Simple Salsa (Female)",
-			"Description":"Concatenate the basic steps into a coreography.\n Many uses this as their first move to get into the rhythm.",
+			"Description":"Concatenate the basic steps into a choreography.\n Many uses this as their first move to get into the rhythm.",
 			"HighScore":0,
 			"FileLocation":"jsondata/salsa_m/2020_12_14-16_08_32.txt"
 		}
