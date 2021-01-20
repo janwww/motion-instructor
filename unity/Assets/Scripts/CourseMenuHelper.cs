@@ -335,7 +335,7 @@ namespace PoseTeacher
                 DescriptionText.text = "<size=30>" + steps[position].Name + "</size>\n" + steps[position].Description;
             } else if (coreographies.ContainsKey(position))
             {
-                DescriptionText.text = coreographies[position].Description;
+                DescriptionText.text = "<size=30>" + coreographies[position].Name + " coreograhy" + "</size>\n" + coreographies[position].Description;
             } else
             {
                 Debug.Log("Step/coreography not found: " + position);
