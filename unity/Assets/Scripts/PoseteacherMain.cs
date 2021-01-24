@@ -1,14 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
-using Microsoft.Azure.Kinect.Sensor;
-using Microsoft.Azure.Kinect.BodyTracking;
-using UnityEngine.UI;
-using System.IO;
-using System.Collections;
-using NativeWebSocket;
-using System.Security.Permissions;
-using Microsoft.MixedReality.Toolkit.UI;
 
 namespace PoseTeacher
 {
@@ -146,18 +137,19 @@ namespace PoseTeacher
                 //newAvatar.transform.position = avatarListSelf[avatarListSelf.Count - 1].avatarContainer.transform.position;
                 //newAvatar.transform.position = newAvatar.transform.position + new Vector3(1,0,0);
                 //newAvatar.transform.position = new Vector3(1, 0, 0);
-            } else
+            }
+            else
             {
                 GameObject newAvatar = Instantiate(avatarTPrefab);
                 AvatarContainer newAvatarCont = new AvatarContainer(newAvatar, mirroring);
                 avatarListTeacher.Add(newAvatarCont);
                 newAvatar.SetActive(true);
                 newAvatarCont.ChangeActiveType(avatarListTeacher[0].activeType);
-                if(TeacherPoseInputGetter.CurrentPose != null)
+                if (TeacherPoseInputGetter.CurrentPose != null)
                 {
                     newAvatarCont.MovePerson(TeacherPoseInputGetter.CurrentPose);
                 }
-                
+
             }
         }
         public void DeleteAvatar(bool self)
@@ -168,7 +160,8 @@ namespace PoseTeacher
                 avatar.avatarContainer.SetActive(false);
                 avatarListSelf.Remove(avatar);
                 Destroy(avatar.avatarContainer.gameObject);
-            } else if (!self && avatarListTeacher.Count > 1)
+            }
+            else if (!self && avatarListTeacher.Count > 1)
             {
                 AvatarContainer avatar = avatarListTeacher[avatarListTeacher.Count - 1];
                 avatar.avatarContainer.SetActive(false);
@@ -176,12 +169,12 @@ namespace PoseTeacher
                 Destroy(avatar.avatarContainer.gameObject);
             }
         }
-        
+
 
         // Mirror all avatar containers
         public void do_mirror()
         {
-            
+
             if (mirroring == true)
             {
                 mirroring = false;
@@ -296,7 +289,7 @@ namespace PoseTeacher
             avatarListTeacher[0].avatarContainer.gameObject.SetActive(false);
 
             SelfPoseInputGetter = new PoseInputGetter(SelfPoseInputSource) { ReadDataPath = fake_file };
-            TeacherPoseInputGetter = new PoseInputGetter(PoseInputSource.FILE){ ReadDataPath = fake_file };
+            TeacherPoseInputGetter = new PoseInputGetter(PoseInputSource.FILE) { ReadDataPath = fake_file };
             SelfPoseInputGetter.loop = true;
             TeacherPoseInputGetter.loop = true;
             RecordedPoseInputGetter = new PoseInputGetter(PoseInputSource.FILE) { ReadDataPath = fake_file };
@@ -370,7 +363,7 @@ namespace PoseTeacher
                 // Only update total score if doing a choreography and paying attention
                 if (isChoreography && TeacherPoseInputGetter.CurrentFilePoseNumber < TeacherPoseInputGetter.TotalFilePoseNumber && pauseRecordingAnimation)
                 {
-                    similarityTotalScore = avatarSimilarity.totalScore; 
+                    similarityTotalScore = avatarSimilarity.totalScore;
                 }
 
                 avatarVisualisationSimilarity.UpdatePart(similarityBodyNr, similarityScoreRaw);
@@ -421,12 +414,12 @@ namespace PoseTeacher
             if (Input.GetKeyDown(KeyCode.H))
             {
                 // Toggle hand menu (in training/choreography)
-                if(pulseObject != null)
+                if (pulseObject != null)
                 {
                     GameObject toggleObject = null;
-                    if(trainingElements.activeSelf)
+                    if (trainingElements.activeSelf)
                         toggleObject = trainHandMenuContent;
-                    if(choreographyElements.activeSelf)
+                    if (choreographyElements.activeSelf)
                         toggleObject = choreoHandMenuContent;
                     if (recordElements.activeSelf)
                         toggleObject = recordHandMenuContent;
@@ -466,7 +459,7 @@ namespace PoseTeacher
                 forceSimilarityUpdate = !forceSimilarityUpdate;
             }
 
-            
+
         }
 
         // Animates all self avatars based on the JointData provided
@@ -573,7 +566,7 @@ namespace PoseTeacher
                 TeacherPoseInputGetter.loop = false;
 
                 // Mute cube
-                ScorePulse sp  = pulseObject.GetComponent<ScorePulse>();
+                ScorePulse sp = pulseObject.GetComponent<ScorePulse>();
                 sp.isMuted = true;
             }
             else
@@ -586,7 +579,7 @@ namespace PoseTeacher
                 sp.isMuted = false;
             }
         }
-        
+
         public void StartRecordingMode(bool temporary)
         {
             Debug.Log("Start recording mode");
@@ -601,7 +594,7 @@ namespace PoseTeacher
                 // Generate new filename with timestamp
                 SelfPoseInputGetter.GenNewFilename();
             }
-            
+
             SelfPoseInputGetter.recording = true;
             isrecording = true;
         }
@@ -621,14 +614,14 @@ namespace PoseTeacher
                     SelfPoseInputGetter.recording = false;
                     recordedAvatar.avatarContainer.SetActive(true);
                     RecordedPoseInputGetter.ReadDataPath = SelfPoseInputGetter.WriteDataPath;
-                    
+
                     isrecording = false;
 
                     if (!isChoreography)
                     {
                         pauseRecordingAnimation = false;
                     }
-                    
+
                 }
             }
         }
@@ -656,7 +649,8 @@ namespace PoseTeacher
             {
                 recordedAvatar.avatarContainer.SetActive(false);
                 pauseRecordingAnimation = false;
-            } else
+            }
+            else
             {
                 recordedAvatar.avatarContainer.SetActive(true);
                 pauseRecordingAnimation = true;
@@ -699,7 +693,7 @@ namespace PoseTeacher
             CourseMenuHelper courseHelper = CourseHelper.GetComponent<CourseMenuHelper>();
             endScreenHelper.SetCoreoName(courseHelper.CurrentStepName());
             endScreenHelper.SetScore((int)similarityTotalScore, TeacherPoseInputGetter.TotalFilePoseNumber);
-            
+
         }
 
         public void RestartCoreo()

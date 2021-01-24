@@ -1,11 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using Microsoft.Azure.Kinect.BodyTracking;
 using Microsoft.Azure.Kinect.Sensor;
-using Microsoft.Azure.Kinect.BodyTracking;
-using UnityEngine.UI;
-using System.IO;
 using NativeWebSocket;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using UnityEngine;
+using UnityEngine.UI;
 
 namespace PoseTeacher
 {
@@ -46,7 +46,8 @@ namespace PoseTeacher
         //File variables
         IEnumerator<string> SequenceEnum;
         private string _ReadDataPath;
-        public string ReadDataPath {
+        public string ReadDataPath
+        {
             get { return _ReadDataPath; }
             set { _ReadDataPath = value; GetTotalPoseNumber(); LoadData(); }
         }
@@ -209,9 +210,9 @@ namespace PoseTeacher
             switch (CurrentPoseInputSource)
             {
                 case PoseInputSource.WEBSOCKET:
-                    #if !UNITY_WEBGL || UNITY_EDITOR
+#if !UNITY_WEBGL || UNITY_EDITOR
                     websocket.DispatchMessageQueue();
-                    #endif
+#endif
                     // poseLiveWS is non-null if alternative is sending pose data over websocket
                     if (poseLiveWS != null)
                     {
@@ -221,7 +222,7 @@ namespace PoseTeacher
                     else
                     {
                         Debug.Log("No pose recieved from WebSocket!");
-                        
+
                     }
                     break;
 
@@ -241,7 +242,7 @@ namespace PoseTeacher
                         _CurrentFilePoseNumber = 1;
 
                     }
-                    
+
 
                     string frame_json = SequenceEnum.Current;
                     PoseData fake_live_data = PoseDataUtils.JSONstring2PoseData(frame_json);
@@ -286,7 +287,7 @@ namespace PoseTeacher
                                 }
 
                             }
-                            
+
                         }
 
                         // Get pose estimate from tracker
@@ -320,7 +321,7 @@ namespace PoseTeacher
                         Debug.Log("device is null!");
                     }
                     break;
-                    
+
             }
             return CurrentPose;
         }

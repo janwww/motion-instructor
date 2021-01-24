@@ -21,7 +21,7 @@ namespace PoseTeacher
             //constructor. Initialise objects for the plot visualisation
             graphContainer = graphContainerIn;
             dataLine = graphContainer.transform.Find("Dataline").gameObject;
-            
+
             //similarityScore = similarityScoreIn;
             lineRenderer = dataLine.GetComponent<LineRenderer>();
             Start_plot(similarityScoreIn);

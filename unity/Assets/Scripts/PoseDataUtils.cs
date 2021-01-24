@@ -1,8 +1,7 @@
-﻿using System;
+﻿using Microsoft.Azure.Kinect.BodyTracking;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
-
-using Microsoft.Azure.Kinect.BodyTracking;
 
 namespace PoseTeacher
 {

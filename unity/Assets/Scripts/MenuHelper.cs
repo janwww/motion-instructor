@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
@@ -37,7 +36,7 @@ namespace PoseTeacher
         public GameObject TrainingElements;
         public GameObject CoreoElements;
         public GameObject RecordElements;
-       
+
         private PauseType pauseType = PauseType.TRAINING;
 
         // Sets the state (and pausetype) of the new menu and displays it.
@@ -97,7 +96,7 @@ namespace PoseTeacher
                     // change buttins
                     MenuObject.transform.Find("TitleBarHolder").Find("Buttons").Find("MainButtons").gameObject.SetActive(true);
                     MenuObject.transform.Find("TitleBarHolder").Find("Buttons").Find("PausedButtons").gameObject.SetActive(false);
-                    
+
                     switch (pauseType)
                     {
                         case PauseType.TRAINING:
@@ -498,15 +497,15 @@ namespace PoseTeacher
             {
                 case Difficulty.EASY:
                     menus[CurrentMenu].transform.Find("DifficultySettingsMenuButtonCollection").Find("EasyDifficultySettingsButton").
-                        Find("IconAndText").Find("TextMeshPro").gameObject.GetComponent<TextMeshPro>().color = new Color(255,255,0);
+                        Find("IconAndText").Find("TextMeshPro").gameObject.GetComponent<TextMeshPro>().color = new Color(255, 255, 0);
                     break;
                 case Difficulty.MEDIUM:
                     menus[CurrentMenu].transform.Find("DifficultySettingsMenuButtonCollection").Find("MediumDifficultySettingsButton").
-                        Find("IconAndText").Find("TextMeshPro").gameObject.GetComponent<TextMeshPro>().color = new Color(255, 255, 0); 
+                        Find("IconAndText").Find("TextMeshPro").gameObject.GetComponent<TextMeshPro>().color = new Color(255, 255, 0);
                     break;
                 case Difficulty.HARD:
                     menus[CurrentMenu].transform.Find("DifficultySettingsMenuButtonCollection").Find("HardDifficultySettingsButton").
-                        Find("IconAndText").Find("TextMeshPro").gameObject.GetComponent<TextMeshPro>().color = new Color(255, 255, 0); 
+                        Find("IconAndText").Find("TextMeshPro").gameObject.GetComponent<TextMeshPro>().color = new Color(255, 255, 0);
                     break;
             }
         }
@@ -574,7 +573,7 @@ namespace PoseTeacher
         // Modify the TitleBar text based on the currently active menu screen.
         private void SetTitleBarText()
         {
-            
+
             switch (CurrentMenu)
             {
                 case Menus.TITLE:

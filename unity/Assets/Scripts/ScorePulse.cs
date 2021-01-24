@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace PoseTeacher
 {
@@ -20,7 +18,6 @@ namespace PoseTeacher
         public GameObject PulsingObject; // Object that this script is assigned to
 
         // Audiofiles and objects. Consider moving them away from the pulsing object to their own script. (bring SetMute() function too)
-        // Audiofiles and objects. Consider moving them away from the pulsing object to their own script. (bring SetMute() function too)
         private AudioSource audioSource;
         public AudioClip clave_beat1;
         public AudioClip clave_beat2;
@@ -28,7 +25,7 @@ namespace PoseTeacher
         public AudioClip clave_beat4;
         public AudioClip conga_bar;
         private int beat_counter = 0;
-        
+
         private bool isPaused = false;
         public bool isMuted = false;
 
@@ -80,7 +77,7 @@ namespace PoseTeacher
                     SetMaterialColor();
                 }
 
-                FramesSinceMayorBeat += 3 ;
+                FramesSinceMayorBeat += 3;
                 FramesSinceMinorBeat += 3;
 
                 // TODO remove this from here and call Beat and BarSubscriber from the correct place
@@ -113,7 +110,7 @@ namespace PoseTeacher
             {
                 audioSource.PlayOneShot(conga_bar);
             }
-                
+
         }
 
         // Notfiy this object of a Beat thats happening
@@ -132,7 +129,7 @@ namespace PoseTeacher
                     case 3: audioSource.PlayOneShot(clave_beat4); break;
                     default: break;
                 }
-            }  
+            }
         }
 
         // Enable or Disable Beats (only Bars)
@@ -144,7 +141,7 @@ namespace PoseTeacher
         // Sets the color of the object based on the current rating
         private void SetMaterialColor()
         {
-            switch(currentRating)
+            switch (currentRating)
             {
                 case ScoreRating.UNRATED: material.color = BaseColor; break;
                 case ScoreRating.MISS: material.color = MissColor; break;

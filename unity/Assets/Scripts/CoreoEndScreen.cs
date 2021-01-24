@@ -1,9 +1,8 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
-namespace PoseTeacher {
+namespace PoseTeacher
+{
     public class CoreoEndScreen : MonoBehaviour
     {
 
@@ -14,10 +13,10 @@ namespace PoseTeacher {
         // The EndCoreoScreen GameObject
         public GameObject EndCoreoScreen;
         private GameObject _CoreoScoreDescription;
-        private GameObject CoreoScoreDescription 
+        private GameObject CoreoScoreDescription
         {
-            get 
-            { 
+            get
+            {
                 if (_CoreoScoreDescription == null)
                     _CoreoScoreDescription = EndCoreoScreen.transform.Find("TextContent").Find("CoreoScoreDescription").gameObject;
                 return _CoreoScoreDescription;
@@ -79,7 +78,7 @@ namespace PoseTeacher {
         public void UpdateText()
         {
             Text text = CoreoScoreDescription.GetComponent<Text>();
-            text.text = CoreoName + "\nScore: <color=yellow>" + Score +"/"+ MaxScore + "</color>";
+            text.text = CoreoName + "\nScore: <color=yellow>" + Score + "/" + MaxScore + "</color>";
         }
     }
 }

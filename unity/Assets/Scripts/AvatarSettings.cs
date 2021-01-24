@@ -1,7 +1,4 @@
-﻿using Microsoft.MixedReality.Toolkit.UI;
-using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System;
 using UnityEngine;
 
 namespace PoseTeacher
@@ -38,10 +35,10 @@ namespace PoseTeacher
         public void ChangeAvatarType(string typeString)
         {
             // Convert string to enum
-            AvatarType aType = (AvatarType) Enum.Parse(typeof(AvatarType), typeString);
+            AvatarType aType = (AvatarType)Enum.Parse(typeof(AvatarType), typeString);
 
             poseteacher.SetAvatarTypes(aType);
-            
+
         }
 
         // Mirrors all Avatars. 

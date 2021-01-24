@@ -1,7 +1,7 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
-using Microsoft.Azure.Kinect.BodyTracking;
+﻿using Microsoft.Azure.Kinect.BodyTracking;
+using System.Collections.Generic;
 using System.Text;
+using UnityEngine;
 
 namespace PoseTeacher
 {
@@ -115,7 +115,7 @@ namespace PoseTeacher
             return new SkeletonBone();
         }
 
-        
+
         public static Quaternion AbsoluteJointRotations(Quaternion jointRot, JointId jointId)
         {
             // Change rotations from local coordinate system of Kinect Joints to absolute rotations
@@ -132,7 +132,7 @@ namespace PoseTeacher
                     // get the absolute offset
                     Quaternion absOffset = absoluteOffsetMap[(JointId)j];
                     Transform finalJoint = animator.GetBoneTransform(MapKinectJoint((JointId)j));
-                    
+
                     Quaternion jointRot = AbsoluteJointRotations(poseData.data[j].Orientation, (JointId)j);
 
                     finalJoint.rotation = absOffset * Quaternion.Inverse(absOffset) * jointRot * absOffset;
@@ -148,7 +148,7 @@ namespace PoseTeacher
 
         public static Dictionary<JointId, Quaternion> CreateOffsetMap(Animator animator, Transform rootJointTransform)
         {
-            Dictionary<JointId, Quaternion>  absoluteOffsetMap = new Dictionary<JointId, Quaternion>();
+            Dictionary<JointId, Quaternion> absoluteOffsetMap = new Dictionary<JointId, Quaternion>();
             for (int i = 0; i < (int)JointId.Count; i++)
             {
                 HumanBodyBones hbb = MapKinectJoint((JointId)i);

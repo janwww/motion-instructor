@@ -1,8 +1,7 @@
+using Microsoft.Azure.Kinect.BodyTracking;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using Microsoft.Azure.Kinect.BodyTracking;
-using System.Text;
 
 namespace PoseTeacher
 {
@@ -77,7 +76,7 @@ namespace PoseTeacher
 
         public Vector3 GetReferencePosition()
         {
-            return SubContainerObject.transform.position + new Vector3(0,-0.4f,0);
+            return SubContainerObject.transform.position + new Vector3(0, -0.4f, 0);
         }
 
         public void SetActive(bool active)
@@ -544,7 +543,7 @@ namespace PoseTeacher
         {
             GameObject robotRoot = CharacterRootTransform.Find("Root").gameObject;
             GameObject hip = robotRoot.transform.Find("Hip").gameObject;
-            return hip.transform.position + new Vector3(0,-0.1f,0);
+            return hip.transform.position + new Vector3(0, -0.1f, 0);
         }
 
         public void SetActive(bool active)
@@ -594,7 +593,7 @@ namespace PoseTeacher
         {
             GameObject pelvis = CharacterRootTransform.Find("m_avg_Pelvis").gameObject;
             GameObject Spine1 = pelvis.transform.Find("m_avg_Spine1").gameObject;
-            return Spine1.transform.position + new Vector3(0,0.1f,0);
+            return Spine1.transform.position + new Vector3(0, 0.1f, 0);
             //return stickContainer.HipStick.transform.position;
         }
 
@@ -643,7 +642,7 @@ namespace PoseTeacher
             containers.Add(AvatarType.STICK, stickContainer);
             containers.Add(AvatarType.ROBOT, robotContainer);
             containers.Add(AvatarType.SMPL, smplContainer);
-            
+
 
             // Deactivate all other avatars except stickContainer
             // Note: it is necessary to do this after getting references, otherwise objects can't be found in scene
@@ -653,12 +652,15 @@ namespace PoseTeacher
             smplContainer.SetActive(false);
 
             Mirror(mirror);
-            
+
         }
 
         // Move active avatar based on the input JointData
         public void MovePerson(PoseData live_data)
         {
+            if (live_data == null)
+                return;
+
             // stickContainer needs to always be updated, because score calculation relies on it
             switch (activeType)
             {
@@ -682,12 +684,12 @@ namespace PoseTeacher
                     break;
             }
 
-           MoveIndicators();
+            MoveIndicators();
         }
 
         public void MoveIndicators(bool forceMove = false)
         {
-            Vector3 indicatorPos = new Vector3(0,0,0), cubePos = new Vector3(0, 0, 0);
+            Vector3 indicatorPos = new Vector3(0, 0, 0), cubePos = new Vector3(0, 0, 0);
             bool moveIndicators = forceMove;
             Transform scoreIndicatorTr = avatarContainer.transform.Find("ScoreIndicator");
             if (scoreIndicatorTr != null)
@@ -699,7 +701,7 @@ namespace PoseTeacher
                     indicatorPos = new Vector3(newPosition.x, newPosition.y + 0.9f, newPosition.z);
                     if ((scoreIndicator.transform.position - indicatorPos).magnitude > 1)
                         moveIndicators = true;
-                        
+
                 }
             }
 
@@ -774,7 +776,7 @@ namespace PoseTeacher
         // Needs to mirror SubContainers, because negative scale in the main container interferes with moving object in MRTK
         public void Mirror(bool? mirror = null)
         {
-            if(mirror == null)
+            if (mirror == null)
             {
                 mirror = !isMirrored;
             }

@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class AudioAdjuster : MonoBehaviour
 {
@@ -15,7 +13,8 @@ public class AudioAdjuster : MonoBehaviour
         {
             soundLevel = AudioListener.volume;
             AudioListener.volume = 0;
-        } else
+        }
+        else
         {
             AudioListener.volume = soundLevel;
         }

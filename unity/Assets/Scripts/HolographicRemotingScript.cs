@@ -1,9 +1,9 @@
-﻿
-using System.Collections;
+﻿using System.Collections;
 using UnityEngine;
 using UnityEngine.XR;
 using UnityEngine.XR.WSA;
 
+// Script  used to automatically connect to Holographic Remoting
 public class HolographicRemotingScript : MonoBehaviour
 {
     public string hololensIP;
@@ -14,7 +14,7 @@ public class HolographicRemotingScript : MonoBehaviour
         if (HolographicRemoting.ConnectionState != HolographicStreamerConnectionState.Connected)
         {
             Debug.Log("Connecting...");
-            HolographicRemoting.Connect(hololensIP, 99999, RemoteDeviceVersion.V1);
+            HolographicRemoting.Connect(hololensIP, 99999, RemoteDeviceVersion.V2);
         }
     }
 
