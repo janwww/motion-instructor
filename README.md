@@ -1,35 +1,94 @@
 # MR Motion Instructor
 [**Report**](https://placeholder) | [**Presentation**](https://placeholder) | [**Video**](https://placeholder)
 
-[Jan Wiegner](https://github.com/janwww), [Rudolf Varga](https://github.com/ketjatekos), [Felix Pfreundtner](https://github.com/felixpfreundtner), [Daniil Emtsev](https://github.com/daniil-777) and [Utkarsh Bajpai](https://github.com/Utkarsh-Bajpai)
 
-## Abstract
-Learning complex movements can be a time-consuming process, but it is necessary for the mastery of activities like Karate Kata, Yoga and dance choreographies. It is important to have a teacher in person to demonstrate the correct pose sequences step by step and correct errors in the student’s body postures.
-In-person sessions can be impractical due to epidemics or travel distance, while videos make it hard to see the 3D postures of the teacher and of the students. As an alternative, we propose the teaching of poses in Augmented Reality (AR) with a virtual teacher and 3D avatars.
+Authors:
+[Jan Wiegner](https://github.com/janwww), 
+[Rudolf Varga](https://github.com/ketjatekos), 
+[Felix Pfreundtner](https://github.com/felixpfreundtner), 
+[Daniil Emtsev](https://github.com/daniil-777) and 
+[Utkarsh Bajpai](https://github.com/Utkarsh-Bajpai)
 
-## License
+Project for the course Mixed Reality Lab 2020 at ETH.
 
-All our code and modifications are licensed under the attached MIT License. 
+Check out the report and video linked above for more detailed information.
 
-We use some code and assets from:
--  [This fork](https://github.com/Aviscii/azure-kinect-dk-unity) of the [azure-kinect-dk-unity repository](https://github.com/curiosity-inc/azure-kinect-dk-unity) (MIT License).
-- [NativeWebSocket](https://github.com/endel/NativeWebSocket) (Apache-2.0 License). 
-- [SMPL](https://smpl.is.tue.mpg.de/) (Creative Commons Attribution 4.0 International License). 
-- [Space Robot Kyle](https://assetstore.unity.com/packages/3d/characters/robots/space-robot-kyle-4696) (Unity Extension Asset License). 
-- [Lightweight human pose estimation](https://github.com/Daniil-Osokin/lightweight-human-pose-estimation-3d-demo.pytorch) (Apache-2.0 License). 
+
+### Abstract
+Learning complex movements can be a time-consuming process, but it is necessary for the mastery of activities like Karate Kata, Yoga and dance choreographies. 
+It is important to have a teacher in person to demonstrate the correct pose sequences step by step and correct errors in the student’s body postures.
+In-person sessions can be impractical due to epidemics or travel distance, while videos make it hard to see the 3D postures of the teacher and of the students. 
+As an alternative, we propose the teaching of poses in Augmented Reality (AR) with a virtual teacher and 3D avatars.
+Our focus was on dancing, but it can easily be adapted for other activities.
+
+<p align="center">
+<img src="images/train.gif">
+</p>
+
+
+### Architecture
+
+<p align="center">
+<img src="images/architecture_main.png">
+</p>
+
+Our main method of pose estimation is using the Azure Kinect with the Sensor SDK and Body tracking SDK 
+and we use the official C# wrapper to connect it to Unity.
+We rely on Microsoft’s 
+[Holographic Remoting Player](https://docs.microsoft.com/en-us/windows/mixed-reality/develop/platform-capabilities-and-apis/holographic-remoting-player) 
+to display content on the Hololens 2 which is being run and rendered on a separate computer.
+
+
+### Learning Motion in MR
+<p align="center">
+<img width=380 src="images/menu.gif">
+<img width=380 src="images/handmenu.gif">
+</p>
+
+The user has an option of following a guided course, which consisits of repeating basic steps to perfect them and testing their skills on choreographies.
+They can also use freeplay mode to beat their previous highest score.
+
+There are a multitude of visualization options, so the user can change the environment to their own needs and accelerates the learning process.
+This includes creating multiple instances of his avatar and the one of the teacher, mirroring them, showing a graph of the score, a live RGB feed from the kinect and others.
+Changes can be either done in the main menu or trough the hand menu for smaller changes.
+
+Our scoring mechanism is explained in our report linked above.
+
+<p align="center">
+<img src="images/choreography.gif">
+</p>
+
+
+### Avatars
+
+<p align="center">
+<img src="images/avatars.gif">
+</p>
+
+There are 4 avatar options to choose from in our project: 
+- Cube avatar (position and orientation of all estimated joints)
+- Stick figure avatar (body parts used for score calculation, changing color depending on correctness)
+- Robot avatar (rigged model)
+- SMPL avatar models (parametized rigged model)
+
+
+
 
 ## Environment
-As of December 10, 2020, this repository has been tested under the following environment:
+As of January 24, 2021, this repository has been tested under the following environment:
 - Windows 10 Education (10.0.19042 Build 19042)
 - [All tools required to develop on the Hololens](https://docs.microsoft.com/en-us/windows/mixed-reality/install-the-tools)
 - Unity 2019.4.13f1 // Unity 2019 LTS version
-- GTX 1070
+
+ A dedicated CUDA compatible graphics card is necessary, NVIDIA GEFORCE GTX 1070 or better. For more information consult the 
+ [official BT SDK hardware requirements](https://docs.microsoft.com/en-us/azure/kinect-dk/system-requirements). 
+ We used a GTX 1070 for development and testing.
 
 ## Get Started
 1. Clone this repository.
 2. Setup the Azure Kinect Libraries: (same as [Sample Unity Body Tracking Application](https://github.com/microsoft/Azure-Kinect-Samples/tree/master/body-tracking-samples/sample_unity_bodytracking))
     1. Get the latest nuget packages of libraries:
-        - Open the Visual Studio Solution (.sln) associated with this project. You can make one by opening a csharp file the Unity Editor.
+        - Open the Visual Studio Solution (.sln) associated with this project. You can create one by opening the project in Unity Editor and opening a csharp file.
         - In Visual Studio open: Tools->NuGet Package Manager-> Package Manager Console
         - Exectue in the console: `Install-Package Microsoft.Azure.Kinect.BodyTracking -Version 1.0.1`
     2. Move libraries to correct folders:
@@ -55,9 +114,23 @@ As of December 10, 2020, this repository has been tested under the following env
 - It is recommended to use the UI to navigate in the application.
 - For debugging we added the following keyboard shortcuts:
    - H for toggling Hand menu in traing/choreography (for use in editor testing)
-   - T for toggling pause of teacher avatar updates
+   - O for toggling pause of teacher avatar updates
    - P for toggling pause of self avatar updates
    - U for toggling force similarity update (even if teacher updates are paused)
+
+
+## License
+
+All our code and modifications are licensed under the attached MIT License. 
+
+We use some code and assets from:
+-  [This fork](https://github.com/Aviscii/azure-kinect-dk-unity) of the [azure-kinect-dk-unity repository](https://github.com/curiosity-inc/azure-kinect-dk-unity) (MIT License).
+- [NativeWebSocket](https://github.com/endel/NativeWebSocket) (Apache-2.0 License). 
+- [SMPL](https://smpl.is.tue.mpg.de/) (Creative Commons Attribution 4.0 International License). 
+- [Space Robot Kyle](https://assetstore.unity.com/packages/3d/characters/robots/space-robot-kyle-4696) (Unity Extension Asset License). 
+- [Lightweight human pose estimation](https://github.com/Daniil-Osokin/lightweight-human-pose-estimation-3d-demo.pytorch) (Apache-2.0 License). 
+- [Official Sample Unity Body Tracking Application](https://github.com/microsoft/Azure-Kinect-Samples/tree/master/body-tracking-samples/sample_unity_bodytracking) (MIT License)
+
 
 ## Alternative pose estimation (experimental)
 

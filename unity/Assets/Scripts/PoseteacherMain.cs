@@ -443,9 +443,9 @@ namespace PoseTeacher
                     }
                 }
             }
-            else if (Input.GetKeyDown(KeyCode.T))
+            else if (Input.GetKeyDown(KeyCode.O))
             {
-                Debug.Log("T - toggle teacher pause");
+                Debug.Log("O - toggle teacher pause");
                 pauseTeacher = !pauseTeacher;
             }
             else if (Input.GetKeyDown(KeyCode.P))
