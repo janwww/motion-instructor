@@ -513,7 +513,7 @@ namespace PoseTeacher
         Animator animator;
         public Transform CharacterRootTransform;
         Dictionary<JointId, Quaternion> absoluteOffsetMap;
-        public float OffsetY = 0.2f;
+        public float OffsetY = 0.5f;
         public float OffsetZ = -3.0f;
 
         public RobotContainer(GameObject container, StickContainer stickSkeleton)
@@ -563,7 +563,7 @@ namespace PoseTeacher
         Animator animator;
         public Transform CharacterRootTransform;
         Dictionary<JointId, Quaternion> absoluteOffsetMap;
-        public float OffsetY = 0.8f;
+        public float OffsetY = 1.0f;
         public float OffsetZ = 1.0f;
 
         public SmplContainer(GameObject container, StickContainer stickSkeleton)
