@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class UpdateSMPLShape : MonoBehaviour
 {
-    
+    // Enables setting blendshapes from MRTK sliders
 
 
     public void UpdateSMPLShapeParam1( GameObject slider)
