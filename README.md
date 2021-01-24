@@ -1,5 +1,10 @@
 # MR Motion Instructor
-[**Report**](https://placeholder) | [**Presentation**](https://placeholder) | [**Video**](https://placeholder)
+[**Report**][report-link] | [**Presentation**][presentation-link] | [**Video**][video-link]
+
+
+[report-link]: https://drive.google.com/file/d/1_MNpdT8GBWdvsy8UoUCX1AudPGPk2mM0/view?usp=sharing
+[presentation-link]: https://drive.google.com/file/d/1Tdgr7TpSHI3s6lD8M-23Ves3paCuMY5g/view?usp=sharing
+[video-link]: https://drive.google.com/file/d/12SufbJpmwGuYedoX1JAJ5AfUv7IJO9HS/view?usp=sharing
 
 
 Authors:
@@ -16,10 +21,10 @@ Check out the report and video linked above for more detailed information.
 
 ### Abstract
 Learning complex movements can be a time-consuming process, but it is necessary for the mastery of activities like Karate Kata, Yoga and dance choreographies. 
-It is important to have a teacher in person to demonstrate the correct pose sequences step by step and correct errors in the student’s body postures.
+It is important to have a teacher to demonstrate the correct pose sequences step by step and correct errors in the student’s body postures.
 In-person sessions can be impractical due to epidemics or travel distance, while videos make it hard to see the 3D postures of the teacher and of the students. 
 As an alternative, we propose the teaching of poses in Augmented Reality (AR) with a virtual teacher and 3D avatars.
-Our focus was on dancing, but it can easily be adapted for other activities.
+The focus of our project was on dancing, but it can easily be adapted for other activities.
 
 <p align="center">
 <img src="images/train.gif">
@@ -52,12 +57,13 @@ There are a multitude of visualization options, so the user can change the envir
 This includes creating multiple instances of his avatar and the one of the teacher, mirroring them, showing a graph of the score, a live RGB feed from the kinect and others.
 Changes can be either done in the main menu or trough the hand menu for smaller changes.
 
-Our scoring mechanism is explained in our report linked above.
+
 
 <p align="center">
 <img src="images/choreography.gif">
 </p>
 
+Our scoring mechanism is explained in our [report][report-link].
 
 ### Avatars
 
