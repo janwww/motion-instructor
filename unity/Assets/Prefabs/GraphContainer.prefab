@@ -17,7 +17,7 @@ GameObject:
   - component: {fileID: 5503904612296165954}
   - component: {fileID: 810617126}
   m_Layer: 0
-  m_Name: GraphTestContainer
+  m_Name: GraphContainer
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
