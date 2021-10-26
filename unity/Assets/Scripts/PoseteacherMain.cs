@@ -318,8 +318,8 @@ namespace PoseTeacher
 
         }
 
-        // Done at each application update
-        void Update()
+        // Done at each fixed Frame Update
+        void FixedUpdate()
         {
             CheckKeyInput();
 
