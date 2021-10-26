@@ -1,4 +1,4 @@
-﻿using System.Collections;
+﻿/*using System.Collections;
 using UnityEngine;
 using UnityEngine.XR;
 using UnityEngine.XR.WSA;
@@ -50,4 +50,4 @@ public class HolographicRemotingScript : MonoBehaviour
         yield return null;
         XRSettings.enabled = true;
     }
-}
+}*/
