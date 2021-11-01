@@ -17,41 +17,8 @@ namespace PoseTeacher
         MOTION, POSE
     }
 
-    public class ScoringScript
+    class ScoringScript
     {
-        //init
-        List<double> StickWeights = new List<double>(new double[] {
-             0.0,
-             0.0,
-             1.0, //LeftUpperArm
-             1.0, //RightUpperArm
-             0.0,
-             0.0,
-             1.0, //TorsoLeft
-             1.0, //TorsoRight
-             1.0, //HipStick
-             1.0, //LeftLowerArm
-             1.0, //RightLowerArm
-             0.0,
-             0.0,
-             1.0, //Shoulders
-             0.0,
-             0.0,
-             0.0,
-             0.0,
-             0.0, 
-             0.0, 
-             0.0, 
-             0.0, 
-             0.0, 
-             0.0, 
-             0.0, 
-             0.0, 
-             0.0,
-             0.0,
-             0.0,
-             0.0,
-        });
         AvatarContainer self;
         List<Scores> scores;
 
@@ -70,6 +37,9 @@ namespace PoseTeacher
         int goalLength;
         List<double> currentScores;
 
+        //constants
+        int numberOfComparisons = 8;
+
 
         public ScoringScript(AvatarContainer selfIn, bool activateKalmanIn = true)
         {
@@ -80,8 +50,8 @@ namespace PoseTeacher
             // generate kalman filters
             if (activateKalman)
             {
-                kalmanFilter = new List<KalmanFilter>(new KalmanFilter[StickWeights.Count]);
-                for (int i = 0; i < StickWeights.Count; i++)
+                kalmanFilter = new List<KalmanFilter>(new KalmanFilter[numberOfComparisons]);
+                for (int i = 0; i < numberOfComparisons; i++)
                 {
                     kalmanFilter[i] = new KalmanFilter(kalmanQ, kalmanR);
                     kalmanFilter[i].Reset(1.0);
@@ -108,30 +78,27 @@ namespace PoseTeacher
             }
         }
 
-        public void Update()
+        public void Update(PoseData currentSelfPose)
         {
             if (currentlyScoring)
             {
                 double similarityTotal = 0.0;
-                for ( int i = 0; i < StickWeights.Count; i++)
+                List<Quaternion> selfList = PoseDataToOrientation(currentSelfPose);
+                List<Quaternion> goalList;
+                if (currentGoalType == GoalType.POSE)
                 {
-                    if (StickWeights[i] == 0) continue;
+                    goalList = PoseDataToOrientation( currentGoal[0]);
+                }
+                else
+                {
+                    goalList = PoseDataToOrientation (currentGoal[goalCounter]);
+                }
+                
+                
+                for ( int i = 0; i < numberOfComparisons; i++)
+                {
+                    double similarity = cosineSimilarity(selfList[i], goalList[i]);
 
-                    Quaternion selfRotation = self.stickContainer.StickList[i].gameObject.transform.rotation;
-                    Quaternion goalRotation;
-                    if (currentGoalType == GoalType.POSE)
-                    {
-                        goalRotation = currentGoal[0].data[i].Orientation;
-                    } else
-                    {
-                        goalRotation = currentGoal[i].data[i].Orientation;
-                    }
-
-                    // get cosine similarity from quaternion 
-                    // background: https://www.researchgate.net/publication/316447858_Similarity_analysis_of_motion_based_on_motion_capture_technology
-                    // background: https://gdalgorithms-list.narkive.com/9TaVDT9G/quaternion-similarity-measure
-                    double similarity = Mathf.Abs(selfRotation.w * goalRotation.w + selfRotation.x * goalRotation.x + selfRotation.y * goalRotation.y + selfRotation.z * goalRotation.z);
-                    
                     if (activateKalman)
                     {
                         similarity = kalmanFilter[i].Update(similarity);
@@ -139,9 +106,9 @@ namespace PoseTeacher
                         if (similarity < 1.0) similarity = 0.0;
                     }
 
-                    similarityTotal += similarity * StickWeights[i];
+                    similarityTotal += similarity;
                 }
-                currentScores.Add(similarityTotal / StickWeights.Sum());
+                currentScores.Add(similarityTotal/numberOfComparisons);
 
                 goalCounter += 1;
                 if (goalCounter == goalLength) {
@@ -172,5 +139,55 @@ namespace PoseTeacher
                 }
             }
         }
+
+        double cosineSimilarity(Quaternion a, Quaternion b)
+        {
+            // get cosine similarity from quaternion 
+            // background: https://www.researchgate.net/publication/316447858_Similarity_analysis_of_motion_based_on_motion_capture_technology
+            // background: https://gdalgorithms-list.narkive.com/9TaVDT9G/quaternion-similarity-measure
+            return Mathf.Abs(a.w * b.w + a.x * b.x + a.y * b.y + a.z * b.z);
+        }
+
+        List<Quaternion> PoseDataToOrientation(PoseData pose)
+        {
+            List<Quaternion> list = new List<Quaternion>();
+            Vector3 vector;
+
+            //LeftUpperArm (SHOULDER_LEFT - ELBOW_LEFT)
+            vector = pose.data[5].Position - pose.data[6].Position;
+            list.Add(Quaternion.LookRotation(vector, Vector3.up));
+
+            //RightUpperArm (SHOULDER_RIGHT - ELBOW_RIGHT)
+            vector = pose.data[12].Position - pose.data[13].Position;
+            list.Add(Quaternion.LookRotation(vector, Vector3.up));
+
+            //TorsoLeft (SHOULDER_LEFT - HIP_LEFT
+            vector = pose.data[5].Position - pose.data[18].Position;
+            list.Add(Quaternion.LookRotation(vector, Vector3.up));
+
+            //TorsoRight (SHOULDER_RIGHT - HIP_RIGHT
+            vector = pose.data[12].Position - pose.data[22].Position;
+            list.Add(Quaternion.LookRotation(vector, Vector3.up));
+
+            //HipStick (HIP_LEFT - HIP_RIGHT)
+            vector = pose.data[18].Position - pose.data[22].Position;
+            list.Add(Quaternion.LookRotation(vector, Vector3.up));
+
+            //LeftLowerArm (ELBOW_LEFT - WRIST_LEFT)
+            vector = pose.data[6].Position - pose.data[7].Position;
+            list.Add(Quaternion.LookRotation(vector, Vector3.up));
+
+            //RightLowerArm (ELBOW_RIGHT - WRIST_RIGHT)
+            vector = pose.data[13].Position - pose.data[17].Position;
+            list.Add(Quaternion.LookRotation(vector, Vector3.up));
+
+            //Shoulders (SHOULDER_LEFT - SHOULDER_RIGHT)
+            vector = pose.data[5].Position - pose.data[12].Position;
+            list.Add(Quaternion.LookRotation(vector, Vector3.up));
+
+            return list;
+        }
+
+        
     }
 }

@@ -318,6 +318,15 @@ namespace PoseTeacher
 
         }
 
+        private void Update()
+        {
+            if (!pauseSelf)
+            {
+                AnimateSelf(SelfPoseInputGetter.GetNextPose());
+            }
+
+        }
+
         // Done at each fixed Frame Update
         void FixedUpdate()
         {
@@ -328,11 +337,7 @@ namespace PoseTeacher
                 CoreoEnded();
             }
 
-            if (!pauseSelf)
-            {
-                AnimateSelf(SelfPoseInputGetter.GetNextPose());
-            }
-
+            
             int playlimit = 1;
             switch (playbackSpeed)
             {
