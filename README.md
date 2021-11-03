@@ -93,16 +93,35 @@ As of January 24, 2021, this repository has been tested under the following envi
 ## Get Started
 1. Clone this repository.
 2. Open the `unity` folder as a Unity project, with `Universal Windows Platform` as the build platform. It might take a while to fetch all packages.
-3. Setup the Azure Kinect Libraries: (same as [Sample Unity Body Tracking Application](https://github.com/microsoft/Azure-Kinect-Samples/tree/master/body-tracking-samples/sample_unity_bodytracking))
-    1. Get the NuGet packages of libraries:
+3. Use the Mixed Reality Feature Tool to install:
+    - Mixed Reality Toolkit Examples v2.7.2
+    - Mixed Reality Toolkit Extensions v2.7.2
+    - Mixed Reality Toolkit Foundation v2.7.2
+    - Mixed Reality Toolkit Standard Assets v2.7.2
+    - Mixed Reality Toolkit Tools v2.7.2
+    - Mixed Reality OpenXR Plugin v1.1.1
+5. Setup the Azure Kinect Libraries: (same as [Sample Unity Body Tracking Application](https://github.com/microsoft/Azure-Kinect-Samples/tree/master/body-tracking-samples/sample_unity_bodytracking))
+    1. Upgrade Microsoft.Azure.Kinect.Sensor Package to the newest Version (v1.4.1)
+    2. Manually install the Azure Kinect Body Tracking SDK v1.1.0 [Link](https://docs.microsoft.com/en-us/azure/kinect-dk/body-sdk-download)
+    4. Get the NuGet packages of libraries:
         - Open the Visual Studio Solution (.sln) associated with this project. You can create one by opening a csharp file in the Unity Editor.
         - In Visual Studio open: Tools->NuGet Package Manager-> Package Manager Console
-        - Exectue in the console: `Install-Package Microsoft.Azure.Kinect.BodyTracking -Version 1.0.1`
-    2. Move libraries to correct folders:
+        - When Prompted to get missing packages, click confirm
+    5. Move libraries to correct folders:
         - Execute the file `unity/MoveLibraryFile.bat`. You should now have library files in `unity/` and in the newly created `unity/Assets/Plugins`.
-4. Open `Assets/PoseteacherScene` in the Unity Editor.
-5. When prompted to import TextMesh Pro, select `Import TMP Essentials`. You will need to reopen the scene to fix visual glitches.
-6. (Optional) Connect to the HoloLens with [Holographic Remoting](https://microsoft.github.io/MixedRealityToolkit-Unity/Documentation/Tools/HolographicRemoting.html#connecting-to-the-hololens-with-wi-fi) using the `Windows XR Plugin Remoting` in Unity.
+    6. Add these libraries to the root directory (contains the assets folder)
+       From Azure Kinect Body Tracking SDK\tools\
+        - cudnn64_8.dll
+        - cudnn64_cnn_infer64_8.dll
+        - cudnn64_ops_infer64_8.dll
+        - cudart64_110.dll
+        - cublas64_11.dll
+        - cublasLt64_11.dll
+        - onxxruntime.dll
+        - dnn_model_2_0_op11.onnx
+6. Open `Assets/PoseteacherScene` in the Unity Editor.
+7. When prompted to import TextMesh Pro, select `Import TMP Essentials`. You will need to reopen the scene to fix visual glitches.
+8. (Optional) Connect to the HoloLens with [Holographic Remoting](https://microsoft.github.io/MixedRealityToolkit-Unity/Documentation/Tools/HolographicRemoting.html#connecting-to-the-hololens-with-wi-fi) using the `Windows XR Plugin Remoting` in Unity.
 Otherwise the scene will only play in the editor.
 7. (Optional) In the `Main` object in `PoseteacherScene` set `Self Pose Input Source` to `KINECT`.
 Otherwise the input of the user is simulated from a file.
