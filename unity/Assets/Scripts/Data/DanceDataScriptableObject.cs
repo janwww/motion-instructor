@@ -7,6 +7,7 @@ using UnityEngine;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
+using PoseTeacher;
 
 [CreateAssetMenu(fileName = "Dance", menuName = "ScriptableObjects/DanceDataScriptableObject", order = 2)]
 public class DanceDataScriptableObject : ScriptableObject {

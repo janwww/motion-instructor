@@ -13,6 +13,7 @@ namespace PoseTeacher
 
         public GameObject videoCube;
         public GameObject scoreDisplay;
+        public DancePerformanceScriptableObject DancePerformanceObject;
 
         public GameObject avatarContainerSelf, avatarContainerTeacher;
         List<AvatarContainer> avatarListSelf, avatarListTeacher;
@@ -24,23 +25,33 @@ namespace PoseTeacher
 
         ScoringScript scoringUtil;
 
-        public bool paused = true;
+        public bool paused = false;
 
         PoseData currentSelfPose;
 
-        List<PoseData> move = new List<PoseData>();
+        private DanceData danceData;
+        private AudioClip song;
+        private AudioSource audioSource;
 
-        int currentframe = 0;
+
+        readonly List<DancePose> move = new List<DancePose>();
+
+        int currentId = 0;
 
         // Start is called before the first frame update
-        void Start()
+        public void Start()
         {
             avatarListSelf = new List<AvatarContainer>();
             avatarListTeacher = new List<AvatarContainer>();
             avatarListSelf.Add(new AvatarContainer(avatarContainerSelf));
             avatarListTeacher.Add(new AvatarContainer(avatarContainerTeacher));
 
-            selfPoseInputGetter = new PoseInputGetter(selfPoseInputSource) { ReadDataPath = dance_file };
+            audioSource = GetComponent<AudioSource>();
+            song = DancePerformanceObject.SongObject.SongClip;
+            audioSource.clip = song;
+            danceData = DancePerformanceObject.danceData.LoadDanceDataFromScriptableObject();
+
+            selfPoseInputGetter = new PoseInputGetter(selfPoseInputSource) { ReadDataPath = fake_file };
             teacherPoseInputGetter = new PoseInputGetter(PoseInputSource.FILE) { ReadDataPath = dance_file };
             selfPoseInputGetter.loop = true;
             teacherPoseInputGetter.loop = false;
@@ -49,39 +60,33 @@ namespace PoseTeacher
             
             scoringUtil = new ScoringScript(scoreDisplay);
 
-            List<string> sequence = File.ReadLines(move_file).ToList();
-            for (int i = 0; i<sequence.Count;i+=10)
+            Debug.Log(danceData.poses.Count);
+            for (int i = 0; i<danceData.poses.Count;i+=10)
             {
-                move.Add(PoseDataUtils.JSONstring2PoseData(sequence[i]));
+                move.Add(danceData.poses[i]);
             }
-            scoringUtil.StartNewGoal(GoalType.MOTION, move);
+
+            scoringUtil.StartNewGoal(GoalType.MOTION, move, 0f);
+            audioSource.Play();
         }
 
         // Update is called once per frame
-        private void Update()
+        public void Update()
         {
-            
+            float timeOffset = audioSource.time - danceData.poses[currentId].timestamp;
+            currentSelfPose = selfPoseInputGetter.GetNextPose();
+            AnimateSelf(currentSelfPose);
+            AnimateTeacher(danceData.GetInterpolatedPose(currentId, out currentId, timeOffset).toPoseData());
+
+            scoringUtil.Update(currentSelfPose, audioSource.time);
         }
 
-        private void FixedUpdate()
+        public void FixedUpdate()
         {
-            
-            if (!paused)
-            {
-                currentframe += 1;
-                currentSelfPose = selfPoseInputGetter.GetNextPose();
-                AnimateSelf(currentSelfPose);
-                AnimateTeacher(teacherPoseInputGetter.GetNextPose());
-
-                if (currentframe >= 10)
-                {
-                    currentframe = 0;
-                    scoringUtil.Update(currentSelfPose);
-                }
-            }
+           
         }
 
-        private void OnApplicationQuit()
+        public void OnApplicationQuit()
         {
             selfPoseInputGetter.Dispose();
             teacherPoseInputGetter.Dispose();
