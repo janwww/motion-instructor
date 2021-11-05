@@ -150,336 +150,152 @@ namespace PoseTeacher
 
         public void MovePerson(PoseData joint_data_list)
         {
+
             /************************************Joints**************************************/
             JointData stickJoint = joint_data_list.data[5];
             var stickPos = stickJoint.Position;
             var stickOrientation = stickJoint.Orientation;
             var stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.008f;
             var stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-            LeftShoulderStick.transform.localPosition = stickV;
-            LeftShoulderStick.transform.localRotation = stickR;
 
-            stickJoint = joint_data_list.data[12];
-            stickPos = stickJoint.Position;
-            stickOrientation = stickJoint.Orientation;
-            stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.008f;
-            stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-            RightShoulderStick.transform.localPosition = stickV;
-            RightShoulderStick.transform.localRotation = stickR;
+            Vector3 jointWeight = new Vector3(1, -1, 1) * 0.008f;
 
-            stickJoint = joint_data_list.data[18];
-            stickPos = stickJoint.Position;
-            stickOrientation = stickJoint.Orientation;
-            stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.008f;
-            stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-            LeftHipStick.transform.localPosition = stickV;
-            LeftHipStick.transform.localRotation = stickR;
+            LeftShoulderStick.transform.localPosition = Vector3.Scale(joint_data_list.data[5].Position, jointWeight);
+            LeftShoulderStick.transform.localRotation = joint_data_list.data[5].Orientation;
 
-            stickJoint = joint_data_list.data[22];
-            stickPos = stickJoint.Position;
-            stickOrientation = stickJoint.Orientation;
-            stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.008f;
-            stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-            RightHipStick.transform.localPosition = stickV;
-            RightHipStick.transform.localRotation = stickR;
+            RightShoulderStick.transform.localPosition = Vector3.Scale(joint_data_list.data[12].Position, jointWeight);
+            RightShoulderStick.transform.localRotation = joint_data_list.data[12].Orientation;
 
-            stickJoint = joint_data_list.data[6];
-            stickPos = stickJoint.Position;
-            stickOrientation = stickJoint.Orientation;
-            stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.008f;
-            stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-            LeftElbowStick.transform.localPosition = stickV;
-            LeftElbowStick.transform.localRotation = stickR;
+            LeftHipStick.transform.localPosition = Vector3.Scale(joint_data_list.data[18].Position, jointWeight);
+            LeftHipStick.transform.localRotation = joint_data_list.data[12].Orientation;
 
-            stickJoint = joint_data_list.data[13];
-            stickPos = stickJoint.Position;
-            stickOrientation = stickJoint.Orientation;
-            stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.008f;
-            stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-            RightElbowStick.transform.localPosition = stickV;
-            RightElbowStick.transform.localRotation = stickR;
+            RightHipStick.transform.localPosition = Vector3.Scale(joint_data_list.data[22].Position, jointWeight);
+            RightHipStick.transform.localRotation = joint_data_list.data[22].Orientation;
 
-            stickJoint = joint_data_list.data[7];
-            stickPos = stickJoint.Position;
-            stickOrientation = stickJoint.Orientation;
-            stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.008f;
-            stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-            LeftWristStick.transform.localPosition = stickV;
-            LeftWristStick.transform.localRotation = stickR;
+            LeftElbowStick.transform.localPosition = Vector3.Scale(joint_data_list.data[6].Position, jointWeight);
+            LeftElbowStick.transform.localRotation = joint_data_list.data[6].Orientation;
 
-            stickJoint = joint_data_list.data[14];
-            stickPos = stickJoint.Position;
-            stickOrientation = stickJoint.Orientation;
-            stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.008f;
-            stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-            RightWristStick.transform.localPosition = stickV;
-            RightWristStick.transform.localRotation = stickR;
+            RightElbowStick.transform.localPosition = Vector3.Scale(joint_data_list.data[13].Position, jointWeight);
+            RightElbowStick.transform.localRotation = joint_data_list.data[13].Orientation;
 
-            stickJoint = joint_data_list.data[19];
-            stickPos = stickJoint.Position;
-            stickOrientation = stickJoint.Orientation;
-            stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.008f;
-            stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-            LeftKneeStick.transform.localPosition = stickV;
-            LeftKneeStick.transform.localRotation = stickR;
+            LeftWristStick.transform.localPosition = Vector3.Scale(joint_data_list.data[7].Position, jointWeight);
+            LeftWristStick.transform.localRotation = joint_data_list.data[13].Orientation;
 
-            stickJoint = joint_data_list.data[23];
-            stickPos = stickJoint.Position;
-            stickOrientation = stickJoint.Orientation;
-            stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.008f;
-            stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-            RightKneeStick.transform.localPosition = stickV;
-            RightKneeStick.transform.localRotation = stickR;
+            RightWristStick.transform.localPosition = Vector3.Scale(joint_data_list.data[14].Position, jointWeight);
+            RightWristStick.transform.localRotation = joint_data_list.data[14].Orientation;
 
-            stickJoint = joint_data_list.data[20];
-            stickPos = stickJoint.Position;
-            stickOrientation = stickJoint.Orientation;
-            stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.008f;
-            stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-            LeftAnkleStick.transform.localPosition = stickV;
-            LeftAnkleStick.transform.localRotation = stickR;
+            LeftKneeStick.transform.localPosition = Vector3.Scale(joint_data_list.data[19].Position, jointWeight);
+            LeftKneeStick.transform.localRotation = joint_data_list.data[19].Orientation;
 
-            stickJoint = joint_data_list.data[24];
-            stickPos = stickJoint.Position;
-            stickOrientation = stickJoint.Orientation;
-            stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.008f;
-            stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-            RightAnkleStick.transform.localPosition = stickV;
-            RightAnkleStick.transform.localRotation = stickR;
+            RightKneeStick.transform.localPosition = Vector3.Scale(joint_data_list.data[23].Position, jointWeight);
+            RightKneeStick.transform.localRotation = joint_data_list.data[23].Orientation;
+
+            LeftAnkleStick.transform.localPosition = Vector3.Scale(joint_data_list.data[20].Position, jointWeight);
+            LeftAnkleStick.transform.localRotation = joint_data_list.data[20].Orientation;
+
+            RightAnkleStick.transform.localPosition = Vector3.Scale(joint_data_list.data[24].Position, jointWeight);
+            RightAnkleStick.transform.localRotation = joint_data_list.data[24].Orientation;
 
 
             /************************************Head**************************************/
-            stickJoint = joint_data_list.data[28];
-            stickPos = stickJoint.Position;
-            stickOrientation = stickJoint.Orientation;
-            stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.008f;
-            stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-            LeftEye.transform.localPosition = stickV;
-            LeftEye.transform.localRotation = stickR;
-            LeftEye.transform.localScale = new Vector3(0.3f, 0.2f, 0.2f);
+            Vector3 eyeScale = new Vector3(0.3f, 0.2f, 0.2f);
+            Vector3 otherScale = new Vector3(0.2f, 0.2f, 0.2f);
 
-            stickJoint = joint_data_list.data[30];
-            stickPos = stickJoint.Position;
-            stickOrientation = stickJoint.Orientation;
-            stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.008f;
-            stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-            RightEye.transform.localPosition = stickV;
-            RightEye.transform.localRotation = stickR;
-            RightEye.transform.localScale = new Vector3(0.3f, 0.2f, 0.2f);
+            LeftEye.transform.localPosition = Vector3.Scale(joint_data_list.data[28].Position, jointWeight);
+            LeftEye.transform.localRotation = joint_data_list.data[28].Orientation;
+            LeftEye.transform.localScale = eyeScale;
 
-            stickJoint = joint_data_list.data[27];
-            stickPos = stickJoint.Position;
-            stickOrientation = stickJoint.Orientation;
-            stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.008f;
-            stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-            NoseStick.transform.localPosition = stickV;
-            NoseStick.transform.localRotation = stickR;
-            NoseStick.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
+            RightEye.transform.localPosition = Vector3.Scale(joint_data_list.data[30].Position, jointWeight);
+            RightEye.transform.localRotation = joint_data_list.data[30].Orientation;
+            RightEye.transform.localScale = eyeScale;
 
-            stickJoint = joint_data_list.data[29];
-            stickPos = stickJoint.Position;
-            stickOrientation = stickJoint.Orientation;
-            stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.008f;
-            stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-            LeftEar.transform.localPosition = stickV;
-            LeftEar.transform.localRotation = stickR;
-            LeftEar.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
+            NoseStick.transform.localPosition = Vector3.Scale(joint_data_list.data[27].Position, jointWeight);
+            NoseStick.transform.localRotation = joint_data_list.data[27].Orientation;
+            NoseStick.transform.localScale = otherScale;
+
+            LeftEar.transform.localPosition = Vector3.Scale(joint_data_list.data[29].Position, jointWeight);
+            LeftEar.transform.localScale = otherScale;
             LeftEar.transform.LookAt(LeftShoulderStick.transform.position);
             LeftEar.transform.Rotate(90, 0, 0);
 
-            stickJoint = joint_data_list.data[31];
-            stickPos = stickJoint.Position;
-            stickOrientation = stickJoint.Orientation;
-            stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.008f;
-            stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-            RightEar.transform.localPosition = stickV;
-            RightEar.transform.localRotation = stickR;
-            RightEar.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
+            RightEar.transform.localPosition = Vector3.Scale(joint_data_list.data[31].Position, jointWeight);
+            RightEar.transform.localScale = otherScale;
             RightEar.transform.LookAt(RightShoulderStick.transform.position);
             RightEar.transform.Rotate(90, 0, 0);
 
-            stickJoint = joint_data_list.data[27];
-            stickPos = stickJoint.Position;
-            stickOrientation = stickJoint.Orientation;
-            stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.008f;
-            stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-            MouthStick.transform.localPosition = stickV;
-            MouthStick.transform.localRotation = stickR;
-            MouthStick.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
+            MouthStick.transform.localPosition = Vector3.Scale(joint_data_list.data[27].Position, jointWeight);
+            MouthStick.transform.localRotation = joint_data_list.data[27].Orientation;
+            MouthStick.transform.localScale = otherScale;
 
 
             /************************************Body**************************************/
-            stickJoint = joint_data_list.data[5];
-            var stickJoint_b = joint_data_list.data[12];
-            stickPos = stickJoint.Position;
-            var stickPos_b = stickJoint_b.Position;
-            stickOrientation = stickJoint.Orientation;
-            Vector3 stick = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) - new Vector3(stickPos_b[0], -stickPos_b[1], stickPos_b[2]);
-            float stick_length = stick.magnitude * 0.002f;
-            stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.004f;
-            stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-            Shoulders.transform.localPosition = new Vector3((stickPos[0] + stickPos_b[0]) * 0.5f, (-stickPos[1] - stickPos_b[1]) * 0.5f, (stickPos[2] + stickPos_b[2]) * 0.5f) * 0.008f;
+            float stickWeight = 0.002f;
+
+            Shoulders.transform.localPosition = Vector3.Scale((joint_data_list.data[5].Position + joint_data_list.data[12].Position) * 0.5f, jointWeight);
             Shoulders.transform.LookAt(RightShoulderStick.transform.position);
             Shoulders.transform.Rotate(90, 0, 0);
-            Shoulders.transform.localScale = new Vector3(0.2f, stick_length, 0.2f);
+            Shoulders.transform.localScale = new Vector3(0.2f, Vector3.Distance(joint_data_list.data[5].Position, joint_data_list.data[12].Position) * stickWeight, 0.2f);
 
-            stickJoint = joint_data_list.data[18];
-            stickJoint_b = joint_data_list.data[22];
-            stickPos = stickJoint.Position;
-            stickPos_b = stickJoint_b.Position;
-            stickOrientation = stickJoint.Orientation;
-            stick = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) - new Vector3(stickPos_b[0], -stickPos_b[1], stickPos_b[2]);
-            stick_length = stick.magnitude * 0.002f;
-            stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.004f;
-            stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-            HipStick.transform.localPosition = new Vector3((stickPos[0] + stickPos_b[0]) * 0.5f, (-stickPos[1] - stickPos_b[1]) * 0.5f, (stickPos[2] + stickPos_b[2]) * 0.5f) * 0.008f;
+            HipStick.transform.localPosition = Vector3.Scale((joint_data_list.data[18].Position + joint_data_list.data[22].Position) * 0.5f, jointWeight);
             HipStick.transform.LookAt(RightHipStick.transform.position);
             HipStick.transform.Rotate(90, 0, 0);
-            HipStick.transform.localScale = new Vector3(0.2f, stick_length, 0.2f);
+            HipStick.transform.localScale = new Vector3(0.2f, Vector3.Distance(joint_data_list.data[18].Position, joint_data_list.data[22].Position) * stickWeight, 0.2f);
 
-            stickJoint = joint_data_list.data[18];
-            stickJoint_b = joint_data_list.data[5];
-            stickPos = stickJoint.Position;
-            stickPos_b = stickJoint_b.Position;
-            stickOrientation = stickJoint.Orientation;
-            stick = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) - new Vector3(stickPos_b[0], -stickPos_b[1], stickPos_b[2]);
-            stick_length = stick.magnitude * 0.002f;
-            stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.004f;
-            stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-            TorsoLeft.transform.localPosition = new Vector3((stickPos[0] + stickPos_b[0]) * 0.5f, (-stickPos[1] - stickPos_b[1]) * 0.5f, (stickPos[2] + stickPos_b[2]) * 0.5f) * 0.008f;
+            TorsoLeft.transform.localPosition = Vector3.Scale((joint_data_list.data[18].Position + joint_data_list.data[5].Position) * 0.5f, jointWeight);
             TorsoLeft.transform.LookAt(LeftShoulderStick.transform.position);
             TorsoLeft.transform.Rotate(90, 0, 0);
-            TorsoLeft.transform.localScale = new Vector3(0.2f, stick_length, 0.2f);
+            TorsoLeft.transform.localScale = new Vector3(0.2f, Vector3.Distance(joint_data_list.data[18].Position, joint_data_list.data[5].Position) * stickWeight, 0.2f);
 
-            stickJoint = joint_data_list.data[12];
-            stickJoint_b = joint_data_list.data[22];
-            stickPos = stickJoint.Position;
-            stickPos_b = stickJoint_b.Position;
-            stickOrientation = stickJoint.Orientation;
-            stick = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) - new Vector3(stickPos_b[0], -stickPos_b[1], stickPos_b[2]);
-            stick_length = stick.magnitude * 0.002f;
-            stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.004f;
-            stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-            TorsoRight.transform.localPosition = new Vector3((stickPos[0] + stickPos_b[0]) * 0.5f, (-stickPos[1] - stickPos_b[1]) * 0.5f, (stickPos[2] + stickPos_b[2]) * 0.5f) * 0.008f;
+            TorsoRight.transform.localPosition = Vector3.Scale((joint_data_list.data[12].Position + joint_data_list.data[22].Position) * 0.5f, jointWeight);
             TorsoRight.transform.LookAt(RightShoulderStick.transform.position);
             TorsoRight.transform.Rotate(90, 0, 0);
-            TorsoRight.transform.localScale = new Vector3(0.2f, stick_length, 0.2f);
+            TorsoRight.transform.localScale = new Vector3(0.2f, Vector3.Distance(joint_data_list.data[12].Position, joint_data_list.data[22].Position) * stickWeight, 0.2f);
 
 
             /************************************Arms**************************************/
-            stickJoint = joint_data_list.data[5];
-            stickJoint_b = joint_data_list.data[6];
-            stickPos = stickJoint.Position;
-            stickPos_b = stickJoint_b.Position;
-            stickOrientation = stickJoint.Orientation;
-            stick = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) - new Vector3(stickPos_b[0], -stickPos_b[1], stickPos_b[2]);
-            stick_length = stick.magnitude * 0.002f;
-            stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.004f;
-            stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-            LeftUpperArm.transform.localPosition = new Vector3((stickPos[0] + stickPos_b[0]) * 0.5f, (-stickPos[1] - stickPos_b[1]) * 0.5f, (stickPos[2] + stickPos_b[2]) * 0.5f) * 0.008f;
+            Vector3 limbScale = new Vector3(0.2f, 1.2f, 0.2f);
+
+            LeftUpperArm.transform.localPosition = Vector3.Scale((joint_data_list.data[5].Position + joint_data_list.data[6].Position) * 0.5f, jointWeight);
             LeftUpperArm.transform.LookAt(LeftElbowStick.transform.position);
             LeftUpperArm.transform.Rotate(90, 0, 0);
-            LeftUpperArm.transform.localScale = new Vector3(0.2f, 1.2f, 0.2f);
-
-            stickJoint = joint_data_list.data[12];
-            stickJoint_b = joint_data_list.data[13];
-            stickPos = stickJoint.Position;
-            stickPos_b = stickJoint_b.Position;
-            stickOrientation = stickJoint.Orientation;
-            stick = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) - new Vector3(stickPos_b[0], -stickPos_b[1], stickPos_b[2]);
-            stick_length = stick.magnitude * 0.002f;
-            stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.004f;
-            stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-            RightUpperArm.transform.localPosition = new Vector3((stickPos[0] + stickPos_b[0]) * 0.5f, (-stickPos[1] - stickPos_b[1]) * 0.5f, (stickPos[2] + stickPos_b[2]) * 0.5f) * 0.008f;
+            LeftUpperArm.transform.localScale = limbScale;
+            
+            RightUpperArm.transform.localPosition = Vector3.Scale((joint_data_list.data[12].Position + joint_data_list.data[13].Position) * 0.5f, jointWeight);
             RightUpperArm.transform.LookAt(RightElbowStick.transform.position);
             RightUpperArm.transform.Rotate(90, 0, 0);
-            RightUpperArm.transform.localScale = new Vector3(0.2f, 1.2f, 0.2f);
+            RightUpperArm.transform.localScale = limbScale;
 
-            stickJoint = joint_data_list.data[6];
-            stickJoint_b = joint_data_list.data[7];
-            stickPos = stickJoint.Position;
-            stickPos_b = stickJoint_b.Position;
-            stickOrientation = stickJoint.Orientation;
-            stick = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) - new Vector3(stickPos_b[0], -stickPos_b[1], stickPos_b[2]);
-            stick_length = stick.magnitude * 0.002f;
-            stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.004f;
-            stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-            LeftLowerArm.transform.localPosition = new Vector3((stickPos[0] + stickPos_b[0]) * 0.5f, (-stickPos[1] - stickPos_b[1]) * 0.5f, (stickPos[2] + stickPos_b[2]) * 0.5f) * 0.008f;
+            LeftLowerArm.transform.localPosition = Vector3.Scale((joint_data_list.data[6].Position + joint_data_list.data[7].Position) * 0.5f, jointWeight);
             LeftLowerArm.transform.LookAt(LeftWristStick.transform.position);
             LeftLowerArm.transform.Rotate(90, 0, 0);
-            LeftLowerArm.transform.localScale = new Vector3(0.2f, 1.2f, 0.2f);
+            LeftLowerArm.transform.localScale = limbScale;
 
-            stickJoint = joint_data_list.data[13];
-            stickJoint_b = joint_data_list.data[14];
-            stickPos = stickJoint.Position;
-            stickPos_b = stickJoint_b.Position;
-            stickOrientation = stickJoint.Orientation;
-            stick = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) - new Vector3(stickPos_b[0], -stickPos_b[1], stickPos_b[2]);
-            stick_length = stick.magnitude * 0.002f;
-            stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.004f;
-            stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-            RightLowerArm.transform.localPosition = new Vector3((stickPos[0] + stickPos_b[0]) * 0.5f, (-stickPos[1] - stickPos_b[1]) * 0.5f, (stickPos[2] + stickPos_b[2]) * 0.5f) * 0.008f;
+            RightLowerArm.transform.localPosition = Vector3.Scale((joint_data_list.data[13].Position + joint_data_list.data[14].Position) * 0.5f, jointWeight);
             RightLowerArm.transform.LookAt(RightWristStick.transform.position);
             RightLowerArm.transform.Rotate(90, 0, 0);
-            RightLowerArm.transform.localScale = new Vector3(0.2f, 1.2f, 0.2f);
+            RightLowerArm.transform.localScale = limbScale;
 
 
             /************************************Legs**************************************/
-            stickJoint = joint_data_list.data[18];
-            stickJoint_b = joint_data_list.data[19];
-            stickPos = stickJoint.Position;
-            stickPos_b = stickJoint_b.Position;
-            stickOrientation = stickJoint.Orientation;
-            stick = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) - new Vector3(stickPos_b[0], -stickPos_b[1], stickPos_b[2]);
-            stick_length = stick.magnitude * 0.002f;
-            stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.004f;
-            stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-            LeftUpperLeg.transform.localPosition = new Vector3((stickPos[0] + stickPos_b[0]) * 0.5f, (-stickPos[1] - stickPos_b[1]) * 0.5f, (stickPos[2] + stickPos_b[2]) * 0.5f) * 0.008f;
+            LeftUpperLeg.transform.localPosition = Vector3.Scale((joint_data_list.data[18].Position + joint_data_list.data[19].Position) * 0.5f, jointWeight);
             LeftUpperLeg.transform.LookAt(LeftHipStick.transform.position);
             LeftUpperLeg.transform.Rotate(90, 0, 0);
-            LeftUpperLeg.transform.localScale = new Vector3(0.2f, 1.2f, 0.2f);
+            LeftUpperLeg.transform.localScale = limbScale;
 
-            stickJoint = joint_data_list.data[22];
-            stickJoint_b = joint_data_list.data[23];
-            stickPos = stickJoint.Position;
-            stickPos_b = stickJoint_b.Position;
-            stickOrientation = stickJoint.Orientation;
-            stick = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) - new Vector3(stickPos_b[0], -stickPos_b[1], stickPos_b[2]);
-            stick_length = stick.magnitude * 0.002f;
-            stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.004f;
-            stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-            RightUpperLeg.transform.localPosition = new Vector3((stickPos[0] + stickPos_b[0]) * 0.5f, (-stickPos[1] - stickPos_b[1]) * 0.5f, (stickPos[2] + stickPos_b[2]) * 0.5f) * 0.008f;
+            RightUpperLeg.transform.localPosition = Vector3.Scale((joint_data_list.data[22].Position + joint_data_list.data[23].Position) * 0.5f, jointWeight);
             RightUpperLeg.transform.LookAt(RightHipStick.transform.position);
             RightUpperLeg.transform.Rotate(90, 0, 0);
-            RightUpperLeg.transform.localScale = new Vector3(0.2f, 1.2f, 0.2f);
+            RightUpperLeg.transform.localScale = limbScale;
 
-            stickJoint = joint_data_list.data[19];
-            stickJoint_b = joint_data_list.data[20];
-            stickPos = stickJoint.Position;
-            stickPos_b = stickJoint_b.Position;
-            stickOrientation = stickJoint.Orientation;
-            stick = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) - new Vector3(stickPos_b[0], -stickPos_b[1], stickPos_b[2]);
-            stick_length = stick.magnitude * 0.002f;
-            stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.004f;
-            stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-            LeftLowerLeg.transform.localPosition = new Vector3((stickPos[0] + stickPos_b[0]) * 0.5f, (-stickPos[1] - stickPos_b[1]) * 0.5f, (stickPos[2] + stickPos_b[2]) * 0.5f) * 0.008f;
+            LeftLowerLeg.transform.localPosition = Vector3.Scale((joint_data_list.data[19].Position + joint_data_list.data[20].Position) * 0.5f, jointWeight);
             LeftLowerLeg.transform.LookAt(LeftKneeStick.transform.position);
             LeftLowerLeg.transform.Rotate(90, 0, 0);
-            LeftLowerLeg.transform.localScale = new Vector3(0.2f, 1.2f, 0.2f);
+            LeftLowerLeg.transform.localScale = limbScale;
 
-            stickJoint = joint_data_list.data[23];
-            stickJoint_b = joint_data_list.data[24];
-            stickPos = stickJoint.Position;
-            stickPos_b = stickJoint_b.Position;
-            stickOrientation = stickJoint.Orientation;
-            stick = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) - new Vector3(stickPos_b[0], -stickPos_b[1], stickPos_b[2]);
-            stick_length = stick.magnitude * 0.002f;
-            stickV = new Vector3(stickPos[0], -stickPos[1], stickPos[2]) * 0.004f;
-            stickR = new Quaternion(stickOrientation[0], stickOrientation[1], stickOrientation[2], stickOrientation[3]);
-            RightLowerLeg.transform.localPosition = new Vector3((stickPos[0] + stickPos_b[0]) * 0.5f, (-stickPos[1] - stickPos_b[1]) * 0.5f, (stickPos[2] + stickPos_b[2]) * 0.5f) * 0.008f;
+            RightLowerLeg.transform.localPosition = Vector3.Scale((joint_data_list.data[23].Position + joint_data_list.data[24].Position) * 0.5f, jointWeight);
             RightLowerLeg.transform.LookAt(RightKneeStick.transform.position);
             RightLowerLeg.transform.Rotate(90, 0, 0);
-            RightLowerLeg.transform.localScale = new Vector3(0.2f, 1.2f, 0.2f);
+            RightLowerLeg.transform.localScale = limbScale;
         }
 
         public Vector3 GetReferencePosition()
