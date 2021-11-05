@@ -181,7 +181,7 @@ namespace PoseTeacher
             list.Add(Quaternion.LookRotation(vector, Vector3.up));
 
             //RightLowerArm (ELBOW_RIGHT - WRIST_RIGHT)
-            vector = pose.data[13].Position - pose.data[17].Position;
+            vector = pose.data[13].Position - pose.data[14].Position;
             list.Add(Quaternion.LookRotation(vector, Vector3.up));
 
             //Shoulders (SHOULDER_LEFT - SHOULDER_RIGHT)
