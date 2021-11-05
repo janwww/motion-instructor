@@ -53,10 +53,10 @@ namespace PoseTeacher
             kalmanFilter = new List<KalmanFilter>();
             for (int i = 0; i < numberOfComparisons; i++)
             {
-               kalmanFilter.Add(new KalmanFilter(kalmanQ, kalmanR));
-               kalmanFilter[i].Reset(1.0);
+                kalmanFilter.Add(new KalmanFilter(kalmanQ, kalmanR));
+                kalmanFilter[i].Reset(1.0);
             }
-            
+
 
             scores = new List<Scores>();
         }
@@ -97,7 +97,7 @@ namespace PoseTeacher
                         break;
                 }
 
-                
+
                 if (nextStep)
                 {
                     double similarityTotal = 0.0;
@@ -123,10 +123,10 @@ namespace PoseTeacher
                             if (similarity < 0.0) similarity = 0.0;
                         }
 
-                        similarityTotal += similarity;
+                        similarityTotal += similarity*scoringWeightsPrioritizeArms[i];
                     }
-                    Debug.Log(similarityTotal / numberOfComparisons);
-                    currentScores.Add(similarityTotal / numberOfComparisons);
+                    Debug.Log(similarityTotal / TotalWeights(scoringWeightsPrioritizeArms));
+                    currentScores.Add(similarityTotal / TotalWeights(scoringWeightsPrioritizeArms));
 
                     currentTimeStamp = danceTimeStamp;
                     goalCounter += 1;
@@ -260,6 +260,16 @@ namespace PoseTeacher
             return list;
         }
 
+        List<int> scoringWeightsPrioritizeArms = new List<int>{3, 3, 1, 1, 1, 3, 3, 1};
 
+        int TotalWeights(List<int> weights)
+        {
+            int total = 0;
+            foreach (int i in weights)
+            {
+                total += i;
+            }
+            return total;
+        }
     }
 }
