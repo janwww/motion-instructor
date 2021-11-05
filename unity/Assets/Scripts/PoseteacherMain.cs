@@ -318,8 +318,17 @@ namespace PoseTeacher
 
         }
 
-        // Done at each application update
-        void Update()
+        private void Update()
+        {
+            if (!pauseSelf)
+            {
+                AnimateSelf(SelfPoseInputGetter.GetNextPose());
+            }
+
+        }
+
+        // Done at each fixed Frame Update
+        void FixedUpdate()
         {
             CheckKeyInput();
 
@@ -328,11 +337,7 @@ namespace PoseTeacher
                 CoreoEnded();
             }
 
-            if (!pauseSelf)
-            {
-                AnimateSelf(SelfPoseInputGetter.GetNextPose());
-            }
-
+            
             int playlimit = 1;
             switch (playbackSpeed)
             {

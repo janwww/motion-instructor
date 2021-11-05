@@ -63,66 +63,66 @@ namespace PoseTeacher
 
                 case BodyWeightsType.TOP:
                     return new List<double>(new double[] {
+                                0.0, 
+                                0.0, 
+                                0.0, 
+                                0.0, 
+                                0.0, 
+                                0.0, 
+                                0.0, 
                                 0.0,
                                 0.0,
+                                0.0, 
+                                0.0, 
+                                1.0, //LeftEye
+                                1.0, //RightEye
+                                1.0, //Shoulders
+                                1.0, //MouthStick
+                                1.0, //NoseStick
+                                1.0, //LeftEar
+                                1.0, //RightEar
+                                1.0, //LeftShoulderStick
+                                1.0, //RightShoulderStick
                                 0.0,
                                 0.0,
+                                0.0, 
+                                0.0, 
+                                0.0, 
+                                0.0, 
+                                0.0, 
                                 0.0,
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0,
-                                1.0,
-                                1.0,
-                                1.0,
-                                1.0,
-                                1.0,
-                                1.0,
-                                1.0,
-                                1.0,
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.0,
+                                0.0, 
+                                0.0, 
                             });
 
                 case BodyWeightsType.MIDDLE:
                     return new List<double>(new double[] {
                         0.0,
                         0.0,
-                        1.0,
-                        1.0,
+                        1.0, //LeftUpperArm
+                        1.0, //RightUpperArm
                         0.0,
                         0.0,
-                        1.0,
-                        1.0,
-                        1.0,
-                        1.0,
-                        1.0,
+                        1.0, //TorsoLeft
+                        1.0, //TorsoRight
+                        1.0, //HipStick
+                        1.0, //LeftLowerArm
+                        1.0, //RightLowerArm
                         0.0,
                         0.0,
-                        1.0,
+                        1.0, //Shoulders
                         0.0,
                         0.0,
                         0.0,
                         0.0,
-                        1.0,
-                        1.0,
-                        1.0,
-                        1.0,
-                        1.0,
-                        1.0,
-                        1.0,
-                        1.0,
+                        1.0, //LeftShoulderStick
+                        1.0, //RightShoulderStick
+                        1.0, //LeftHipStick
+                        1.0, //RightHipStick
+                        1.0, //LeftElbowStick
+                        1.0, //RightElbowStick
+                        1.0, //LeftWristStick
+                        1.0, //RightWristStick
                         0.0,
                         0.0,
                         0.0,
@@ -131,15 +131,12 @@ namespace PoseTeacher
 
                 case BodyWeightsType.BOTTOM:
                     return new List<double>(new double[] {
-                        1.0,
-                        1.0,
+                        1.0, //LeftLowerLeg
+                        1.0, //RightLowerLeg
                         0.0,
                         0.0,
-                        1.0,
-                        1.0,
-                        0.0,
-                        0.0,
-                        0.0,
+                        1.0, //LeftUpperLeg
+                        1.0,//RightUpperLeg
                         0.0,
                         0.0,
                         0.0,
@@ -157,10 +154,13 @@ namespace PoseTeacher
                         0.0,
                         0.0,
                         0.0,
-                        1.0,
-                        1.0,
-                        1.0,
-                        1.0
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0, //LeftKneeStick
+                        1.0, //RightKneeStick
+                        1.0, //LeftAnkleStick
+                        1.0, //RightAnkleStick
                     });
 
                 default:
