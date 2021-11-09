@@ -7,7 +7,6 @@ using System;
 
 namespace PoseTeacher
 {
-
     [System.Serializable]
     public class DanceData
     {
