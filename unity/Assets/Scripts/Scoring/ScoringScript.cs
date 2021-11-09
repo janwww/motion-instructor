@@ -140,6 +140,12 @@ namespace PoseTeacher
             }
         }
 
+        public List<Scores> getFinalScores()
+        {
+            if (currentlyScoring) finishGoal();
+            return scores;
+        }
+
         void finishGoal()
         {
             double tempScore;
@@ -169,8 +175,6 @@ namespace PoseTeacher
             }
 
             //TODO: Maybe add an event that fires when a new score is reached
-            currentlyScoring = false;
-
             if (scoreDisplay != null)
             {
                 scoreDisplay.SendMessage("addScore", scores[scores.Count - 1]);
