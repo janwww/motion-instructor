@@ -32,6 +32,7 @@ namespace PoseTeacher
         GoalType currentGoalType;
         List<DancePose> currentGoal;
         float currentTimeStamp;
+        float goalStartTimeStamp;
         int goalCounter;
         int goalLength;
         List<double> currentScores;
@@ -63,13 +64,14 @@ namespace PoseTeacher
 
         public void StartNewGoal(GoalType type, List<DancePose> goal, float startTimeStamp)
         {
-            if (currentlyScoring) return;
+            if (currentlyScoring) finishGoal();
             currentlyScoring = true;
             currentScores = new List<double>();
             currentGoalType = type;
             currentGoal = goal;
             goalCounter = 0;
             currentTimeStamp = startTimeStamp;
+            goalStartTimeStamp = startTimeStamp;
             if (currentGoalType == GoalType.POSE)
             {
                 goalLength = 15;
@@ -93,7 +95,7 @@ namespace PoseTeacher
                         nextStep = deltaTime >= constDeltaTime;
                         break;
                     case GoalType.MOTION:
-                        nextStep = danceTimeStamp >= currentGoal[goalCounter].timestamp;
+                        nextStep = danceTimeStamp >= currentGoal[goalCounter].timestamp + goalStartTimeStamp;
                         break;
                 }
 
@@ -115,69 +117,70 @@ namespace PoseTeacher
 
                     for (int i = 0; i < numberOfComparisons; i++)
                     {
-                        double similarity = cosineSimilarity(selfList[i], goalList[i]);
+                        
+                        double similarity = quaternionDistance(selfList[i], goalList[i]);
                         if (activateKalman)
                         {
                             similarity = kalmanFilter[i].Update(similarity);
                             if (similarity > 1.0) similarity = 1.0;
                             if (similarity < 0.0) similarity = 0.0;
                         }
-
                         similarityTotal += similarity*scoringWeightsPrioritizeArms[i];
                     }
-                    Debug.Log(similarityTotal / TotalWeights(scoringWeightsPrioritizeArms));
                     currentScores.Add(similarityTotal / TotalWeights(scoringWeightsPrioritizeArms));
 
                     currentTimeStamp = danceTimeStamp;
                     goalCounter += 1;
                     if (goalCounter == goalLength)
                     {
-                        double tempScore;
-                        if (currentGoalType == GoalType.POSE)
-                        {
-                            //for a pose, take best score in evaluation period
-                            tempScore = currentScores.Max();
-
-                        }
-                        else
-                        {
-                            //for a move, take best 75% of scores and average them 
-                            tempScore = currentScores.OrderByDescending(list => list).Take(Mathf.RoundToInt(currentScores.Count * 0.75f)).Average();
-                        }
-
-                        if (tempScore > 0.8)
-                        {
-                            scores.Add(Scores.GREAT);
-                        }
-                        else if (tempScore > 0.4)
-                        {
-                            scores.Add(Scores.GOOD);
-                        }
-                        else
-                        {
-                            scores.Add(Scores.BAD);
-                        }
-
-                        Debug.Log(scores[scores.Count - 1]);
-                        //TODO: Maybe add an event that fires when a new score is reached
-                        currentlyScoring = false;
-
-                        if (scoreDisplay != null)
-                        {
-                            scoreDisplay.SendMessage("addScore", scores[scores.Count - 1]);
-                        }
+                        finishGoal();
                     }
                 }
 
             }
         }
 
-        double cosineSimilarity(Quaternion a, Quaternion b)
+        void finishGoal()
         {
-            // get cosine similarity from quaternion 
-            // background: https://www.researchgate.net/publication/316447858_Similarity_analysis_of_motion_based_on_motion_capture_technology
-            // background: https://gdalgorithms-list.narkive.com/9TaVDT9G/quaternion-similarity-measure
-            return Mathf.Abs(a.w * b.w + a.x * b.x + a.y * b.y + a.z * b.z);
+            double tempScore;
+            if (currentGoalType == GoalType.POSE)
+            {
+                //for a pose, take best score in evaluation period
+                tempScore = currentScores.Max();
+
+            }
+            else
+            {
+                //for a move, take best 75% of scores and average them 
+                tempScore = currentScores.OrderByDescending(list => list).Take(Mathf.RoundToInt(currentScores.Count * 0.75f)).Average();
+            }
+
+            if (tempScore > 0.8)
+            {
+                scores.Add(Scores.GREAT);
+            }
+            else if (tempScore > 0.4)
+            {
+                scores.Add(Scores.GOOD);
+            }
+            else
+            {
+                scores.Add(Scores.BAD);
+            }
+
+            //TODO: Maybe add an event that fires when a new score is reached
+            currentlyScoring = false;
+
+            if (scoreDisplay != null)
+            {
+                scoreDisplay.SendMessage("addScore", scores[scores.Count - 1]);
+            }
+            currentlyScoring = false;
+        }
+
+        double quaternionDistance(Quaternion a, Quaternion b)
+        {
+            return 1 - Mathf.Pow(a.w * b.w + a.x * b.x + a.y * b.y + a.z * b.z, 2);
         }
 
         List<Quaternion> PoseDataToOrientation(PoseData pose)

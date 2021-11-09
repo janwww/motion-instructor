@@ -9,7 +9,7 @@ namespace PoseTeacher
 
     public class DanceSceneMain : MonoBehaviour
     {
-        PoseInputGetter selfPoseInputGetter, teacherPoseInputGetter;
+        PoseInputGetter selfPoseInputGetter;
 
         public GameObject videoCube;
         public GameObject scoreDisplay;
@@ -33,8 +33,7 @@ namespace PoseTeacher
         private AudioClip song;
         private AudioSource audioSource;
 
-
-        readonly List<DancePose> move = new List<DancePose>();
+        readonly List<(float, DanceData)> goals = new List<(float,DanceData)>();
 
         int currentId = 0;
 
@@ -51,22 +50,20 @@ namespace PoseTeacher
             audioSource.clip = song;
             danceData = DancePerformanceObject.danceData.LoadDanceDataFromScriptableObject();
 
-            selfPoseInputGetter = new PoseInputGetter(selfPoseInputSource) { ReadDataPath = fake_file };
-            teacherPoseInputGetter = new PoseInputGetter(PoseInputSource.FILE) { ReadDataPath = dance_file };
-            selfPoseInputGetter.loop = true;
-            teacherPoseInputGetter.loop = false;
+            for(int i = 0; i < DancePerformanceObject.goals.Count; i++)
+            {
+                goals.Add((DancePerformanceObject.goalTimestamps[i], DancePerformanceObject.goals[i].LoadDanceDataFromScriptableObject()));
+            }
 
+
+            selfPoseInputGetter = new PoseInputGetter(selfPoseInputSource) { ReadDataPath = fake_file };
+            selfPoseInputGetter.loop = true;
             selfPoseInputGetter.VideoCube = videoCube;
             
             scoringUtil = new ScoringScript(scoreDisplay);
 
-            Debug.Log(danceData.poses.Count);
-            for (int i = 0; i<danceData.poses.Count;i+=10)
-            {
-                move.Add(danceData.poses[i]);
-            }
-
-            scoringUtil.StartNewGoal(GoalType.MOTION, move, 0f);
+            scoringUtil.StartNewGoal(GoalType.MOTION, goals[0].Item2.poses, 0f);
+            goals.RemoveAt(0);
             audioSource.Play();
         }
 
@@ -76,6 +73,11 @@ namespace PoseTeacher
             float timeOffset = audioSource.time - danceData.poses[currentId].timestamp;
             currentSelfPose = selfPoseInputGetter.GetNextPose();
             AnimateSelf(currentSelfPose);
+            if (goals.Count > 0 && audioSource.time >= goals[0].Item1)
+            {
+                scoringUtil.StartNewGoal(GoalType.MOTION, goals[0].Item2.poses, 0f);
+                goals.RemoveAt(0);
+            }
             AnimateTeacher(danceData.GetInterpolatedPose(currentId, out currentId, timeOffset).toPoseData());
 
             scoringUtil.Update(currentSelfPose, audioSource.time);
@@ -89,7 +91,6 @@ namespace PoseTeacher
         public void OnApplicationQuit()
         {
             selfPoseInputGetter.Dispose();
-            teacherPoseInputGetter.Dispose();
             
         }
 
