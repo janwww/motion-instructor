@@ -45,6 +45,13 @@ namespace PoseTeacher {
                     textMesh.color = new Color(0.22f, 0.56f, 0.22f);
                     break;
             }
+            StartCoroutine(TextDisappear(1));
+        }
+
+        private IEnumerator TextDisappear(float waitTime)
+        {
+            yield return new WaitForSeconds(waitTime);
+            textMesh.text = "";
         }
     }
 }
