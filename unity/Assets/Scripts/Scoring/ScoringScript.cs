@@ -161,11 +161,11 @@ namespace PoseTeacher
                 tempScore = currentScores.OrderByDescending(list => list).Take(Mathf.RoundToInt(currentScores.Count * 0.75f)).Average();
             }
 
-            if (tempScore > 0.8)
+            if (tempScore < 0.2)
             {
                 scores.Add(Scores.GREAT);
             }
-            else if (tempScore > 0.4)
+            else if (tempScore < 0.6)
             {
                 scores.Add(Scores.GOOD);
             }
