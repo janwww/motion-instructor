@@ -102,7 +102,7 @@ namespace PoseTeacher
 
                 if (nextStep)
                 {
-                    double similarityTotal = 0.0;
+                    double distanceTotal = 0.0;
                     List<Quaternion> selfList = PoseDataToOrientation(currentSelfPose);
                     List<Quaternion> goalList;
                     if (currentGoalType == GoalType.POSE)
@@ -117,17 +117,10 @@ namespace PoseTeacher
 
                     for (int i = 0; i < numberOfComparisons; i++)
                     {
-                        
-                        double similarity = quaternionDistance(selfList[i], goalList[i]);
-                        if (activateKalman)
-                        {
-                            similarity = kalmanFilter[i].Update(similarity);
-                            if (similarity > 1.0) similarity = 1.0;
-                            if (similarity < 0.0) similarity = 0.0;
-                        }
-                        similarityTotal += similarity*scoringWeightsPrioritizeArms[i];
+                        double distance = quaternionDistance(selfList[i], goalList[i]);
+                        distanceTotal += distance*scoringWeightsPrioritizeArms[i];
                     }
-                    currentScores.Add(similarityTotal / TotalWeights(scoringWeightsPrioritizeArms));
+                    currentScores.Add(distanceTotal / TotalWeights(scoringWeightsPrioritizeArms));
 
                     currentTimeStamp = danceTimeStamp;
                     goalCounter += 1;
@@ -157,9 +150,10 @@ namespace PoseTeacher
             }
             else
             {
-                //for a move, take best 75% of scores and average them 
-                tempScore = currentScores.OrderByDescending(list => list).Take(Mathf.RoundToInt(currentScores.Count * 0.75f)).Average();
+                //for a move, take average of scores
+                tempScore = currentScores.Average();
             }
+            Debug.Log(tempScore);
 
             if (tempScore > 0.8)
             {
