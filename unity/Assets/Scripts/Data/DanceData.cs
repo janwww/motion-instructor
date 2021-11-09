@@ -5,7 +5,6 @@ using Microsoft.Azure.Kinect.BodyTracking;
 using System.IO;
 using System;
 
-
 namespace PoseTeacher
 {
 
