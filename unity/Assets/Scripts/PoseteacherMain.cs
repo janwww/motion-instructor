@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Collections;
 using UnityEngine;
 
 namespace PoseTeacher
@@ -63,8 +64,8 @@ namespace PoseTeacher
         private bool pauseRecordingAnimation = true;
 
         // For fake data when emulating input from file
-        private readonly string fake_file = "jsondata/2020_05_27-00_01_59.txt";
-        public PoseInputSource SelfPoseInputSource = PoseInputSource.KINECT;
+        private readonly string fake_file = "jsondata/salsa_m/2020_12_14-16_08_32.txt"; //"jsondata/2020_05_27-00_01_59.txt";
+        public PoseInputSource SelfPoseInputSource = PoseInputSource.KINECT; // This is set in the Settings in Main object.
         public bool mirroring = false; // can probably be changed to private (if no UI elements use it)
 
 
@@ -81,6 +82,9 @@ namespace PoseTeacher
         public List<double> similarityScoreRaw; // similarity value for all body sticks
         public List<double> similarityWeightRaw; // weight value for all body sticks
         AvatarSimilarity avatarSimilarity;
+
+        // for score calculation (EDD)
+        public ScoreEDD scoreEDD;
 
         // Debugging and testing variables
         private bool forceSimilarityUpdate = false;
@@ -273,6 +277,7 @@ namespace PoseTeacher
         // Do once on scene startup
         private void Start()
         {
+            Debug.Log("Starting Initialzation ...");
             // Initialize the respective AvatarContainer classes
             avatarListSelf = new List<AvatarContainer>();
             avatarListTeacher = new List<AvatarContainer>();
@@ -285,8 +290,8 @@ namespace PoseTeacher
             recordedAvatar = new AvatarContainer(newAvatar);
             newAvatar.SetActive(false);
 
-            // Set teacher container to inactive at start
-            avatarListTeacher[0].avatarContainer.gameObject.SetActive(false);
+            // Set teacher container to active for now // inactive at start
+            avatarListTeacher[0].avatarContainer.gameObject.SetActive(true);
 
             SelfPoseInputGetter = new PoseInputGetter(SelfPoseInputSource) { ReadDataPath = fake_file };
             TeacherPoseInputGetter = new PoseInputGetter(PoseInputSource.FILE) { ReadDataPath = fake_file };
@@ -305,6 +310,9 @@ namespace PoseTeacher
             recordedAvatarSimilarity = new AvatarSimilarity(recordedAvatar, avatarListTeacher[similarityTeacherNr], similarityBodyNr, similarityPenalty, similarityActivateKalman, similarityKalmanQ, similarityKalmanR);
             recordedAvatarVisualisationSimilarity = new VisualisationSimilarity(recordedAvatar);
 
+            // initialize eudlidean distance difference score
+            scoreEDD = new ScoreEDD(pF: 1);
+
             // Find attached objects in scene
             scoreIndicator = avatarContainer.transform.Find("ScoreIndicator").gameObject;
             pulseObject = avatarContainer.transform.Find("PulsingCube").gameObject;
@@ -316,9 +324,12 @@ namespace PoseTeacher
             // Default is to have a mirrored view
             do_mirror();
 
+            Debug.Log("Finished Initalisation.");
+
         }
 
-        private void Update()
+
+    private void Update()
         {
             if (!pauseSelf)
             {
@@ -352,6 +363,11 @@ namespace PoseTeacher
             // Playback for teacher avatar(s)
             if (!pauseTeacher) // playback
             {
+
+                /*Debug.Log("avrg edd cost: " + scoreEDD.eddScore / scoreEDD.totalFrames + 
+                    " total edd cost: " + scoreEDD.eddScore + " in time: " + scoreEDD.totalFrames);*/
+                scoreEDD.Update(TeacherPoseInputGetter.GetNextPose(), SelfPoseInputGetter.GetNextPose());
+
                 playback_counter++;
                 if (playback_counter >= playlimit)
                 {
@@ -552,6 +568,7 @@ namespace PoseTeacher
         public void SetTeacherFile(string path)
         {
             TeacherPoseInputGetter.ReadDataPath = path;
+            Debug.Log("Chose new Teacher File: " + path);
         }
 
         public void ShowTeacher()

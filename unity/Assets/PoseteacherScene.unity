@@ -1322,8 +1322,8 @@ MonoBehaviour:
   pauseSelf: 0
   pauseTeacher: 1
   isChoreography: 0
-  playbackSpeed: 0
-  SelfPoseInputSource: 0
+  playbackSpeed: 2
+  SelfPoseInputSource: 2
   mirroring: 0
   similarityBodyNr: 0
   similaritySelfNr: 0
@@ -1336,6 +1336,7 @@ MonoBehaviour:
   similarityTotalScore: 0
   similarityScoreRaw: []
   similarityWeightRaw: []
+  scoringBoxes: []
   difficulty: 0
 --- !u!224 &1630789625
 RectTransform:

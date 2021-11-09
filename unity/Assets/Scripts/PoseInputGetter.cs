@@ -67,7 +67,9 @@ namespace PoseTeacher
 
         public PoseInputGetter(PoseInputSource InitPoseInputSource)
         {
+            Debug.Log("Creating a Input Getter.");
             CurrentPoseInputSource = InitPoseInputSource;
+            Debug.Log("Input Source is:" + CurrentPoseInputSource.ToString());
 
             switch (CurrentPoseInputSource)
             {
@@ -80,6 +82,7 @@ namespace PoseTeacher
                     break;
 
                 case PoseInputSource.FILE:
+                    Debug.Log("New Pose Input Getter is of type FILE.");
                     break;
             }
         }

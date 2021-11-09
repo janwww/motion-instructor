@@ -1,7 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 using System.Linq;
+using Microsoft.Azure.Kinect.BodyTracking;
 
 
 
@@ -51,10 +53,10 @@ namespace PoseTeacher
             kalmanFilter = new List<KalmanFilter>();
             for (int i = 0; i < numberOfComparisons; i++)
             {
-               kalmanFilter.Add(new KalmanFilter(kalmanQ, kalmanR));
-               kalmanFilter[i].Reset(1.0);
+                kalmanFilter.Add(new KalmanFilter(kalmanQ, kalmanR));
+                kalmanFilter[i].Reset(1.0);
             }
-            
+
 
             scores = new List<Scores>();
         }
@@ -85,15 +87,15 @@ namespace PoseTeacher
                 List<Quaternion> goalList;
                 if (currentGoalType == GoalType.POSE)
                 {
-                    goalList = PoseDataToOrientation( currentGoal[0]);
+                    goalList = PoseDataToOrientation(currentGoal[0]);
                 }
                 else
                 {
-                    goalList = PoseDataToOrientation (currentGoal[goalCounter]);
+                    goalList = PoseDataToOrientation(currentGoal[goalCounter]);
                 }
-                
-                
-                for ( int i = 0; i < numberOfComparisons; i++)
+
+
+                for (int i = 0; i < numberOfComparisons; i++)
                 {
                     double similarity = cosineSimilarity(selfList[i], goalList[i]);
                     if (activateKalman)
@@ -105,17 +107,17 @@ namespace PoseTeacher
 
                     similarityTotal += similarity;
                 }
-                currentScores.Add(similarityTotal/numberOfComparisons);
+                currentScores.Add(similarityTotal / numberOfComparisons);
                 goalCounter += 1;
                 if (goalCounter == goalLength) {
                     double tempScore;
                     if (currentGoalType == GoalType.POSE)
                     {
                         tempScore = currentScores.Max();
-                        
+
                     } else
                     {
-                        tempScore = currentScores.OrderByDescending(list=>list).Take(Mathf.RoundToInt(currentScores.Count*0.75f)).Average();
+                        tempScore = currentScores.OrderByDescending(list => list).Take(Mathf.RoundToInt(currentScores.Count * 0.75f)).Average();
                     }
 
                     if (tempScore > 0.8)
@@ -191,6 +193,140 @@ namespace PoseTeacher
             return list;
         }
 
-        
+
     }
+
+
+    public class ScoreEDD
+    {
+        List<PoseData> teacherPoses;
+        List<double[,]> scoreList;
+        public double eddScore;
+        public int totalFrames;
+        int previousFrames;
+
+        public ScoreEDD(int pF = 5)
+        {
+            teacherPoses = new List<PoseData>();
+            scoreList = new List<double[,]>();
+            eddScore = 0;
+            totalFrames = 0;
+            previousFrames = pF;
+        }
+
+
+        // Euclidean Distance Differences 
+        public double[,] ScoreMatrix(PoseData teacherPoseData, PoseData playerPoseData)
+        {
+            // scaling such that the score isnt to high
+            double scaling = 1;
+
+            // center the pose joints to the hip middle (this will be 0, 0, 0)
+            // body centre is joint[2]
+            Vector3 centreTeacher = teacherPoseData.data[2].Position;
+            Vector3 centrePlayer = playerPoseData.data[2].Position;
+
+            //Debug.Log("Number of teacher poses: " + teacherPoseData.data.Length);
+            //Debug.Log("Number of player poses:  " + playerPoseData.data.Length);
+
+            // iterate over all joints
+            // and get their respective distance
+            double[,] scoreMatrix = new double[teacherPoseData.data.Length, playerPoseData.data.Length];
+            double[,] distanceTT = new double[teacherPoseData.data.Length, teacherPoseData.data.Length];
+            double[,] distanceTP = new double[teacherPoseData.data.Length, playerPoseData.data.Length];
+
+            // distance between teacher and player
+            int i = 0, j = 0;
+            foreach (JointData teacherJoint in teacherPoseData.data)
+            {
+                j = 0;
+                foreach(JointData playerJoint in playerPoseData.data)
+                {
+                    double distance = Math.Abs(Vector3.Distance(teacherJoint.Position - centreTeacher, playerJoint.Position - centrePlayer)) * scaling;
+                    distanceTP[i, j] = distance;
+                    j++;
+                }
+                i++;
+            }
+
+            // distance between teacher and teacher
+            // and difference between self distance and t-p distance
+            i = 0; j = 0;
+            foreach (JointData teacherJoint1 in teacherPoseData.data)
+            {
+                j = 0;
+                foreach (JointData teacherJoint2 in teacherPoseData.data)
+                {
+                    // centering not needed here, relative distance is the same.
+                    double distance = Math.Abs(Vector3.Distance(teacherJoint1.Position, teacherJoint2.Position)) * scaling;
+                    distanceTT[i, j] = distance;
+                    scoreMatrix[i, j] = Math.Abs(distance - distanceTP[i, j]);
+
+                    j++;
+                }
+                i++;
+            }
+
+            // NOTE: introduce some weighting mechanism if wanted (or make it a own function)
+
+            return scoreMatrix;
+        }
+
+
+        // Calculate the average Euclidean Distance Differences (EDD) of the player for the last numberPreviousFrames
+        // 0 best score. if wrong higher, on average wrong movement around 100. on average good movement around 10?
+        public double EDDOverTime(int numberPreviousFrames, PoseData player)
+        {
+            // scaling such that the score isnt to high
+            double scaling = 0.001;
+            double average = 0;
+
+            int listLength = teacherPoses.Count;
+            //Debug.Log("Number of teacher frames: " + listLength);
+            if(listLength <= numberPreviousFrames)
+            {
+                foreach(PoseData teacher in teacherPoses)
+                {
+                    double[,] score = ScoreMatrix(teacher, player);
+                    foreach(double value in score)
+                    {
+                        //Debug.Log("value in score matrix: " + value);
+                        average += value*scaling;
+                    }
+                //Debug.Log("average after row: " + average);
+                }
+                average /= listLength;
+            }
+
+            else
+            {
+                for(int i = numberPreviousFrames; i > 0; --i)
+                {
+                    double[,] score = ScoreMatrix(teacherPoses[listLength - i], player);
+                    foreach (double value in score)
+                    {
+                        //Debug.Log("value in score matrix: " + value);
+                        average += value*scaling;
+                    }
+                    //Debug.Log("average after row: " + average);
+                }
+                average /= numberPreviousFrames;
+            }
+
+            return average;
+        }
+
+        public void Update(PoseData teacher, PoseData player)
+        {
+            teacherPoses.Add(teacher);
+            eddScore += EDDOverTime(previousFrames, player);
+            totalFrames++;
+        }
+
+
+    }
+
+    
+
 }
+
