@@ -18,8 +18,6 @@ namespace PoseTeacher
         public GameObject avatarContainerSelf, avatarContainerTeacher;
         List<AvatarContainer> avatarListSelf, avatarListTeacher;
 
-        private readonly string dance_file = "jsondata/salsa_m/2020_12_14-15_46_29.txt";
-        private readonly string move_file = "jsondata/move1.txt";
         private readonly string fake_file = "jsondata/2020_05_27-00_01_59.txt";
         public PoseInputSource selfPoseInputSource = PoseInputSource.KINECT;
 
@@ -81,11 +79,14 @@ namespace PoseTeacher
             AnimateTeacher(danceData.GetInterpolatedPose(currentId, out currentId, timeOffset).toPoseData());
 
             scoringUtil.Update(currentSelfPose, audioSource.time);
-        }
 
-        public void FixedUpdate()
-        {
-           
+            if (audioSource.time > danceData.poses[danceData.poses.Count - 1].timestamp)
+            {
+                audioSource.Stop();
+                List<Scores> finalScores = scoringUtil.getFinalScores();
+                Debug.Log(finalScores);
+                //TODO: Add final score screen
+            }
         }
 
         public void OnApplicationQuit()
