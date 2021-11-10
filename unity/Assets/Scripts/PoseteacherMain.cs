@@ -68,6 +68,10 @@ namespace PoseTeacher
         public PoseInputSource SelfPoseInputSource = PoseInputSource.KINECT; // This is set in the Settings in Main object.
         public bool mirroring = false; // can probably be changed to private (if no UI elements use it)
 
+        // PoseData to not always requery the next pose
+        public PoseData currentTeacherPose;
+        public PoseData currentPlayerPose;
+
 
         // Used for pose similarity calculation
         public BodyWeightsType similarityBodyNr = BodyWeightsType.TOTAL;
@@ -333,7 +337,8 @@ namespace PoseTeacher
         {
             if (!pauseSelf)
             {
-                AnimateSelf(SelfPoseInputGetter.GetNextPose());
+                currentPlayerPose = SelfPoseInputGetter.GetNextPose();
+                AnimateSelf(currentPlayerPose);
             }
 
         }
@@ -364,16 +369,18 @@ namespace PoseTeacher
             if (!pauseTeacher) // playback
             {
 
-                /*Debug.Log("avrg edd cost: " + scoreEDD.eddScore / scoreEDD.totalFrames + 
-                    " total edd cost: " + scoreEDD.eddScore + " in time: " + scoreEDD.totalFrames);*/
-                scoreEDD.Update(TeacherPoseInputGetter.GetNextPose(), SelfPoseInputGetter.GetNextPose());
-
                 playback_counter++;
                 if (playback_counter >= playlimit)
                 {
-                    AnimateTeacher(TeacherPoseInputGetter.GetNextPose());
+                    currentTeacherPose = TeacherPoseInputGetter.GetNextPose();
+                    AnimateTeacher(currentTeacherPose);
                     playback_counter = 0;
                 }
+
+                Debug.Log("avrg edd cost: " + scoreEDD.eddScore / scoreEDD.totalFrames + 
+                    " total edd cost: " + scoreEDD.eddScore + " in time: " + scoreEDD.totalFrames);
+                // TODO: should this be called again? Or should we have a variable where the current teacher and self poses are saved? 
+                scoreEDD.Update(currentTeacherPose, currentPlayerPose);
 
                 // Get pose similarity
                 avatarSimilarity.Update(); // update similarity calculation with each update loop step
