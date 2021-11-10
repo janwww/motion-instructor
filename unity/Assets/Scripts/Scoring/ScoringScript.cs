@@ -35,7 +35,7 @@ namespace PoseTeacher
         float goalStartTimeStamp;
         int goalCounter;
         int goalLength;
-        List<double> currentScores;
+        List<float> currentScores;
 
         //constants
         int numberOfComparisons = 8;
@@ -66,7 +66,7 @@ namespace PoseTeacher
         {
             if (currentlyScoring) finishGoal();
             currentlyScoring = true;
-            currentScores = new List<double>();
+            currentScores = new List<float>();
             currentGoalType = type;
             currentGoal = goal;
             goalCounter = 0;
@@ -102,25 +102,7 @@ namespace PoseTeacher
 
                 if (nextStep)
                 {
-                    double distanceTotal = 0.0;
-                    List<Quaternion> selfList = PoseDataToOrientation(currentSelfPose);
-                    List<Quaternion> goalList;
-                    if (currentGoalType == GoalType.POSE)
-                    {
-                        goalList = DancePoseToOrientation(currentGoal[0]);
-                    }
-                    else
-                    {
-                        goalList = DancePoseToOrientation(currentGoal[goalCounter]);
-                    }
-
-
-                    for (int i = 0; i < numberOfComparisons; i++)
-                    {
-                        double distance = quaternionDistance(selfList[i], goalList[i]);
-                        distanceTotal += distance*scoringWeightsPrioritizeArms[i];
-                    }
-                    currentScores.Add(distanceTotal / TotalWeights(scoringWeightsPrioritizeArms));
+                    currentScores.Add(quaternionDistanceScore(currentSelfPose));
 
                     currentTimeStamp = danceTimeStamp;
                     goalCounter += 1;
@@ -132,6 +114,31 @@ namespace PoseTeacher
 
             }
         }
+
+
+        private float quaternionDistanceScore(PoseData currentSelfPose)
+        {
+            float distanceTotal = 0.0f;
+            List<Quaternion> selfList = PoseDataToOrientation(currentSelfPose);
+            List<Quaternion> goalList;
+
+            if (currentGoalType == GoalType.POSE)
+            {
+                goalList = DancePoseToOrientation(currentGoal[0]);
+            }
+            else
+            {
+                goalList = DancePoseToOrientation(currentGoal[goalCounter]);
+            }
+
+            for (int i = 0; i < numberOfComparisons; i++)
+            {
+                float distance = quaternionDistance(selfList[i], goalList[i]);
+                distanceTotal += Mathf.Pow(distance, 2) * scoringWeightsPrioritizeArms[i];
+            }
+            return Mathf.Sqrt(distanceTotal / TotalWeights(scoringWeightsPrioritizeArms));
+        }
+
 
         public List<Scores> getFinalScores()
         {
@@ -150,8 +157,8 @@ namespace PoseTeacher
             }
             else
             {
-                //for a move, take average of scores
-                tempScore = currentScores.Average();
+                //for a move, take square average of scores
+                tempScore = squaredAverage(currentScores);
             }
             Debug.Log(tempScore);
 
@@ -174,11 +181,6 @@ namespace PoseTeacher
                 scoreDisplay.SendMessage("addScore", scores[scores.Count - 1]);
             }
             currentlyScoring = false;
-        }
-
-        double quaternionDistance(Quaternion a, Quaternion b)
-        {
-            return 1 - Mathf.Pow(a.w * b.w + a.x * b.x + a.y * b.y + a.z * b.z, 2);
         }
 
         List<Quaternion> PoseDataToOrientation(PoseData pose)
@@ -271,6 +273,21 @@ namespace PoseTeacher
                 total += i;
             }
             return total;
+        }
+
+        float squaredAverage(List<float> values)
+        {
+            float squaredTotal = 0f;
+            foreach (float f in values)
+            {
+                squaredTotal += Mathf.Pow(f, 2);
+            }
+            return Mathf.Sqrt(squaredTotal / values.Count);
+        }
+
+        float quaternionDistance(Quaternion a, Quaternion b)
+        {
+            return 1 - Mathf.Pow(a.w * b.w + a.x * b.x + a.y * b.y + a.z * b.z, 2);
         }
     }
 }
