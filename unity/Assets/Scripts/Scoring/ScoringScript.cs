@@ -40,6 +40,7 @@ namespace PoseTeacher
         //constants
         int numberOfComparisons = 8;
         readonly float constDeltaTime = 0.1f;
+        public bool alternateDistanceMetric = false;
 
         GameObject scoreDisplay;
 
@@ -102,7 +103,13 @@ namespace PoseTeacher
 
                 if (nextStep)
                 {
-                    currentScores.Add(quaternionDistanceScore(currentSelfPose));
+                    if (!alternateDistanceMetric)
+                    {
+                        currentScores.Add(quaternionDistanceScore(currentSelfPose));
+                    } else
+                    {
+                        currentScores.Add(euclideanDistanceScore(currentSelfPose));
+                    }
 
                     currentTimeStamp = danceTimeStamp;
                     goalCounter += 1;
@@ -139,6 +146,12 @@ namespace PoseTeacher
             return Mathf.Sqrt(distanceTotal / TotalWeights(scoringWeightsPrioritizeArms));
         }
 
+        private float euclideanDistanceScore(PoseData currentSelfPose)
+        {
+            //TODO: Implement EuclideanDistance
+            return 0;
+        }
+
 
         public List<Scores> getFinalScores()
         {
@@ -162,20 +175,26 @@ namespace PoseTeacher
             }
             Debug.Log(tempScore);
 
-            if (tempScore > 0.8)
+            if (!alternateDistanceMetric)
             {
-                scores.Add(Scores.GREAT);
-            }
-            else if (tempScore > 0.4)
-            {
-                scores.Add(Scores.GOOD);
+                if (tempScore < 0.15)
+                {
+                    scores.Add(Scores.GREAT);
+                }
+                else if (tempScore < 0.4)
+                {
+                    scores.Add(Scores.GOOD);
+                }
+                else
+                {
+                    scores.Add(Scores.BAD);
+                }
             }
             else
             {
-                scores.Add(Scores.BAD);
+                //TODO: Scoring for EuclideanDistance
             }
 
-            //TODO: Maybe add an event that fires when a new score is reached
             if (scoreDisplay != null)
             {
                 scoreDisplay.SendMessage("addScore", scores[scores.Count - 1]);
