@@ -48,10 +48,10 @@ namespace PoseTeacher
             audioSource.clip = song;
             danceData = DancePerformanceObject.danceData.LoadDanceDataFromScriptableObject();
 
-            //for(int i = 0; i < DancePerformanceObject.goals.Count; i++)
-            //{
-            //    goals.Add((DancePerformanceObject.goalTimestamps[i], DancePerformanceObject.goals[i].LoadDanceDataFromScriptableObject()));
-            //}
+            for(int i = 0; i < DancePerformanceObject.goals.Count; i++)
+            {
+                goals.Add((DancePerformanceObject.goalTimestamps[i], DancePerformanceObject.goals[i].LoadDanceDataFromScriptableObject()));
+            }
 
 
             selfPoseInputGetter = new PoseInputGetter(selfPoseInputSource) { ReadDataPath = fake_file };
