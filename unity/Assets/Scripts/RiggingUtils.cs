@@ -163,7 +163,7 @@ namespace PoseTeacher
 
                     Quaternion absOffset = GetSkeletonBone(animator, transform.name).rotation;
                     // find the absolute offset for the tpose
-                    while (!ReferenceEquals(transform.parent, rootJointTransform))
+                    while (!ReferenceEquals(transform, rootJointTransform))
                     {
                         transform = transform.parent;
                         absOffset = GetSkeletonBone(animator, transform.name).rotation * absOffset;
