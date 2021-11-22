@@ -30,13 +30,17 @@ namespace PoseTeacher
         //Goals
         bool currentlyScoring = false;
         GoalType currentGoalType;
-        List<PoseData> currentGoal;
+        List<DancePose> currentGoal;
+        float currentTimeStamp;
+        float goalStartTimeStamp;
         int goalCounter;
         int goalLength;
-        List<double> currentScores;
+        List<float> currentScores;
 
         //constants
         int numberOfComparisons = 8;
+        readonly float constDeltaTime = 0.1f;
+        public bool alternateDistanceMetric = false;
 
         GameObject scoreDisplay;
 
@@ -51,22 +55,24 @@ namespace PoseTeacher
             kalmanFilter = new List<KalmanFilter>();
             for (int i = 0; i < numberOfComparisons; i++)
             {
-               kalmanFilter.Add(new KalmanFilter(kalmanQ, kalmanR));
-               kalmanFilter[i].Reset(1.0);
+                kalmanFilter.Add(new KalmanFilter(kalmanQ, kalmanR));
+                kalmanFilter[i].Reset(1.0);
             }
-            
+
 
             scores = new List<Scores>();
         }
 
-        public void StartNewGoal(GoalType type, List<PoseData> goal)
+        public void StartNewGoal(GoalType type, List<DancePose> goal, float startTimeStamp)
         {
-            if (currentlyScoring) return;
+            if (currentlyScoring) finishGoal();
             currentlyScoring = true;
-            currentScores = new List<double>();
+            currentScores = new List<float>();
             currentGoalType = type;
             currentGoal = goal;
             goalCounter = 0;
+            currentTimeStamp = startTimeStamp;
+            goalStartTimeStamp = startTimeStamp;
             if (currentGoalType == GoalType.POSE)
             {
                 goalLength = 15;
@@ -76,79 +82,124 @@ namespace PoseTeacher
             }
         }
 
-        public void Update(PoseData currentSelfPose)
+        public void Update(PoseData currentSelfPose, float danceTimeStamp)
         {
             if (currentlyScoring)
             {
-                double similarityTotal = 0.0;
-                List<Quaternion> selfList = PoseDataToOrientation(currentSelfPose);
-                List<Quaternion> goalList;
-                if (currentGoalType == GoalType.POSE)
-                {
-                    goalList = PoseDataToOrientation( currentGoal[0]);
-                }
-                else
-                {
-                    goalList = PoseDataToOrientation (currentGoal[goalCounter]);
-                }
-                
-                
-                for ( int i = 0; i < numberOfComparisons; i++)
-                {
-                    double similarity = cosineSimilarity(selfList[i], goalList[i]);
-                    if (activateKalman)
-                    {
-                        similarity = kalmanFilter[i].Update(similarity);
-                        if (similarity > 1.0) similarity = 1.0;
-                        if (similarity < 0.0) similarity = 0.0;
-                    }
 
-                    similarityTotal += similarity;
+                bool nextStep = false;
+
+                switch (currentGoalType)
+                {
+                    case GoalType.POSE:
+                        float deltaTime = danceTimeStamp - currentTimeStamp;
+                        nextStep = deltaTime >= constDeltaTime;
+                        break;
+                    case GoalType.MOTION:
+                        nextStep = danceTimeStamp >= currentGoal[goalCounter].timestamp + goalStartTimeStamp;
+                        break;
                 }
-                currentScores.Add(similarityTotal/numberOfComparisons);
-                goalCounter += 1;
-                if (goalCounter == goalLength) {
-                    double tempScore;
-                    if (currentGoalType == GoalType.POSE)
+
+
+                if (nextStep)
+                {
+                    if (!alternateDistanceMetric)
                     {
-                        tempScore = currentScores.Max();
-                        
+                        currentScores.Add(quaternionDistanceScore(currentSelfPose));
                     } else
                     {
-                        tempScore = currentScores.OrderByDescending(list=>list).Take(Mathf.RoundToInt(currentScores.Count*0.75f)).Average();
+                        currentScores.Add(euclideanDistanceScore(currentSelfPose));
                     }
 
-                    if (tempScore > 0.8)
+                    currentTimeStamp = danceTimeStamp;
+                    goalCounter += 1;
+                    if (goalCounter == goalLength)
                     {
-                        scores.Add(Scores.GREAT);
-                    }
-                    else if (tempScore > 0.4)
-                    {
-                        scores.Add(Scores.GOOD);
-                    }
-                    else
-                    {
-                        scores.Add(Scores.BAD);
-                    }
-
-                    Debug.Log(scores[scores.Count - 1]);
-                    //TODO: Maybe add an event that fires when a new score is reached
-                    currentlyScoring = false;
-
-                    if (scoreDisplay != null)
-                    {
-                        scoreDisplay.SendMessage("addScore", scores[scores.Count - 1]);
+                        finishGoal();
                     }
                 }
+
             }
         }
 
-        double cosineSimilarity(Quaternion a, Quaternion b)
+
+        private float quaternionDistanceScore(PoseData currentSelfPose)
         {
-            // get cosine similarity from quaternion 
-            // background: https://www.researchgate.net/publication/316447858_Similarity_analysis_of_motion_based_on_motion_capture_technology
-            // background: https://gdalgorithms-list.narkive.com/9TaVDT9G/quaternion-similarity-measure
-            return Mathf.Abs(a.w * b.w + a.x * b.x + a.y * b.y + a.z * b.z);
+            float distanceTotal = 0.0f;
+            List<Quaternion> selfList = PoseDataToOrientation(currentSelfPose);
+            List<Quaternion> goalList;
+
+            if (currentGoalType == GoalType.POSE)
+            {
+                goalList = DancePoseToOrientation(currentGoal[0]);
+            }
+            else
+            {
+                goalList = DancePoseToOrientation(currentGoal[goalCounter]);
+            }
+
+            for (int i = 0; i < numberOfComparisons; i++)
+            {
+                float distance = quaternionDistance(selfList[i], goalList[i]);
+                distanceTotal += Mathf.Pow(distance, 2) * scoringWeightsPrioritizeArms[i];
+            }
+            return Mathf.Sqrt(distanceTotal / TotalWeights(scoringWeightsPrioritizeArms));
+        }
+
+        private float euclideanDistanceScore(PoseData currentSelfPose)
+        {
+            //TODO: Implement EuclideanDistance
+            return 0;
+        }
+
+
+        public List<Scores> getFinalScores()
+        {
+            if (currentlyScoring) finishGoal();
+            return scores;
+        }
+
+        void finishGoal()
+        {
+            double tempScore;
+            if (currentGoalType == GoalType.POSE)
+            {
+                //for a pose, take best score in evaluation period
+                tempScore = currentScores.Max();
+
+            }
+            else
+            {
+                //for a move, take square average of scores
+                tempScore = squaredAverage(currentScores);
+            }
+            Debug.Log(tempScore);
+
+            if (!alternateDistanceMetric)
+            {
+                if (tempScore < 0.15)
+                {
+                    scores.Add(Scores.GREAT);
+                }
+                else if (tempScore < 0.4)
+                {
+                    scores.Add(Scores.GOOD);
+                }
+                else
+                {
+                    scores.Add(Scores.BAD);
+                }
+            }
+            else
+            {
+                //TODO: Scoring for EuclideanDistance
+            }
+
+            if (scoreDisplay != null)
+            {
+                scoreDisplay.SendMessage("addScore", scores[scores.Count - 1]);
+            }
+            currentlyScoring = false;
         }
 
         List<Quaternion> PoseDataToOrientation(PoseData pose)
@@ -191,6 +242,71 @@ namespace PoseTeacher
             return list;
         }
 
-        
+        List<Quaternion> DancePoseToOrientation(DancePose pose)
+        {
+            List<Quaternion> list = new List<Quaternion>();
+            Vector3 vector;
+
+            //LeftUpperArm (SHOULDER_LEFT - ELBOW_LEFT)
+            vector = pose.positions[5] - pose.positions[6];
+            list.Add(Quaternion.LookRotation(vector, Vector3.up));
+
+            //RightUpperArm (SHOULDER_RIGHT - ELBOW_RIGHT)
+            vector = pose.positions[12] - pose.positions[13];
+            list.Add(Quaternion.LookRotation(vector, Vector3.up));
+
+            //TorsoLeft (SHOULDER_LEFT - HIP_LEFT
+            vector = pose.positions[5] - pose.positions[18];
+            list.Add(Quaternion.LookRotation(vector, Vector3.up));
+
+            //TorsoRight (SHOULDER_RIGHT - HIP_RIGHT
+            vector = pose.positions[12] - pose.positions[22];
+            list.Add(Quaternion.LookRotation(vector, Vector3.up));
+
+            //HipStick (HIP_LEFT - HIP_RIGHT)
+            vector = pose.positions[18] - pose.positions[22];
+            list.Add(Quaternion.LookRotation(vector, Vector3.up));
+
+            //LeftLowerArm (ELBOW_LEFT - WRIST_LEFT)
+            vector = pose.positions[6] - pose.positions[7];
+            list.Add(Quaternion.LookRotation(vector, Vector3.up));
+
+            //RightLowerArm (ELBOW_RIGHT - WRIST_RIGHT)
+            vector = pose.positions[13] - pose.positions[14];
+            list.Add(Quaternion.LookRotation(vector, Vector3.up));
+
+            //Shoulders (SHOULDER_LEFT - SHOULDER_RIGHT)
+            vector = pose.positions[5] - pose.positions[12];
+            list.Add(Quaternion.LookRotation(vector, Vector3.up));
+
+            return list;
+        }
+
+        List<int> scoringWeightsPrioritizeArms = new List<int>{3, 3, 1, 1, 1, 3, 3, 1};
+
+        int TotalWeights(List<int> weights)
+        {
+            int total = 0;
+            foreach (int i in weights)
+            {
+                total += i;
+            }
+            return total;
+        }
+
+        float squaredAverage(List<float> values)
+        {
+            float squaredTotal = 0f;
+            foreach (float f in values)
+            {
+                squaredTotal += Mathf.Pow(f, 2);
+            }
+            return Mathf.Sqrt(squaredTotal / values.Count);
+        }
+
+        float quaternionDistance(Quaternion a, Quaternion b)
+        {
+            return 1 - Mathf.Pow(a.w * b.w + a.x * b.x + a.y * b.y + a.z * b.z, 2);
+        }
     }
 }

@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 76a2edb5b8e99ac458047a027605fa38, type: 3}
+  m_Name: Shadows Short
+  m_EditorClassIdentifier: 
+  SongName: Shadows Short
+  SongClip: {fileID: 8300000, guid: 4a826d883ede8384ba0c7c891209cea5, type: 3}
+  Volume: 1
+  Attribution: 'Song: its different - Shadows (feat. Miss Mary) [NCS Release]    
+    Music     provided by NoCopyrightSounds Free Download/Stream: http://ncs.io/shadows    
+    Watch:     http://youtu.be/UHbDJ1oPuGo'

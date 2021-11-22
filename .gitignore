@@ -32,4 +32,4 @@ lightweight-human-pose-estimation-3d-demo.pytorch/
 /unity/Assets/Plugins
 *.dll
 *.onnx
-unity/Recordings/movie_001.mp4
+unity/Recordings

@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1b8aaa8c9ada8d9408776eb449a331ba, type: 3}
+  m_Name: Make Me Move Performance
+  m_EditorClassIdentifier: 
+  danceData: {fileID: 11400000, guid: 2f02cd02e1e67e947916e643b3d0606f, type: 2}
+  goals:
+  - {fileID: 11400000, guid: 49fa0f5012f7b944fbc29d78f8eb6ef1, type: 2}
+  - {fileID: 11400000, guid: 13724a60944715b41a235dbd00e63306, type: 2}
+  - {fileID: 11400000, guid: b5f6464d1f92ec24498b5d0e5e7f7016, type: 2}
+  - {fileID: 11400000, guid: 9fe9662cf6a72fe4d9f601e1a13bf62a, type: 2}
+  - {fileID: 11400000, guid: 6ca526492f434984e8f6baa3dfa6e1bc, type: 2}
+  - {fileID: 11400000, guid: c2e8b65451ddd044e881962120ff3ebd, type: 2}
+  goalTimestamps:
+  - 0
+  - 16.4
+  - 37.6
+  - 60.4
+  - 85.2
+  - 113.6
+  SongObject: {fileID: 11400000, guid: ff1f81647084f7e488b978ca5be7c6ec, type: 2}
+  Difficulty: 0
