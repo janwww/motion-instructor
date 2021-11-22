@@ -71,8 +71,6 @@ namespace PoseTeacher
             selfPoseInputGetter.loop = true;
             selfPoseInputGetter.VideoCube = videoCube;
             
-            ScoringManager.Instance.StartNewGoal(GoalType.MOTION, goals[0].Item2.poses, 0f);
-            goals.RemoveAt(0);
             audioSource.Play();
         }
 
@@ -84,7 +82,7 @@ namespace PoseTeacher
             AnimateSelf(currentSelfPose);
             if (goals.Count > 0 && audioSource.time >= goals[0].Item1)
             {
-                ScoringManager.Instance.StartNewGoal(GoalType.MOTION, goals[0].Item2.poses, 0f);
+                ScoringManager.Instance.StartNewGoal(goals[0].Item2.poses, 0f);
                 goals.RemoveAt(0);
             }
             AnimateTeacher(danceData.GetInterpolatedPose(currentId, out currentId, timeOffset).toPoseData());

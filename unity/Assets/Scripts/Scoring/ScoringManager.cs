@@ -111,8 +111,9 @@ namespace PoseTeacher
         }
 
 
-        public void StartNewGoal(GoalType type, List<DancePose> goal, float startTimeStamp)
+        public void StartNewGoal( List<DancePose> goal, float startTimeStamp)
         {
+            GoalType type = goal.Count == 1 ? GoalType.POSE : GoalType.MOTION;
             if (currentlyScoring) finishGoal();
             currentlyScoring = true;
             currentScores = new List<float>();

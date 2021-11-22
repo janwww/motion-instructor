@@ -31,9 +31,10 @@ public class DancePerformanceScriptableObject : ScriptableObject {
                     int id = 0;
                     if (goalDuration[i] > 0)
                     {
-                        for (float timestamp = goalStartTimestamps[i]; timestamp < goalStartTimestamps[i] + goalDuration[i]; timestamp += 0.1f)
+                        for (float timestamp = 0f; timestamp <= goalDuration[i]; timestamp += 0.1f)
                         {
-                            newDanceData.poses.Add(decompressedDancedata.GetInterpolatedPose(0, out id, timestamp));
+                            newDanceData.poses.Add(decompressedDancedata.GetInterpolatedPose(0, out id, goalStartTimestamps[i] + timestamp));
+                            newDanceData.poses[newDanceData.poses.Count - 1].timestamp = timestamp;
                         }
                     }
                     else
