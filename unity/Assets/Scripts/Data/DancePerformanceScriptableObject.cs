@@ -55,4 +55,24 @@ public class DancePerformanceScriptableObject : ScriptableObject {
     }
 }
 
+[CustomEditor(typeof(DancePerformanceScriptableObject))]
+public class APanelEditor : Editor
+{
+    public override void OnInspectorGUI()
+    {
+        serializedObject.Update();
+
+        if (serializedObject.FindProperty("dynamicGoals").boolValue)
+        {
+            DrawPropertiesExcluding(serializedObject, new string[] { "explicitGoals" });
+        }
+        else
+        {
+            DrawPropertiesExcluding(serializedObject, new string[] { "goalDuration" });
+        }
+
+        serializedObject.ApplyModifiedProperties();
+    }
+}
+
 
