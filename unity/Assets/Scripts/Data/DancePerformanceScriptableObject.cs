@@ -56,7 +56,7 @@ public class DancePerformanceScriptableObject : ScriptableObject {
 }
 
 [CustomEditor(typeof(DancePerformanceScriptableObject))]
-public class APanelEditor : Editor
+public class DancePerformanceEditor : Editor
 {
     public override void OnInspectorGUI()
     {
