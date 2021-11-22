@@ -22,7 +22,6 @@ public class DanceDataScriptableObject : ScriptableObject {
 
             // Convert DanceData to serializable cheapDancedata
             cheapDanceData cheapDanceData = new cheapDanceData();
-            cheapDanceData.evaluationPoses = danceData.evaluationPoses;
             cheapDanceData.cheapPoses = new List<cheapDancePose>();
             foreach (var pose in danceData.poses) {
                 cheapDancePose cheapDancePose = new cheapDancePose();
@@ -70,7 +69,6 @@ public class DanceDataScriptableObject : ScriptableObject {
 
             // Convert cheapDanceData to Dancedata
             DanceData danceData = new DanceData();
-            danceData.evaluationPoses = cheapDanceData.evaluationPoses;
 
             foreach (var pose in cheapDanceData.cheapPoses) {
                 DancePose dancePose = new DancePose();
@@ -91,7 +89,6 @@ public class DanceDataScriptableObject : ScriptableObject {
     [System.Serializable]
     public struct cheapDanceData {
         public List<cheapDancePose> cheapPoses;
-        public List<int> evaluationPoses;
     }
 
     [System.Serializable]
