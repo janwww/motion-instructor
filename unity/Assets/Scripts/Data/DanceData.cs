@@ -11,7 +11,6 @@ namespace PoseTeacher
     public class DanceData
     {
         public List<DancePose> poses = new List<DancePose>();
-        public List<int> evaluationPoses = new List<int>();
 
         // returns the interpolated pose for id and offsetTime and return id+1 in newId if offsetTime is larger than timestamp difference
         public DancePose GetInterpolatedPose(int id, out int newId, float offsetTime)

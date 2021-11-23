@@ -7,12 +7,13 @@ using System.Linq;
 namespace PoseTeacher
 {
 
-    public class DanceSceneMain : MonoBehaviour
+    public class DanceManager : MonoBehaviour
     {
+        public static DanceManager Instance;
+
         PoseInputGetter selfPoseInputGetter;
 
         public GameObject videoCube;
-        public GameObject scoreDisplay;
         public DancePerformanceScriptableObject DancePerformanceObject;
 
         public GameObject avatarContainerSelf, avatarContainerTeacher;
@@ -21,11 +22,9 @@ namespace PoseTeacher
         private readonly string fake_file = "jsondata/2020_05_27-00_01_59.txt";
         public PoseInputSource selfPoseInputSource = PoseInputSource.KINECT;
 
-        ScoringScript scoringUtil;
-
         public bool paused = false;
 
-        PoseData currentSelfPose;
+        public PoseData currentSelfPose;
 
         private DanceData danceData;
         private AudioClip song;
@@ -33,9 +32,23 @@ namespace PoseTeacher
 
         readonly List<(float, DanceData)> goals = new List<(float,DanceData)>();
 
+        public float songTime => audioSource?.time ?? 0;
+
         int currentId = 0;
 
-        // Start is called before the first frame update
+        public void Awake()
+        {
+            if (Instance != null)
+            {
+                Destroy(this);
+            }
+            else
+            {
+                Instance = this;
+            }
+        }
+
+            // Start is called before the first frame update
         public void Start()
         {
             avatarListSelf = new List<AvatarContainer>();
@@ -50,7 +63,7 @@ namespace PoseTeacher
 
             for(int i = 0; i < DancePerformanceObject.goals.Count; i++)
             {
-                goals.Add((DancePerformanceObject.goalTimestamps[i], DancePerformanceObject.goals[i].LoadDanceDataFromScriptableObject()));
+                goals.Add((DancePerformanceObject.goalStartTimestamps[i], DancePerformanceObject.goals[i]));
             }
 
 
@@ -58,10 +71,6 @@ namespace PoseTeacher
             selfPoseInputGetter.loop = true;
             selfPoseInputGetter.VideoCube = videoCube;
             
-            scoringUtil = new ScoringScript(scoreDisplay);
-
-            scoringUtil.StartNewGoal(GoalType.MOTION, goals[0].Item2.poses, 0f);
-            goals.RemoveAt(0);
             audioSource.Play();
         }
 
@@ -73,17 +82,15 @@ namespace PoseTeacher
             AnimateSelf(currentSelfPose);
             if (goals.Count > 0 && audioSource.time >= goals[0].Item1)
             {
-                scoringUtil.StartNewGoal(GoalType.MOTION, goals[0].Item2.poses, 0f);
+                ScoringManager.Instance.StartNewGoal(goals[0].Item2.poses, 0f);
                 goals.RemoveAt(0);
             }
             AnimateTeacher(danceData.GetInterpolatedPose(currentId, out currentId, timeOffset).toPoseData());
 
-            scoringUtil.Update(currentSelfPose, audioSource.time);
-
             if (audioSource.time > danceData.poses[danceData.poses.Count - 1].timestamp)
             {
                 audioSource.Stop();
-                List<Scores> finalScores = scoringUtil.getFinalScores();
+                List<Scores> finalScores = ScoringManager.Instance.getFinalScores();
                 Debug.Log(finalScores);
                 //TODO: Add final score screen
             }

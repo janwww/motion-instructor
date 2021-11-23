@@ -17,14 +17,16 @@ namespace PoseTeacher
         MOTION, POSE
     }
 
-    class ScoringScript
+    class ScoringManager : MonoBehaviour
     {
+        public static ScoringManager Instance;
+
         List<Scores> scores;
 
         // filter
         public double kalmanQ = 0.0001;
         public double kalmanR = 1.0;
-        bool activateKalman;
+        public bool activateKalman = false;
         public List<KalmanFilter> kalmanFilter;
 
         //Goals
@@ -42,14 +44,18 @@ namespace PoseTeacher
         readonly float constDeltaTime = 0.1f;
         public bool alternateDistanceMetric = false;
 
-        GameObject scoreDisplay;
+        public GameObject scoreDisplay;
 
 
-        public ScoringScript(GameObject _scoreDisplay = null, bool activateKalmanIn = true)
+        public void Awake()
         {
-            scoreDisplay = _scoreDisplay;
-
-            activateKalman = activateKalmanIn;
+            if (Instance != null)
+            {
+                Destroy(this);
+            } else
+            {
+                Instance = this;
+            }
 
             // generate kalman filters
             kalmanFilter = new List<KalmanFilter>();
@@ -59,33 +65,15 @@ namespace PoseTeacher
                 kalmanFilter[i].Reset(1.0);
             }
 
-
             scores = new List<Scores>();
         }
 
-        public void StartNewGoal(GoalType type, List<DancePose> goal, float startTimeStamp)
+        public void Update()
         {
-            if (currentlyScoring) finishGoal();
-            currentlyScoring = true;
-            currentScores = new List<float>();
-            currentGoalType = type;
-            currentGoal = goal;
-            goalCounter = 0;
-            currentTimeStamp = startTimeStamp;
-            goalStartTimeStamp = startTimeStamp;
-            if (currentGoalType == GoalType.POSE)
+            if (currentlyScoring && DanceManager.Instance.currentSelfPose!=null)
             {
-                goalLength = 15;
-            } else
-            {
-                goalLength = currentGoal.Count;
-            }
-        }
-
-        public void Update(PoseData currentSelfPose, float danceTimeStamp)
-        {
-            if (currentlyScoring)
-            {
+                PoseData currentSelfPose = DanceManager.Instance.currentSelfPose;
+                float danceTimeStamp = DanceManager.Instance.songTime;
 
                 bool nextStep = false;
 
@@ -122,6 +110,27 @@ namespace PoseTeacher
             }
         }
 
+
+        public void StartNewGoal( List<DancePose> goal, float startTimeStamp)
+        {
+            GoalType type = goal.Count == 1 ? GoalType.POSE : GoalType.MOTION;
+            if (currentlyScoring) finishGoal();
+            currentlyScoring = true;
+            currentScores = new List<float>();
+            currentGoalType = type;
+            currentGoal = goal;
+            goalCounter = 0;
+            currentTimeStamp = startTimeStamp;
+            goalStartTimeStamp = startTimeStamp;
+            if (currentGoalType == GoalType.POSE)
+            {
+                goalLength = 15;
+            }
+            else
+            {
+                goalLength = currentGoal.Count;
+            }
+        }
 
         private float quaternionDistanceScore(PoseData currentSelfPose)
         {
