@@ -11,7 +11,7 @@ namespace PoseTeacher
     {
         public static DanceManager Instance;
 
-        PoseInputGetter selfPoseInputGetter;
+        PoseGetter selfPoseInputGetter;
 
         public GameObject videoCube;
         public DancePerformanceScriptableObject DancePerformanceObject;
@@ -20,7 +20,7 @@ namespace PoseTeacher
         List<AvatarContainer> avatarListSelf, avatarListTeacher;
 
         private readonly string fake_file = "jsondata/2020_05_27-00_01_59.txt";
-        public PoseInputSource selfPoseInputSource = PoseInputSource.KINECT;
+        public InputSource selfPoseInputSource = InputSource.KINECT;
 
         public bool paused = false;
 
@@ -66,10 +66,7 @@ namespace PoseTeacher
                 goals.Add((DancePerformanceObject.goalStartTimestamps[i], DancePerformanceObject.goals[i]));
             }
 
-
-            selfPoseInputGetter = new PoseInputGetter(selfPoseInputSource) { ReadDataPath = fake_file };
-            selfPoseInputGetter.loop = true;
-            selfPoseInputGetter.VideoCube = videoCube;
+            selfPoseInputGetter = getPoseGetter(selfPoseInputSource);
             
             audioSource.Play();
         }
@@ -116,6 +113,18 @@ namespace PoseTeacher
             foreach (AvatarContainer avatar in avatarListTeacher)
             {
                 avatar.MovePerson(recorded_data);
+            }
+        }
+
+        PoseGetter getPoseGetter(InputSource src) {
+            switch (src)
+            {
+                case InputSource.KINECT:
+                    return new KinectPoseGetter() { VideoCube = videoCube};
+                case InputSource.FILE:
+                    return new FilePoseGetter(true) { ReadDataPath = fake_file };
+                default:
+                    return new FilePoseGetter(true) { ReadDataPath = fake_file };
             }
         }
     }
