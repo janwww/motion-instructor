@@ -2,7 +2,7 @@
 using UnityEngine.UI;
 
 
-namespace PoseTeacher
+namespace PoseTeacherOld
 {
     //Class for visualisation of similarity score development over time
     public class Graph

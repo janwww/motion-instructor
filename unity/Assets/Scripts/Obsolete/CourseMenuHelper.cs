@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 
-namespace PoseTeacher
+namespace PoseTeacherOld
 {
     // contains a single Block of a Step
     [Serializable]

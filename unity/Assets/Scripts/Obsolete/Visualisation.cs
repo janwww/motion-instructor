@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
-
-namespace PoseTeacher
+using PoseTeacher;
+namespace PoseTeacherOld
 {
     class VisualisationSimilarity
     {   //Class for the visualisation of score similarity

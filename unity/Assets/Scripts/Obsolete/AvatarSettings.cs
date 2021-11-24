@@ -1,7 +1,8 @@
 ﻿using System;
 using UnityEngine;
 
-namespace PoseTeacher
+using PoseTeacher;
+namespace PoseTeacherOld
 {
     public class AvatarSettings : MonoBehaviour
     {
