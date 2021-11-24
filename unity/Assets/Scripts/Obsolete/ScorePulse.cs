@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace PoseTeacher
+namespace PoseTeacherOld
 {
     public enum ScoreRating
     {

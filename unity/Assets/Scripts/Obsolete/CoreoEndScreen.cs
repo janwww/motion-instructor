@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 
-namespace PoseTeacher
+namespace PoseTeacherOld
 {
     public class CoreoEndScreen : MonoBehaviour
     {

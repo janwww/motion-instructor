@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
-
-namespace PoseTeacher
+using PoseTeacher;
+namespace PoseTeacherOld
 {
     // All possible Menus that can be displayed in the main menu
     public enum Menus

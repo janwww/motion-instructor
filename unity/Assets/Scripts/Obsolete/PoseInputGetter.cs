@@ -6,8 +6,8 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 using UnityEngine.UI;
-
-namespace PoseTeacher
+using PoseTeacher;
+namespace PoseTeacherOld
 {
     // Label for various containers
     public enum PoseInputSource
