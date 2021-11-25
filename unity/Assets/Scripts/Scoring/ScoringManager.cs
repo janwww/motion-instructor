@@ -27,6 +27,7 @@ namespace PoseTeacher
         bool currentlyScoring = false;
         GoalType currentGoalType;
         List<DancePose> currentGoal;
+        List<PoseData> currentMotion;
         float currentTimeStamp;
         float goalStartTimeStamp;
         int goalCounter;
@@ -57,7 +58,6 @@ namespace PoseTeacher
         {
             if (currentlyScoring && DanceManager.Instance.currentSelfPose!=null)
             {
-                PoseData currentSelfPose = DanceManager.Instance.currentSelfPose;
                 float danceTimeStamp = DanceManager.Instance.songTime;
 
                 bool nextStep = false;
@@ -76,12 +76,25 @@ namespace PoseTeacher
 
                 if (nextStep)
                 {
+                    PoseData currentSelfPose = DanceManager.Instance.currentSelfPose;
+                    DancePose goalPose;
+
+                    if (currentGoalType == GoalType.POSE)
+                    {
+                        goalPose = currentGoal[0];
+                    }
+                    else
+                    {
+                        goalPose = currentGoal[goalCounter];
+                        currentMotion.Add(currentSelfPose);
+                    }
+
                     if (!alternateDistanceMetric)
                     {
-                        currentScores.Add(quaternionDistanceScore(currentSelfPose));
+                        currentScores.Add(quaternionDistanceScore(goalPose,currentSelfPose));
                     } else
                     {
-                        currentScores.Add(euclideanDistanceScore(currentSelfPose));
+                        currentScores.Add(euclideanDistanceScore(goalPose,currentSelfPose));
                     }
 
                     currentTimeStamp = danceTimeStamp;
@@ -104,6 +117,7 @@ namespace PoseTeacher
             currentScores = new List<float>();
             currentGoalType = type;
             currentGoal = goal;
+            currentMotion = new List<PoseData>();
             goalCounter = 0;
             currentTimeStamp = startTimeStamp;
             goalStartTimeStamp = startTimeStamp;
@@ -117,20 +131,11 @@ namespace PoseTeacher
             }
         }
 
-        private float quaternionDistanceScore(PoseData currentSelfPose)
+        private float quaternionDistanceScore(DancePose goalPose, PoseData currentSelfPose)
         {
             float distanceTotal = 0.0f;
             List<Quaternion> selfList = QuaternionUtils.PoseDataToOrientation(currentSelfPose);
-            List<Quaternion> goalList;
-
-            if (currentGoalType == GoalType.POSE)
-            {
-                goalList = QuaternionUtils.DancePoseToOrientation(currentGoal[0]);
-            }
-            else
-            {
-                goalList = QuaternionUtils.DancePoseToOrientation(currentGoal[goalCounter]);
-            }
+            List<Quaternion> goalList = QuaternionUtils.DancePoseToOrientation(goalPose);
 
             for (int i = 0; i < numberOfComparisons; i++)
             {
@@ -140,19 +145,10 @@ namespace PoseTeacher
             return Mathf.Sqrt(distanceTotal / ScoringUtils.TotalWeights(QuaternionUtils.quaternionWeightsPrioritizeArms));
         }
 
-        private float euclideanDistanceScore(PoseData currentSelfPose)
+        private float euclideanDistanceScore(DancePose goalPose, PoseData currentSelfPose)
         {
             List<Vector3> selfList = EuclideanUtils.PoseDataToVector3(currentSelfPose);
-            List<Vector3> goalList;
-
-            if (currentGoalType == GoalType.POSE)
-            {
-                goalList = EuclideanUtils.DancePoseToVector3(currentGoal[0]);
-            }
-            else // currentGoalType == goalType.MOTION
-            {
-                goalList = EuclideanUtils.DancePoseToVector3(currentGoal[goalCounter]);
-            }
+            List<Vector3> goalList = EuclideanUtils.DancePoseToVector3(goalPose);
 
             double[,] scores = EuclideanUtils.Vector3ToScoreMatrix(goalList, selfList);
             float scaling = 0.01f;
@@ -165,6 +161,27 @@ namespace PoseTeacher
             return average / scores.Length;
         }
 
+        private float DTWDistance(List<DancePose> goals, List<PoseData> playerPoses, int windowLeft, int windowRight)
+        {
+            float[,] DTW = new float[goals.Count + 1, playerPoses.Count + 1];
+            for(int i = 0; i <= goals.Count; i++)
+            {
+                for (int j = 0; j <= playerPoses.Count; j++)
+                {
+                    DTW[i, j] = Mathf.Infinity;
+                }
+            }
+            DTW[0, 0] = 0;
+            for (int i = 1; i <= goals.Count; i++)
+            {
+                for (int j = Mathf.Max(1, i - windowLeft); j <= Mathf.Min(playerPoses.Count, i + windowRight); j++)
+                {
+                    float cost = quaternionDistanceScore(goals[i-1], playerPoses[j-1]);
+                    DTW[i, j] = cost + Mathf.Min(DTW[i - 1, j], DTW[i, j - 1], DTW[i - 1, j - 1]);
+                }
+            }
+            return DTW[goals.Count, playerPoses.Count] / playerPoses.Count;
+        }
 
         public List<Scores> getFinalScores()
         {
@@ -187,6 +204,7 @@ namespace PoseTeacher
                 tempScore = ScoringUtils.squaredAverage(currentScores);
             }
             Debug.Log(tempScore);
+            Debug.Log("DTW: " + DTWDistance(currentGoal, currentMotion, 3, 10));
 
             if (!alternateDistanceMetric)
             {
