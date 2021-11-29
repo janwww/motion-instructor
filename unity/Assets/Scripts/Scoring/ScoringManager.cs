@@ -22,6 +22,7 @@ namespace PoseTeacher
         public static ScoringManager Instance;
 
         List<Scores> scores;
+        float totalScore;
 
         //Goals
         bool currentlyScoring = false;
@@ -41,7 +42,6 @@ namespace PoseTeacher
 
         public GameObject scoreDisplay;
 
-
         public void Awake()
         {
             if (Instance != null)
@@ -52,6 +52,7 @@ namespace PoseTeacher
                 Instance = this;
             }
             scores = new List<Scores>();
+            totalScore = 0;
         }
 
         public void Update()
@@ -183,15 +184,15 @@ namespace PoseTeacher
             return DTW[goals.Count, playerPoses.Count] / playerPoses.Count;
         }
 
-        public List<Scores> getFinalScores()
+        public (float, List<Scores>) getFinalScores()
         {
             if (currentlyScoring) finishGoal();
-            return scores;
+            return (totalScore, scores);
         }
 
         void finishGoal()
         {
-            double tempScore;
+            float tempScore;
             if (currentGoalType == GoalType.POSE)
             {
                 //for a pose, take best score in evaluation period
@@ -205,6 +206,8 @@ namespace PoseTeacher
             }
             Debug.Log(tempScore);
             Debug.Log("DTW: " + DTWDistance(currentGoal, currentMotion, 3, 10));
+
+            totalScore += 1 - tempScore;
 
             if (!alternateDistanceMetric)
             {
@@ -243,6 +246,13 @@ namespace PoseTeacher
                 scoreDisplay.SendMessage("addScore", scores[scores.Count - 1]);
             }
             currentlyScoring = false;
+        }
+
+        public void ResetScores()
+        {
+            if (currentlyScoring) finishGoal();
+            scores = new List<Scores>();
+            totalScore = 0;
         }
     }
 }
