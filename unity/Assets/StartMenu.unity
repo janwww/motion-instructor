@@ -6053,12 +6053,12 @@ MonoBehaviour:
   minDistance: 0.4
   maxDistance: 0.5
   minViewDegrees: 0
-  maxViewDegrees: 20
+  maxViewDegrees: 25
   aspectV: 1
   ignoreAngleClamp: 0
   ignoreDistanceClamp: 0
   useFixedVerticalPosition: 1
-  fixedVerticalPosition: -0.4
+  fixedVerticalPosition: -0.2
   orientToReferenceDirection: 0
 --- !u!4 &34998704766389837
 Transform:

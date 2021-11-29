@@ -1797,9 +1797,9 @@ MonoBehaviour:
   OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: 
-        m_MethodName: OnToggleHandJoint
+      - m_Target: {fileID: 1630789626}
+        m_TargetAssemblyTypeName: PoseTeacher.DanceManager, Assembly-CSharp
+        m_MethodName: QuitToMenu
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -2499,7 +2499,7 @@ GameObject:
   - component: {fileID: 498164867}
   - component: {fileID: 498164866}
   m_Layer: 0
-  m_Name: MixedRealityToolkit
+  m_Name: MixedRealityToolkit (Inactive)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4006,7 +4006,7 @@ MonoBehaviour:
   minDistance: 0.4
   maxDistance: 0.5
   minViewDegrees: 0
-  maxViewDegrees: 0
+  maxViewDegrees: 25
   aspectV: 1
   ignoreAngleClamp: 0
   ignoreDistanceClamp: 0
@@ -4884,7 +4884,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1063703401
 Transform:
   m_ObjectHideFlags: 0

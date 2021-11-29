@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.IO;
 using System.Linq;
+using UnityEngine.SceneManagement;
 
 namespace PoseTeacher
 {
@@ -165,6 +166,11 @@ namespace PoseTeacher
             currentId = 0;
             finished = false;
             audioSource.PlayDelayed(0.5f);
+        }
+
+        public void QuitToMenu()
+        {
+            SceneManager.LoadScene("StartMenu", LoadSceneMode.Single);
         }
     }
 }
