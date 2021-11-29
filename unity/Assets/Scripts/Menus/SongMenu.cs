@@ -43,4 +43,9 @@ public class SongMenu : MonoBehaviour
         PersistentData.Instance.performance = dances.Find(element => element.songId == selectedID);
         SceneManager.LoadScene("Dance Scene", LoadSceneMode.Single);
     }
+
+    private void OnEnable()
+    {
+        cancelSelection();
+    }
 }
