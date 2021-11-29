@@ -52,6 +52,7 @@ namespace PoseTeacher
                 Instance = this;
             }
             scores = new List<Scores>();
+            totalScore = 0;
         }
 
         public void Update()
@@ -245,6 +246,13 @@ namespace PoseTeacher
                 scoreDisplay.SendMessage("addScore", scores[scores.Count - 1]);
             }
             currentlyScoring = false;
+        }
+
+        public void ResetScores()
+        {
+            if (currentlyScoring) finishGoal();
+            scores = new List<Scores>();
+            totalScore = 0;
         }
     }
 }

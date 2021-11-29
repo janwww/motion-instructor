@@ -31,10 +31,11 @@ namespace PoseTeacher
         private AudioClip song;
         private AudioSource audioSource;
 
-        readonly List<(float, DanceData)> goals = new List<(float,DanceData)>();
+        List<(float, DanceData)> goals = new List<(float,DanceData)>();
 
         public float songTime => audioSource?.time ?? 0;
 
+        bool finished = false;
         int currentId = 0;
 
         public void Awake()
@@ -52,49 +53,31 @@ namespace PoseTeacher
             // Start is called before the first frame update
         public void Start()
         {
-            if (PersistentData.Instance != null)
-            {
-                DancePerformanceObject = PersistentData.Instance.performance;
-            }
-            avatarListSelf = new List<AvatarContainer>();
-            avatarListTeacher = new List<AvatarContainer>();
-            avatarListSelf.Add(new AvatarContainer(avatarContainerSelf));
-            avatarListTeacher.Add(new AvatarContainer(avatarContainerTeacher));
-
-            endScoreScreen.gameObject.SetActive(false);
-
-            audioSource = GetComponent<AudioSource>();
-            song = DancePerformanceObject.SongObject.SongClip;
-            audioSource.clip = song;
-            danceData = DancePerformanceObject.danceData.LoadDanceDataFromScriptableObject();
-
-            for(int i = 0; i < DancePerformanceObject.goals.Count; i++)
-            {
-                goals.Add((DancePerformanceObject.goalStartTimestamps[i], DancePerformanceObject.goals[i]));
-            }
-
-            selfPoseInputGetter = getPoseGetter(selfPoseInputSource);
-            
-            audioSource.Play();
+            Setup();
+            RestartSong();
         }
 
         // Update is called once per frame
         public void Update()
         {
-            float timeOffset = audioSource.time - danceData.poses[currentId].timestamp;
             currentSelfPose = selfPoseInputGetter.GetNextPose();
             AnimateSelf(currentSelfPose);
-            if (goals.Count > 0 && audioSource.time >= goals[0].Item1)
+            if (!finished)
             {
-                ScoringManager.Instance.StartNewGoal(goals[0].Item2.poses, 0f);
-                goals.RemoveAt(0);
-            }
-            AnimateTeacher(danceData.GetInterpolatedPose(currentId, out currentId, timeOffset).toPoseData());
+                float timeOffset = audioSource.time - danceData.poses[currentId].timestamp;
+                if (goals.Count > 0 && audioSource.time >= goals[0].Item1)
+                {
+                    ScoringManager.Instance.StartNewGoal(goals[0].Item2.poses, 0f);
+                    goals.RemoveAt(0);
+                }
+                AnimateTeacher(danceData.GetInterpolatedPose(currentId, out currentId, timeOffset).toPoseData());
 
-            if (audioSource.time >= audioSource.clip.length)
-            {
-                FinishSong();
+                if (audioSource.time >= audioSource.clip.length)
+                {
+                    FinishSong();
+                }
             }
+            
         }
 
         public void OnApplicationQuit()
@@ -134,6 +117,7 @@ namespace PoseTeacher
 
         void FinishSong()
         {
+            finished = true;
             audioSource.Stop();
             float totalScore = ScoringManager.Instance.getFinalScores().Item1;
             List<Scores> finalScores = ScoringManager.Instance.getFinalScores().Item2;
@@ -145,6 +129,42 @@ namespace PoseTeacher
                 finalScores.Where(element => element == Scores.GOOD).Count(),
                 finalScores.Where(element => element == Scores.BAD).Count());
             endScoreScreen.gameObject.SetActive(true);
+        }
+
+        void Setup()
+        {
+            if (PersistentData.Instance != null)
+            {
+                DancePerformanceObject = PersistentData.Instance.performance;
+            }
+            avatarListSelf = new List<AvatarContainer>();
+            avatarListTeacher = new List<AvatarContainer>();
+            avatarListSelf.Add(new AvatarContainer(avatarContainerSelf));
+            avatarListTeacher.Add(new AvatarContainer(avatarContainerTeacher));
+
+
+            audioSource = GetComponent<AudioSource>();
+            song = DancePerformanceObject.SongObject.SongClip;
+            audioSource.clip = song;
+            danceData = DancePerformanceObject.danceData.LoadDanceDataFromScriptableObject();
+
+            selfPoseInputGetter = getPoseGetter(selfPoseInputSource);
+
+        }
+
+        public void RestartSong()
+        {
+            endScoreScreen.gameObject.SetActive(false);
+
+            goals = new List<(float, DanceData)>();
+            for (int i = 0; i < DancePerformanceObject.goals.Count; i++)
+            {
+                goals.Add((DancePerformanceObject.goalStartTimestamps[i], DancePerformanceObject.goals[i]));
+            }
+            audioSource.time = 0;
+            currentId = 0;
+            finished = false;
+            audioSource.PlayDelayed(0.5f);
         }
     }
 }
