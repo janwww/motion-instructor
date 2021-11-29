@@ -5,12 +5,15 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 1
-    path: Assets/PoseteacherScene.unity
-    guid: 9fc0d4010bbf28b4594072e72b8655ab
   - enabled: 0
-    path: Assets/Scenes/MRTK-UI-test.unity
-    guid: fd60f4004f7a3e8479edd3878772ef09
+    path: 
+    guid: 00000000000000000000000000000000
+  - enabled: 1
+    path: Assets/StartMenu.unity
+    guid: 91e2c2005d468344ca81c8cd7e618ca2
+  - enabled: 1
+    path: Assets/Dance Scene.unity
+    guid: e4395edd27293af4c86cdfbb9d38bdd5
   m_configObjects:
     Unity.XR.WindowsMR.Settings: {fileID: 11400000, guid: 2591c24de7c067b4ca996c3fcbd189c5,
       type: 2}

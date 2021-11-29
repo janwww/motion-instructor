@@ -51,6 +51,10 @@ namespace PoseTeacher
             // Start is called before the first frame update
         public void Start()
         {
+            if (PersistentData.Instance != null)
+            {
+                DancePerformanceObject = PersistentData.Instance.performance;
+            }
             avatarListSelf = new List<AvatarContainer>();
             avatarListTeacher = new List<AvatarContainer>();
             avatarListSelf.Add(new AvatarContainer(avatarContainerSelf));

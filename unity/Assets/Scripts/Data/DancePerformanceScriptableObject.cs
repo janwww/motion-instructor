@@ -7,6 +7,9 @@ using UnityEditor;
 
 [CreateAssetMenu(fileName = "Dance", menuName = "ScriptableObjects/DancePerformanceScriptableObject", order = 3)]
 public class DancePerformanceScriptableObject : ScriptableObject {
+    public string songTitle;
+    public string songId;
+
     public DanceDataScriptableObject danceData;
     [Tooltip("If True, Goals are created dynamically based on timestamps")]
     public bool dynamicGoals;
