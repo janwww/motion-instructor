@@ -13,6 +13,7 @@ namespace PoseTeacher
 
         PoseGetter selfPoseInputGetter;
 
+        public EndScoreScreen endScoreScreen;
         public GameObject videoCube;
         public DancePerformanceScriptableObject DancePerformanceObject;
 
@@ -60,6 +61,8 @@ namespace PoseTeacher
             avatarListSelf.Add(new AvatarContainer(avatarContainerSelf));
             avatarListTeacher.Add(new AvatarContainer(avatarContainerTeacher));
 
+            endScoreScreen.gameObject.SetActive(false);
+
             audioSource = GetComponent<AudioSource>();
             song = DancePerformanceObject.SongObject.SongClip;
             audioSource.clip = song;
@@ -88,12 +91,9 @@ namespace PoseTeacher
             }
             AnimateTeacher(danceData.GetInterpolatedPose(currentId, out currentId, timeOffset).toPoseData());
 
-            if (audioSource.time > danceData.poses[danceData.poses.Count - 1].timestamp)
+            if (audioSource.time >= audioSource.clip.length)
             {
-                audioSource.Stop();
-                List<Scores> finalScores = ScoringManager.Instance.getFinalScores();
-                Debug.Log(finalScores);
-                //TODO: Add final score screen
+                FinishSong();
             }
         }
 
@@ -130,6 +130,21 @@ namespace PoseTeacher
                 default:
                     return new FilePoseGetter(true) { ReadDataPath = fake_file };
             }
+        }
+
+        void FinishSong()
+        {
+            audioSource.Stop();
+            float totalScore = ScoringManager.Instance.getFinalScores().Item1;
+            List<Scores> finalScores = ScoringManager.Instance.getFinalScores().Item2;
+
+            Debug.Log(finalScores);
+            //TODO: Add final score screen
+            endScoreScreen.setValues(totalScore,
+                finalScores.Where(element => element == Scores.GREAT).Count(),
+                finalScores.Where(element => element == Scores.GOOD).Count(),
+                finalScores.Where(element => element == Scores.BAD).Count());
+            endScoreScreen.gameObject.SetActive(true);
         }
     }
 }
